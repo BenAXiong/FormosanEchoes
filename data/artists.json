@@ -1,0 +1,82 @@
+[
+  {
+    "id": "art-001",
+    "name_display": "Suming Rupi",
+    "names_zh": ["舒米恩"],
+    "names_rom": ["Suming Rupi", "Suming"],
+    "names_indigenous": ["Suming"],
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "notes": null
+  },
+  {
+    "id": "art-002",
+    "name_display": "Samingad",
+    "names_zh": ["紀曉君"],
+    "names_rom": ["Samingad"],
+    "names_indigenous": ["Samingad"],
+    "ethnic_group": "Puyuma",
+    "language": "Puyuma",
+    "notes": null
+  },
+  {
+    "id": "art-003",
+    "name_display": "Sangpuy",
+    "names_zh": ["桑布伊"],
+    "names_rom": ["Sangpuy"],
+    "names_indigenous": ["Sangpuy"],
+    "ethnic_group": "Puyuma",
+    "language": "Puyuma",
+    "notes": null
+  },
+  {
+    "id": "art-004",
+    "name_display": "陳建年 Paudull",
+    "names_zh": ["陳建年"],
+    "names_rom": ["Paudull"],
+    "names_indigenous": ["Paudull"],
+    "ethnic_group": "Puyuma",
+    "language": "Puyuma",
+    "notes": null
+  },
+  {
+    "id": "art-005",
+    "name_display": "盧靜子",
+    "names_zh": ["盧靜子"],
+    "names_rom": ["Lu Jingzi"],
+    "names_indigenous": [],
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "notes": null
+  },
+  {
+    "id": "art-006",
+    "name_display": "以莉·高露",
+    "names_zh": ["以莉·高露"],
+    "names_rom": ["Ilid Kaolo"],
+    "names_indigenous": ["Ilid Kaolo"],
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "notes": null
+  },
+  {
+    "id": "art-007",
+    "name_display": "Ljaucu Talimaraw",
+    "names_zh": [],
+    "names_rom": ["Ljaucu Talimaraw"],
+    "names_indigenous": ["Ljaucu Talimaraw"],
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "notes": null
+  },
+  {
+    "id": "art-008",
+    "name_display": "陸森寶",
+    "names_zh": ["陸森寶"],
+    "names_rom": ["Baliw Asiray"],
+    "names_indigenous": ["Baliw Asiray"],
+    "ethnic_group": "Puyuma",
+    "language": "Puyuma",
+    "notes": null
+  }
+]

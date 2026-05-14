@@ -1,6 +1,6 @@
 'use client';
-import { useState } from 'react';
-import type { FilterState } from '@/lib/types';
+import { useState, useMemo } from 'react';
+import type { FilterState, Song } from '@/lib/types';
 import { DEFAULT_FILTERS, hasActiveFilters } from '@/lib/filters';
 
 const CIP_LANGUAGES = [
@@ -20,25 +20,6 @@ const CIP_LANGUAGES = [
   { value: 'Seediq', label: 'Seediq 賽德克族語' },
   { value: "Hla'alua", label: "Hla'alua 拉阿魯哇族語" },
   { value: 'Kanakanavu', label: 'Kanakanavu 卡那卡那富族語' },
-];
-
-const CIP_PEOPLES = [
-  { value: 'Amis (Pangcah)', label: 'Amis 阿美族' },
-  { value: 'Atayal', label: 'Atayal 泰雅族' },
-  { value: 'Paiwan', label: 'Paiwan 排灣族' },
-  { value: 'Bunun', label: 'Bunun 布農族' },
-  { value: 'Puyuma', label: 'Puyuma 卑南族' },
-  { value: 'Rukai', label: 'Rukai 魯凱族' },
-  { value: 'Tsou', label: 'Tsou 鄒族' },
-  { value: 'Saisiyat', label: 'Saisiyat 賽夏族' },
-  { value: 'Tao (Yami)', label: 'Tao 達悟族' },
-  { value: 'Thao', label: 'Thao 邵族' },
-  { value: 'Kavalan', label: 'Kavalan 噶瑪蘭族' },
-  { value: 'Truku', label: 'Truku 太魯閣族' },
-  { value: 'Sakizaya', label: 'Sakizaya 撒奇萊雅族' },
-  { value: 'Seediq', label: 'Seediq 賽德克族' },
-  { value: "Hla'alua", label: "Hla'alua 拉阿魯哇族" },
-  { value: 'Kanakanavu', label: 'Kanakanavu 卡那卡那富族' },
 ];
 
 const FIRST_N = 6;
@@ -85,12 +66,30 @@ interface Props {
   onChange: (f: FilterState) => void;
   resultCount: number;
   totalCount: number;
+  allSongs: Song[];
 }
 
-export default function DemoFilterSidebar({ filters, onChange, resultCount, totalCount }: Props) {
+export default function DemoFilterSidebar({ filters, onChange, resultCount, totalCount, allSongs }: Props) {
   const set = (key: keyof FilterState, value: string | boolean | null) =>
     onChange({ ...filters, [key]: value });
   const active = hasActiveFilters(filters);
+
+  // Derive unique, sorted artists from songs matching the current language filter
+  const artistOptions = useMemo(() => {
+    const pool = filters.language
+      ? allSongs.filter((s) => s.language_claimed === filters.language)
+      : allSongs;
+    const names = new Set(
+      pool
+        .map((s) => s.artist)
+        .filter((a): a is string => !!a && a !== 'Unknown / Traditional')
+    );
+    return [...names].sort().map((n) => ({ value: n, label: n }));
+  }, [allSongs, filters.language]);
+
+  // We repurpose the ethnic_group filter as artist filter for now
+  const artistFilter = filters.ethnic_group;
+  const setArtistFilter = (v: string) => set('ethnic_group', v);
 
   return (
     <aside className="h-full flex flex-col bg-[#0f0f16] overflow-hidden">
@@ -117,7 +116,7 @@ export default function DemoFilterSidebar({ filters, onChange, resultCount, tota
       {/* Filter lists */}
       <div className="flex-1 py-4 overflow-y-auto demo-sidebar">
         <div className="mb-5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-3">Language</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-3">Songs</p>
           <PillList
             options={CIP_LANGUAGES}
             value={filters.language}
@@ -126,13 +125,24 @@ export default function DemoFilterSidebar({ filters, onChange, resultCount, tota
           />
         </div>
         <div className="mb-5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-3">People</p>
-          <PillList
-            options={CIP_PEOPLES}
-            value={filters.ethnic_group}
-            onChange={(v) => set('ethnic_group', v)}
-            expandLabel="other peoples"
-          />
+          <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-3">
+            Artists
+            {filters.language && (
+              <span className="ml-1 text-stone-700 normal-case font-normal tracking-normal">
+                — {filters.language}
+              </span>
+            )}
+          </p>
+          {artistOptions.length > 0 ? (
+            <PillList
+              options={artistOptions}
+              value={artistFilter}
+              onChange={setArtistFilter}
+              expandLabel="more artists"
+            />
+          ) : (
+            <p className="text-stone-700 text-xs px-3 italic">No artists yet</p>
+          )}
         </div>
       </div>
 

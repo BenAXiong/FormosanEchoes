@@ -86,6 +86,7 @@ export default function DemoPage() {
           onChange={setFilters}
           resultCount={results.length}
           totalCount={allSongs.length}
+          allSongs={allSongs}
         />
       </div>
 
