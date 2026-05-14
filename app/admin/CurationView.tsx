@@ -10,20 +10,20 @@ import FilterBar from '@/components/FilterBar';
 import SongCard from '@/components/SongCard';
 import SongDetailPanel from '@/components/SongDetailPanel';
 import AddSongPanel from '@/components/admin/AddSongPanel';
+import ArtistAuditPanel from '@/components/admin/ArtistAuditPanel';
 import vocab from '@/data/controlled-vocab.json';
 import type { ControlledVocab } from '@/lib/types';
 
 const typedVocab = vocab as ControlledVocab;
 const allSongs = getSongs();
 
-type Tab = 'browse' | 'add';
+type Tab = 'browse' | 'add' | 'artists';
 
 export default function CurationView() {
   const [tab, setTab] = useState<Tab>('browse');
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
-
 
   const results = useMemo(() => {
     const searched = searchSongs(allSongs, query);
@@ -44,7 +44,7 @@ export default function CurationView() {
           </div>
           {/* Tab switcher */}
           <div className="flex gap-1 bg-stone-100 rounded-lg p-1">
-            {(['browse', 'add'] as Tab[]).map(t => (
+            {(['browse', 'add', 'artists'] as Tab[]).map(t => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
@@ -54,7 +54,7 @@ export default function CurationView() {
                     : 'text-stone-500 hover:text-stone-700'
                 }`}
               >
-                {t === 'browse' ? 'Browse' : '+ Add Song'}
+                {t === 'browse' ? 'Browse' : t === 'add' ? '+ Add Song' : 'Artists Audit'}
               </button>
             ))}
           </div>
@@ -74,6 +74,13 @@ export default function CurationView() {
         {tab === 'add' && (
           <div className="bg-[#0f0f16] rounded-xl border border-white/10 p-6 min-h-[400px]">
             <AddSongPanel />
+          </div>
+        )}
+
+        {/* ── Artist Audit tab ── */}
+        {tab === 'artists' && (
+          <div className="bg-[#0f0f16] rounded-xl border border-white/10 p-6 min-h-[400px]">
+            <ArtistAuditPanel />
           </div>
         )}
 
