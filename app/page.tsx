@@ -45,6 +45,7 @@ export default function DemoPage() {
   const [selected, setSelected] = useState<Song | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [autoplay, setAutoplay] = useState(false);
+  const [compact, setCompact] = useState(false);
   const [panelWidth, setPanelWidth] = useState(640);
 
   const toggleLyricsFilter = () =>
@@ -141,16 +142,42 @@ export default function DemoPage() {
             Has lyrics
           </button>
 
-          {/* Autoplay toggle */}
-          <div className="flex items-center gap-1.5 ml-auto">
-            <span className="text-xs text-stone-500 hidden sm:inline">Autoplay</span>
+          {/* Autoplay + Compact toggles */}
+          <div className="flex items-center gap-3 ml-auto">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-stone-500 hidden sm:inline">Autoplay</span>
+              <button
+                onClick={() => setAutoplay(!autoplay)}
+                aria-pressed={autoplay}
+                aria-label="Toggle autoplay"
+                className={`relative w-9 h-5 rounded-full transition-colors ${autoplay ? 'bg-emerald-500' : 'bg-white/10'}`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${autoplay ? 'translate-x-4' : ''}`} />
+              </button>
+            </div>
             <button
-              onClick={() => setAutoplay(!autoplay)}
-              aria-pressed={autoplay}
-              aria-label="Toggle autoplay"
-              className={`relative w-9 h-5 rounded-full transition-colors ${autoplay ? 'bg-emerald-500' : 'bg-white/10'}`}
+              onClick={() => setCompact(!compact)}
+              aria-pressed={compact}
+              aria-label="Toggle compact view"
+              title={compact ? 'Switch to grid view' : 'Switch to compact view'}
+              className={`p-1.5 rounded-lg transition-colors ${
+                compact ? 'bg-white/15 text-white' : 'text-stone-500 hover:text-white hover:bg-white/8'
+              }`}
             >
-              <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${autoplay ? 'translate-x-4' : ''}`} />
+              {compact ? (
+                // Grid icon
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                </svg>
+              ) : (
+                // List icon
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
@@ -166,6 +193,14 @@ export default function DemoPage() {
                 className="text-xs text-stone-400 hover:text-white transition-colors underline underline-offset-2"
               >Clear all</button>
             </div>
+          ) : compact ? (
+            <ul className="flex flex-col" role="list">
+              {results.map((song) => (
+                <li key={song.id}>
+                  <DemoSongCard song={song} isSelected={selected?.id === song.id} onSelect={setSelected} compact />
+                </li>
+              ))}
+            </ul>
           ) : (
             <ul
               className="grid gap-4"
