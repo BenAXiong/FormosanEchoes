@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, useRef } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import type { Song, FilterState } from '@/lib/types';
 import { getSongs } from '@/lib/data';
 import { searchSongs } from '@/lib/search';
@@ -45,8 +45,13 @@ export default function DemoPage() {
   const [selected, setSelected] = useState<Song | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [autoplay, setAutoplay] = useState(false);
-  const [compact, setCompact] = useState(false);
+  const [compact, setCompact] = useState(false); // set per viewport in effect below
   const [panelWidth, setPanelWidth] = useState(640);
+
+  // Default to compact on mobile (< lg breakpoint)
+  useEffect(() => {
+    if (window.innerWidth < 1024) setCompact(true);
+  }, []);
 
   const toggleLyricsFilter = () =>
     setFilters((f) => ({ ...f, has_lyrics: f.has_lyrics ? null : true }));
