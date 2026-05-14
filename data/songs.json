@@ -1975,7 +1975,7 @@
     "title_original": "木瓜歌",
     "title_romanized": null,
     "title_chinese": "木瓜歌",
-    "artist": null,
+    "artist": "馬蘭吟唱班 feat. 發哥",
     "language_claimed": "Amis",
     "language_evidence": "Notion research database. Language: Amis.",
     "ethnic_group_claimed": "Amis (Pangcah)",
@@ -1983,7 +1983,7 @@
     "performers": [],
     "source_platform": null,
     "url": null,
-    "youtube_url": null,
+    "youtube_url": "https://youtu.be/m80YqWmfw60?si=1G75hwLIeriCtc5F&t=218",
     "lyrics_url": null,
     "album_or_source": null,
     "year": null,
@@ -2001,7 +2001,19 @@
     "verification_status": "needs_review",
     "needs_manual_verification": true,
     "checked_by_me": false,
-    "date_added": "2026-05-14"
+    "date_added": "2026-05-14",
+    "lyrics": {
+      "song_id": "sof-050",
+      "lyrics_original": null,
+      "lyrics_romanized": "什麽叫做偷偷摸摸 sanay\n偷偷摸摸 sanay i kafotian\nO ngoyos sa mikingsa\nO kayam sa i coco\nO toros ko patukalay\nO hemot ko papikokay\n啊頂呀頂呀頂\nSanay si fotol\nO maan ko maliyaway\nSamadahen ~ Samadahen ~~~\nO mata ko molihaway",
+      "lyrics_translation_zh": "中文翻譯第一行\n中文翻譯第二行\n中文翻譯第三行",
+      "lyrics_translation_en": null,
+      "lyrics_source": "Your source here",
+      "lyrics_rights_status": "unverified_transcription",
+      "lyrics_notes": null,
+      "has_permission": false,
+      "show_publicly": true
+    }
   },
   {
     "id": "sof-051",
