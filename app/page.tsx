@@ -11,25 +11,7 @@ import DemoFilterSidebar from '@/components/demo/DemoFilterSidebar';
 
 const allSongs = getSongs();
 
-const CONFIDENCE_OPTS = [
-  { value: '', label: 'All confidence' },
-  { value: 'high', label: 'High' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'low', label: 'Low' },
-  { value: 'unknown', label: 'Unknown' },
-];
-const STATUS_OPTS = [
-  { value: '', label: 'All status' },
-  { value: 'candidate', label: 'Candidate' },
-  { value: 'needs_review', label: 'Needs Review' },
-  { value: 'checked', label: 'Checked' },
-  { value: 'approved_public', label: 'Approved' },
-];
-const LYRICS_OPTS = [
-  { value: '', label: 'All lyrics' },
-  { value: 'yes', label: 'Has lyrics' },
-  { value: 'no', label: 'No lyrics' },
-];
+const DEMO_DEFAULT_FILTERS: FilterState = { ...DEFAULT_FILTERS, has_lyrics: true };
 
 function HeaderSelect({
   id, value, options, onChange,
@@ -59,16 +41,14 @@ function HeaderSelect({
 
 export default function DemoPage() {
   const [query, setQuery] = useState('');
-  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState<FilterState>(DEMO_DEFAULT_FILTERS);
   const [selected, setSelected] = useState<Song | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [autoplay, setAutoplay] = useState(false);
   const [panelWidth, setPanelWidth] = useState(640);
 
-  // Lyrics filter mapped to has_lyrics
-  const lyricsFilter = filters.has_lyrics === true ? 'yes' : filters.has_lyrics === false ? 'no' : '';
-  const setLyricsFilter = (v: string) =>
-    setFilters((f) => ({ ...f, has_lyrics: v === 'yes' ? true : v === 'no' ? false : null }));
+  const toggleLyricsFilter = () =>
+    setFilters((f) => ({ ...f, has_lyrics: f.has_lyrics ? null : true }));
 
   const results = useMemo(() => {
     const searched = searchSongs(allSongs, query);
@@ -142,10 +122,17 @@ export default function DemoPage() {
             />
           </div>
 
-          {/* Header dropdowns */}
-          <HeaderSelect id="hdr-confidence" value={filters.confidence} options={CONFIDENCE_OPTS} onChange={(v) => setFilters((f) => ({ ...f, confidence: v }))} />
-          <HeaderSelect id="hdr-status" value={filters.verification_status} options={STATUS_OPTS} onChange={(v) => setFilters((f) => ({ ...f, verification_status: v }))} />
-          <HeaderSelect id="hdr-lyrics" value={lyricsFilter} options={LYRICS_OPTS} onChange={setLyricsFilter} />
+          {/* Header toggles */}
+          <button
+            onClick={toggleLyricsFilter}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border ${
+              filters.has_lyrics
+                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                : 'bg-white/5 text-stone-400 border-white/10 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            Has lyrics
+          </button>
 
           {/* Autoplay toggle */}
           <div className="flex items-center gap-1.5 ml-auto">
@@ -168,7 +155,7 @@ export default function DemoPage() {
               <span className="text-4xl text-stone-700" aria-hidden>♪</span>
               <p className="text-stone-500 text-sm">No songs match your filters.</p>
               <button
-                onClick={() => { setQuery(''); setFilters(DEFAULT_FILTERS); }}
+                onClick={() => { setQuery(''); setFilters(DEMO_DEFAULT_FILTERS); }}
                 className="text-xs text-stone-400 hover:text-white transition-colors underline underline-offset-2"
               >Clear all</button>
             </div>
