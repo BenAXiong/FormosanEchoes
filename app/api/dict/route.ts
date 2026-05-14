@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const PORTAL_URL = process.env.PORTAL_URL ?? 'http://localhost:3001';
+const PORTAL_URL = process.env.PORTAL_URL ?? 'https://ycm-citadel.vercel.app';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
