@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import type { Song } from '@/lib/types';
-import { getDisplayTitle, isYouTubeUrl, getYouTubeId } from '@/lib/normalize';
+import { getDisplayTitle, isYouTubeUrl, getYouTubeId, getYouTubeStartTime } from '@/lib/normalize';
 import HoverableWord from '@/components/demo/HoverableWord';
 
 function RomLyrics({ text, language }: { text: string; language?: string | null }) {
@@ -46,6 +46,7 @@ export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
 
   const title = getDisplayTitle(song);
   const youtubeId = isYouTubeUrl(song.youtube_url) ? getYouTubeId(song.youtube_url!) : null;
+  const startTime = song.youtube_url ? getYouTubeStartTime(song.youtube_url) : null;
   const conf = CONFIDENCE_CONFIG[song.confidence] ?? CONFIDENCE_CONFIG.unknown;
   const status = STATUS_CONFIG[song.verification_status] ?? STATUS_CONFIG.candidate;
   const hasLyrics = !!song.lyrics?.show_publicly;
@@ -69,7 +70,7 @@ export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
             <iframe
               key={youtubeId}
               title={title}
-              src={`https://www.youtube.com/embed/${youtubeId}?rel=0${autoplay ? '&autoplay=1' : ''}`}
+              src={`https://www.youtube.com/embed/${youtubeId}?rel=0${autoplay ? '&autoplay=1' : ''}${startTime ? `&start=${startTime}` : ''}`}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="w-full h-full"

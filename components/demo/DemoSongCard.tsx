@@ -76,9 +76,9 @@ export default function DemoSongCard({ song, isSelected, onSelect }: Props) {
             <span className="text-white text-lg pl-1" aria-hidden>▶</span>
           </div>
         </div>
-        {/* Language badge (Top Left) */}
+        {/* Language badge (Bottom Left) */}
         {song.language_claimed && (
-          <span className="absolute top-3 left-3 z-10 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-black/40 backdrop-blur text-white/90 border border-white/20">
+          <span className="absolute bottom-3 left-3 z-10 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-black/40 backdrop-blur text-white/90 border border-white/20">
             {song.language_claimed}
           </span>
         )}

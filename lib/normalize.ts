@@ -87,3 +87,22 @@ export function buildSearchText(song: Song): string {
     ...(song.tags ?? []).map(safe),
   ].join(' ');
 }
+
+/** Extract start time in seconds from YouTube URL if present. */
+export function getYouTubeStartTime(url: string): number | null {
+  const tMatch = url.match(/[?&]t=([^&]+)/);
+  if (!tMatch) return null;
+  const tStr = tMatch[1];
+  
+  if (/^\d+s?$/.test(tStr)) return parseInt(tStr, 10);
+  
+  let seconds = 0;
+  const hMatch = tStr.match(/(\d+)h/);
+  const mMatch = tStr.match(/(\d+)m/);
+  const sMatch = tStr.match(/(\d+)s/);
+  if (hMatch) seconds += parseInt(hMatch[1], 10) * 3600;
+  if (mMatch) seconds += parseInt(mMatch[1], 10) * 60;
+  if (sMatch) seconds += parseInt(sMatch[1], 10);
+  
+  return seconds > 0 ? seconds : null;
+}
