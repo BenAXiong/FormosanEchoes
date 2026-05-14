@@ -93,11 +93,21 @@ export default function DemoPage() {
 
       {/* Center */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top bar */}
-        <div className="flex items-center gap-2 px-4 sm:px-5 py-3 border-b border-white/5 bg-[#0f0f16]/80 backdrop-blur-sm sticky top-0 z-10 flex-wrap">
+
+        {/* ── Mobile Header Row: logo + title | profile ───────────────── */}
+        <div className="lg:hidden flex items-center px-4 py-3 border-b border-white/5 bg-[#0f0f16]/95 backdrop-blur-sm sticky top-0 z-20">
+          <img src="/FE_logo_1d.png" alt="Logo" className="w-7 h-7 object-contain mr-2" />
+          <span className="text-white font-bold text-sm tracking-tight">Formosan Echoes</span>
+          <div className="ml-auto w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-xs font-bold text-white shrink-0">B</div>
+        </div>
+
+        {/* ── Toolbar Row ──────────────────────────────────────────────── */}
+        <div className="flex items-center gap-2 px-4 sm:px-5 py-2.5 border-b border-white/5 bg-[#0f0f16]/80 backdrop-blur-sm sticky top-0 lg:top-0 z-10">
+
+          {/* Filter pane toggle — mobile only */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 rounded-lg bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white transition-colors"
+            className="lg:hidden p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white transition-colors shrink-0"
             aria-label="Open filters"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -105,14 +115,8 @@ export default function DemoPage() {
             </svg>
           </button>
 
-          {/* Mobile branding */}
-          <div className="lg:hidden flex items-center gap-2 mr-1">
-            <img src="/FE_logo_1d.png" alt="Logo" className="w-6 h-6 object-contain" />
-            <span className="text-white font-bold text-sm tracking-tight whitespace-nowrap">Formosan Echoes</span>
-          </div>
-
           {/* Search */}
-          <div className="relative flex-1 min-w-36 max-w-xs">
+          <div className="relative flex-1 min-w-0 max-w-xs">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3" aria-hidden>
               <svg className="h-3.5 w-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -130,20 +134,42 @@ export default function DemoPage() {
             />
           </div>
 
-          {/* Header toggles */}
+          {/* Has lyrics toggle */}
           <button
             onClick={toggleLyricsFilter}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border ${
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border shrink-0 ${
               filters.has_lyrics
                 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                 : 'bg-white/5 text-stone-400 border-white/10 hover:text-white hover:bg-white/10'
             }`}
           >
-            Has lyrics
+            ♪ Lyrics
           </button>
 
-          {/* Autoplay + Compact toggles */}
-          <div className="flex items-center gap-3 ml-auto">
+          {/* Compact + Autoplay */}
+          <div className="flex items-center gap-2 ml-auto shrink-0">
+            {/* Compact view */}
+            <button
+              onClick={() => setCompact(!compact)}
+              aria-pressed={compact}
+              aria-label="Toggle compact view"
+              title={compact ? 'Switch to grid view' : 'Switch to compact view'}
+              className={`p-1.5 rounded-lg transition-colors ${
+                compact ? 'bg-white/15 text-white' : 'text-stone-500 hover:text-white hover:bg-white/8'
+              }`}
+            >
+              {compact ? (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+            {/* Autoplay */}
             <div className="flex items-center gap-1.5">
               <span className="text-xs text-stone-500 hidden sm:inline">Autoplay</span>
               <button
@@ -155,30 +181,6 @@ export default function DemoPage() {
                 <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${autoplay ? 'translate-x-4' : ''}`} />
               </button>
             </div>
-            <button
-              onClick={() => setCompact(!compact)}
-              aria-pressed={compact}
-              aria-label="Toggle compact view"
-              title={compact ? 'Switch to grid view' : 'Switch to compact view'}
-              className={`p-1.5 rounded-lg transition-colors ${
-                compact ? 'bg-white/15 text-white' : 'text-stone-500 hover:text-white hover:bg-white/8'
-              }`}
-            >
-              {compact ? (
-                // Grid icon
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <rect x="3" y="3" width="7" height="7" rx="1" />
-                  <rect x="14" y="3" width="7" height="7" rx="1" />
-                  <rect x="3" y="14" width="7" height="7" rx="1" />
-                  <rect x="14" y="14" width="7" height="7" rx="1" />
-                </svg>
-              ) : (
-                // List icon
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              )}
-            </button>
           </div>
         </div>
 
