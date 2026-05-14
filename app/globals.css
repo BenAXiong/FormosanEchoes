@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist);
+
+  /* Brand colors */
+  --color-formosa-teal: #4a8080;
+  --color-formosa-warm: #e8d9c4;
+
+  /* Inherit stone scale from Tailwind base */
+}
+
+:root {
+  --background: #f8f6f2;
+  --foreground: #1c1917;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Demo sidebar slick scrollbar */
+.demo-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+.demo-sidebar::-webkit-scrollbar { width: 3px; }
+.demo-sidebar::-webkit-scrollbar-track { background: transparent; }
+.demo-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 10px; }
+.demo-sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+/* Focus visible ring */
+:focus-visible {
+  outline: 2px solid var(--color-formosa-teal);
+  outline-offset: 2px;
+}

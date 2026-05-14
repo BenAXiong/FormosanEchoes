@@ -1,0 +1,50 @@
+{
+    "work": {
+        "title_original": "馬蘭姑娘",
+        "title_translated": "Malan Girl (or Malan Maiden)",
+        "culture_origin": "Amis (Pangcah) People of Taiwan",
+        "geographic_association": "Malan Tribe (Falangaw), Taitung; also linked to Northern Amis (Hualien) roots.",
+        "nature_of_work": "Modern Folk Composition (evolved approximately between 1920-1950)",
+        "credited_creators": [
+            {
+                "name": "Lu Jingzi (盧靜子)",
+                "role": "Primary songwriter/polisher and performer of the 1969 definitive version."
+            },
+            {
+                "name": "Traditional / Collective",
+                "role": "Oral tradition roots within the Amis community."
+            }
+        ],
+        "thematic_content": "A narrative song about a woman's unwavering love and resolve, famously featuring the line about lying on the 'kasolin' (train tracks). It is a significant marker of Amis matrilineal social dynamics and autonomy.",
+        "alternate_titles": [
+            "馬蘭山歌 (Malan Hill Song)",
+            "山地情歌 (Mountain Love Song)",
+            "離別故鄉 (Leaving My Hometown)"
+        ]
+    },
+    "representative_recordings": [
+        {
+            "performer": "Lu Jingzi (盧靜子)",
+            "era": "Late 1960s",
+            "notes": "The most iconic indigenous recording, often cited as the reference for the modern Amis version."
+        },
+        {
+            "performer": "Mei Dai (美黛)",
+            "era": "1960s",
+            "notes": "Mandarin-language adaptation that popularized the melody in mainstream Taiwanese pop culture."
+        },
+        {
+            "performer": "Lin Ba-zhong & Chen Yue-he",
+            "recording_year": 1961,
+            "notes": "The earliest known audio documentation of the melody, recorded under the title '離別故鄉'."
+        },
+        {
+            "performer": "Difang Duana (郭英男) & the Malan Singers",
+            "album": "Circle of Life (1998)",
+            "notes": "Highly influential international recording representing the polyphonic vocal style of the Malan Amis."
+        }
+    ],
+    "cultural_sensitivity_note": "As a protected cultural expression of the Amis people, '馬蘭姑娘' should be handled with respect for its history of collective creation. Care should be taken to distinguish it from the 'Elders' Drinking Song' (part of the same Malan tradition but a distinct ancient chant).",
+    "needs_manual_verification": true,
+    "checked_by_me": false
+}

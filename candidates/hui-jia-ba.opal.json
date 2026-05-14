@@ -1,0 +1,67 @@
+{
+    "song_title": "回家吧 (Hui Jia Ba)",
+    "research_summary": "The research identified three distinct primary musical works titled '回家吧'. The most culturally significant is 'Kulumaha', a Bunun indigenous gospel folk song from Taiwan. Another prominent contemporary work was released by Wan Fang in 2020, and a more recent one appeared in the 2024 drama 'To the Wonder'.",
+    "works": [
+        {
+            "work_id": "WORK_KULUMAHA_BUNUN",
+            "title": "Kulumaha (回家吧)",
+            "type": "Indigenous Gospel / Folk",
+            "culture": "Bunun (Taiwan)",
+            "composer": "Jin Guobao (金國寶)",
+            "lyricist": "Jin Guobao (金國寶)",
+            "description": "A spiritual song from the Bunun people expressing a deep cultural and ancestral longing to return home.",
+            "representative_recordings": [
+                {
+                    "artist": "Jin Guobao (金國寶)",
+                    "version": "Original",
+                    "context": "Original composition by the late Bunun pastor."
+                },
+                {
+                    "artist": "Vox Nativa Taiwan (原聲童聲合唱團)",
+                    "version": "Choral Cover",
+                    "context": "Featured in the film 'Listen Before You Sing' (聽見歌再唱)."
+                },
+                {
+                    "artist": "Ma Yong'en (馬詠恩)",
+                    "version": "Contemporary Folk Cover",
+                    "context": "Indigenous fusion rendition."
+                }
+            ]
+        },
+        {
+            "work_id": "WORK_WAN_FANG_FRAN",
+            "title": "回家吧 (Go Back Home)",
+            "type": "Mandopop",
+            "composer": "Fran (法蘭 / Fran Chen)",
+            "lyricist": "Fran (法蘭 / Fran Chen)",
+            "description": "An indie-pop song exploring the internal journey of returning to one's self.",
+            "representative_recordings": [
+                {
+                    "artist": "Wan Fang (萬芳)",
+                    "version": "Original Studio Recording",
+                    "album": "Dear All (給你們)",
+                    "year": 2020
+                }
+            ]
+        },
+        {
+            "work_id": "WORK_TO_THE_WONDER_OST",
+            "title": "回家吧 (Let's Go Home)",
+            "type": "TV Soundtrack",
+            "composer": "Tang Yeshu (唐野树)",
+            "lyricist": "Tian Heming (田贺铭)",
+            "description": "Theme song for the TV series 'To the Wonder' set in the Altay region.",
+            "representative_recordings": [
+                {
+                    "artist": "Zhou Yiran (周依然) & Yosh Yu (于适)",
+                    "version": "Original Soundtrack",
+                    "context": "To the Wonder (我的阿勒泰) OST",
+                    "year": 2024
+                }
+            ]
+        }
+    ],
+    "needs_manual_verification": true,
+    "checked_by_me": false,
+    "evidence": "/mnt/research_evidence_hui_jia_ba.md"
+}

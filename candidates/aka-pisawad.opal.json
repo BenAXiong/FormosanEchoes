@@ -1,0 +1,34 @@
+{
+    "work": {
+        "title": "Aka Pisawad",
+        "alternative_titles": [
+            "不要放棄",
+            "Don't Give Up",
+            "Bùyào fàngqì"
+        ],
+        "composer": "Suming Rupi (舒米恩)",
+        "cultural_origin": "Amis (Pangcah) people, Taiwan",
+        "language": "Amis",
+        "description": "A contemporary indigenous folk-pop song written as the theme for the film 'Wawa No Cidal' (Children of the Sun). It highlights themes of resilience and cultural preservation."
+    },
+    "recordings": [
+        {
+            "artist": "Suming Rupi (舒米恩)",
+            "version": "Amis Version (Original)",
+            "album": "Wawa No Cidal (Children of the Sun) Original Motion Picture Soundtrack",
+            "year": 2015,
+            "notable_awards": [
+                "Best Original Film Song (Golden Horse Awards 2015)",
+                "Song of the Year (Golden Melody Awards 2016)"
+            ]
+        },
+        {
+            "artist": "Suming Rupi (舒米恩)",
+            "version": "Mandarin Version",
+            "album": "Wawa No Cidal (Children of the Sun) Original Motion Picture Soundtrack",
+            "year": 2015
+        }
+    ],
+    "needs_manual_verification": true,
+    "checked_by_me": false
+}

@@ -1,0 +1,64 @@
+{
+  "languages": [
+    { "value": "Amis", "label": "Amis (阿美族語)" },
+    { "value": "Bunun", "label": "Bunun (布農族語)" },
+    { "value": "Paiwan", "label": "Paiwan (排灣族語)" },
+    { "value": "Seediq", "label": "Seediq (賽德克族語)" },
+    { "value": "Tao", "label": "Tao / Yami (達悟族語)" },
+    { "value": "Atayal", "label": "Atayal (泰雅族語)" },
+    { "value": "Truku", "label": "Truku (太魯閣族語)" },
+    { "value": "Rukai", "label": "Rukai (魯凱族語)" },
+    { "value": "Tsou", "label": "Tsou (鄒族語)" },
+    { "value": "Saisiyat", "label": "Saisiyat (賽夏族語)" },
+    { "value": "Kavalan", "label": "Kavalan (噶瑪蘭族語)" },
+    { "value": "Hakka", "label": "Hakka (客家語)" },
+    { "value": "Taiwanese", "label": "Taiwanese (台語)" },
+    { "value": "Mandarin", "label": "Mandarin (華語)" },
+    { "value": "Unknown", "label": "Unknown / Unconfirmed" }
+  ],
+  "ethnic_groups": [
+    { "value": "Amis (Pangcah)", "label": "Amis / Pangcah (阿美族)" },
+    { "value": "Bunun", "label": "Bunun (布農族)" },
+    { "value": "Paiwan", "label": "Paiwan (排灣族)" },
+    { "value": "Seediq", "label": "Seediq (賽德克族)" },
+    { "value": "Tao (Yami)", "label": "Tao / Yami (達悟族)" },
+    { "value": "Atayal", "label": "Atayal (泰雅族)" },
+    { "value": "Truku", "label": "Truku (太魯閣族)" },
+    { "value": "Rukai", "label": "Rukai (魯凱族)" },
+    { "value": "Tsou", "label": "Tsou (鄒族)" },
+    { "value": "Saisiyat", "label": "Saisiyat (賽夏族)" },
+    { "value": "Kavalan", "label": "Kavalan (噶瑪蘭族)" }
+  ],
+  "tags": [
+    { "value": "amis", "label": "Amis" },
+    { "value": "bunun", "label": "Bunun" },
+    { "value": "paiwan", "label": "Paiwan" },
+    { "value": "seediq", "label": "Seediq" },
+    { "value": "tao", "label": "Tao / Yami" },
+    { "value": "folk", "label": "Folk" },
+    { "value": "traditional", "label": "Traditional" },
+    { "value": "gospel", "label": "Gospel" },
+    { "value": "choral", "label": "Choral" },
+    { "value": "film-ost", "label": "Film OST" },
+    { "value": "folk-pop", "label": "Folk-Pop" },
+    { "value": "spiritual", "label": "Spiritual" },
+    { "value": "matrilineal", "label": "Matrilineal" },
+    { "value": "archive", "label": "Archive" },
+    { "value": "unverified", "label": "Unverified" }
+  ],
+  "confidence_levels": [
+    { "value": "high", "label": "High" },
+    { "value": "medium", "label": "Medium" },
+    { "value": "low", "label": "Low" },
+    { "value": "unknown", "label": "Unknown" }
+  ],
+  "verification_statuses": [
+    { "value": "candidate", "label": "Candidate" },
+    { "value": "needs_review", "label": "Needs Review" },
+    { "value": "checked", "label": "Checked" },
+    { "value": "approved_public", "label": "Approved (Public)" },
+    { "value": "approved_private", "label": "Approved (Private)" },
+    { "value": "rejected", "label": "Rejected" },
+    { "value": "duplicate", "label": "Duplicate" }
+  ]
+}
