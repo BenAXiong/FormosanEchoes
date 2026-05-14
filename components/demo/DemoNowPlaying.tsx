@@ -4,13 +4,13 @@ import type { Song } from '@/lib/types';
 import { getDisplayTitle, isYouTubeUrl, getYouTubeId } from '@/lib/normalize';
 import HoverableWord from '@/components/demo/HoverableWord';
 
-function RomLyrics({ text }: { text: string }) {
+function RomLyrics({ text, language }: { text: string; language?: string | null }) {
   return (
     <div className="leading-loose text-sm">
       {text.split('\n').map((line, li) => (
         <div key={li} className="min-h-[1.5rem]">
           {line.split(' ').filter(Boolean).map((word, wi) => (
-            <HoverableWord key={wi} word={word} />
+            <HoverableWord key={wi} word={word} language={language} />
           ))}
         </div>
       ))}
@@ -166,7 +166,7 @@ export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
               </p>
             ) : mode === 'rom' ? (
               romText
-                ? <RomLyrics text={romText} />
+                ? <RomLyrics text={romText} language={song.language_claimed} />
                 : <p className="text-stone-600 italic text-sm">No romanization available.</p>
             ) : mode === 'zh' ? (
               zhText
@@ -176,7 +176,7 @@ export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 mb-1.5">Rom</p>
-                  {romText ? <RomLyrics text={romText} /> : <p className="text-stone-500 text-xs">—</p>}
+                  {romText ? <RomLyrics text={romText} language={song.language_claimed} /> : <p className="text-stone-500 text-xs">—</p>}
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 mb-1.5">中文</p>
@@ -190,7 +190,7 @@ export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
                   <div key={i}>
                     <div className="text-sm leading-snug">
                       {line.split(' ').filter(Boolean).map((word, wi) => (
-                        <HoverableWord key={wi} word={word} />
+                        <HoverableWord key={wi} word={word} language={song.language_claimed} />
                       ))}
                     </div>
                     {zhLines[i] && <p className="text-stone-500 text-xs leading-snug mt-0.5">{zhLines[i]}</p>}

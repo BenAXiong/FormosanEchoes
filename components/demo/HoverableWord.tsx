@@ -17,7 +17,15 @@ interface TooltipPos {
   left: number;
 }
 
-export default function HoverableWord({ word }: { word: string }) {
+const LANG_TO_CHINESE: Record<string, string> = {
+  'Amis': '阿美語', 'Atayal': '泰雅語', 'Paiwan': '排灣語', 'Bunun': '布農語',
+  'Puyuma': '卑南語', 'Rukai': '魯凱語', 'Tsou': '鄒語', 'Saisiyat': '賽夏語',
+  'Tao (Yami)': '達悟語', 'Tao': '達悟語', 'Yami': '達悟語', 'Thao': '邵語',
+  'Kavalan': '噶瑪蘭語', 'Truku': '太魯閣語', 'Sakizaya': '撒奇萊雅語',
+  'Seediq': '賽德克語', "Hla'alua": "拉阿魯哇語", 'Kanakanavu': '卡那卡那富語'
+};
+
+export default function HoverableWord({ word, language }: { word: string; language?: string | null }) {
   const [entries, setEntries] = useState<DictEntry[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [show, setShow] = useState(false);
@@ -53,7 +61,11 @@ export default function HoverableWord({ word }: { word: string }) {
     fetchTimer.current = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/dict?q=${encodeURIComponent(clean)}`);
+        let url = `/api/dict?q=${encodeURIComponent(clean)}`;
+        if (language && LANG_TO_CHINESE[language]) {
+          url += `&dialects=${encodeURIComponent(LANG_TO_CHINESE[language])}`;
+        }
+        const res = await fetch(url);
         const data = await res.json();
         setEntries(data.results ?? []);
         fetched.current = true;
@@ -95,7 +107,7 @@ export default function HoverableWord({ word }: { word: string }) {
           {/* Header */}
           <span className="flex items-center justify-between px-3 py-2 border-b border-white/10">
             <span className="text-stone-200 font-semibold font-mono">{clean}</span>
-            <span className="text-[9px] text-stone-600 uppercase tracking-wider">Amis dict</span>
+            <span className="text-[9px] text-stone-600 uppercase tracking-wider">{language || 'All'} dict</span>
           </span>
 
           {/* Body */}
