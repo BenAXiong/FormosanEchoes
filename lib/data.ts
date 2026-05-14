@@ -1,7 +1,7 @@
 import type { Song } from './types';
 import { buildSearchText } from './normalize';
 import { validateSongs } from './validate';
-import rawSongs from '../data/songs.mock.json';
+import rawSongs from '../data/songs.json';
 import { normalizeSong } from './normalize';
 
 let _songs: Song[] | null = null;
