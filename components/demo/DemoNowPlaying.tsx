@@ -125,13 +125,18 @@ export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
 
       {/* Tab bar */}
       <div className="flex gap-0 px-4 pt-2 border-b border-white/5">
-        {(['lyrics'] as const).map((t) => (
+        {(['lyrics', 'evidence'] as const).map((t) => (
           <button
             key={t}
-            onClick={() => setTab(t)}
+            onClick={() => t !== 'evidence' && setTab(t)}
+            disabled={t === 'evidence'}
+            title={t === 'evidence' ? 'Currently unavailable' : undefined}
             className={`px-3 pb-2 text-xs font-semibold border-b-2 transition-colors capitalize
-              ${tab === t ? 'border-white text-white' : 'border-transparent text-stone-500 hover:text-stone-300'}`}
-          >{t}</button>
+              ${tab === t ? 'border-white text-white' : 'border-transparent text-stone-500'}
+              ${t === 'evidence' ? 'opacity-40 cursor-not-allowed' : 'hover:text-stone-300'}`}
+          >
+            {t}
+          </button>
         ))}
       </div>
 
