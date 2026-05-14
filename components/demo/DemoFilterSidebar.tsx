@@ -96,8 +96,7 @@ export default function DemoFilterSidebar({ filters, onChange, resultCount, tota
     <aside className="h-full flex flex-col bg-[#0f0f16] overflow-hidden">
       {/* Title */}
       <div className="px-4 py-4 border-b border-white/5 shrink-0">
-        <p className="text-white font-bold text-sm tracking-tight">Songs of Formosa</p>
-        <p className="text-stone-500 text-[10px] mt-0.5">台灣原住民音樂索引</p>
+        <p className="text-white font-bold text-sm tracking-tight">Formosan Echoes</p>
       </div>
 
       {/* Count + clear */}

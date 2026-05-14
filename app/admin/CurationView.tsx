@@ -32,7 +32,7 @@ export default function CurationView() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-4">
           <div className="flex-1">
             <h1 className="text-lg font-bold text-stone-800 tracking-tight">
-              Songs of Formosa
+              Formosan Echoes
               <span className="ml-2 text-xs font-normal text-stone-400">台灣原住民音樂索引</span>
             </h1>
             <p className="text-xs text-stone-400 hidden sm:block">Formosan-language song metadata browser · all entries are candidates unless verified</p>
@@ -129,7 +129,7 @@ export default function CurationView() {
 
       <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-4 border-t border-stone-200">
         <p className="text-xs text-stone-400 text-center">
-          Songs of Formosa · Cultural metadata browser · All entries are candidates unless marked verified ·{' '}
+          Formosan Echoes · Cultural metadata browser · All entries are candidates unless marked verified ·{' '}
           <span className="italic">Candidate data should not be cited as authoritative.</span>
         </p>
       </footer>

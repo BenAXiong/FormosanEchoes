@@ -5,7 +5,7 @@ import './globals.css';
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' });
 
 export const metadata: Metadata = {
-  title: 'Songs of Formosa — Formosan-Language Song Metadata Browser',
+  title: 'Formosan Echoes — Formosan-Language Song Metadata Browser',
   description:
     'A cultural metadata browser for Formosan-language songs. Search and explore songs from Indigenous Taiwanese peoples, with evidence, verification status, and source links.',
 };
