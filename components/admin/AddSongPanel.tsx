@@ -102,6 +102,7 @@ export default function AddSongPanel() {
   const [draft, setDraft] = useState<DraftSong | null>(null);
   const [status, setStatus] = useState<'idle' | 'fetching' | 'enriching' | 'saving' | 'saved' | 'error'>('idle');
   const [message, setMessage] = useState('');
+  const [sources, setSources] = useState<string[]>([]);
 
   // Generic draft field updater
   const setField = (key: keyof DraftSong, value: unknown) =>
@@ -137,11 +138,13 @@ export default function AddSongPanel() {
           title: draft._oembed?.title ?? draft.title_original ?? '',
           channel: draft._oembed?.channel ?? '',
           youtube_url: draft.youtube_url,
+          videoId: draft._oembed?.videoId ?? '',
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Enrich failed');
       const e = data.enriched;
+      if (data.sources?.length) setSources(data.sources);
       // Merge enriched fields into draft — don't overwrite if already set
       setDraft(d => {
         if (!d) return d;
@@ -286,7 +289,7 @@ export default function AddSongPanel() {
             </div>
           )}
 
-          {/* Enrich button */}
+          {/* Enrich button + sources */}
           <button
             onClick={handleEnrich}
             disabled={status === 'enriching'}
@@ -295,6 +298,19 @@ export default function AddSongPanel() {
             <span>✦</span>
             {status === 'enriching' ? 'Gemini is researching…' : 'Enrich with Gemini'}
           </button>
+          {sources.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {sources.slice(0, 5).map((src, i) => {
+                const host = (() => { try { return new URL(src).hostname.replace('www.', ''); } catch { return src; } })();
+                return (
+                  <a key={i} href={src} target="_blank" rel="noopener noreferrer"
+                    className="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-stone-400 hover:text-white hover:border-white/30 transition-colors truncate max-w-[200px]"
+                    title={src}
+                  >{host}</a>
+                );
+              })}
+            </div>
+          )}
 
           <div className="h-px bg-white/5" />
 
