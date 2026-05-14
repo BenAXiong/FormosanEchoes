@@ -16,12 +16,20 @@ function getLangGradient(lang?: string) {
   return LANG_GRADIENT[lang] ?? 'from-stone-600 via-stone-700 to-stone-800';
 }
 
-const CONFIDENCE_DOT: Record<string, string> = {
-  high: 'bg-emerald-400',
-  medium: 'bg-amber-400',
-  low: 'bg-orange-400',
-  unknown: 'bg-stone-500',
+// Map genre to colors (you can refine these as you populate more data)
+const GENRE_DOT: Record<string, string> = {
+  'Traditional': 'bg-blue-400',
+  'Traditional Choral': 'bg-blue-300',
+  'Modern Folk': 'bg-amber-400',
+  'Contemporary Folk': 'bg-amber-400',
+  'Contemporary Indigenous Folk-Pop': 'bg-fuchsia-400',
+  'Indigenous Gospel / Folk': 'bg-rose-400',
 };
+
+function getGenreDot(genre?: string | null) {
+  if (!genre) return 'bg-stone-600'; // Default gray for unknown/unclassified
+  return GENRE_DOT[genre] || 'bg-stone-400';
+}
 
 interface Props {
   song: Song;
@@ -32,7 +40,8 @@ interface Props {
 export default function DemoSongCard({ song, isSelected, onSelect }: Props) {
   const gradient = getLangGradient(song.language_claimed);
   const title = song.title_original ?? song.title_romanized ?? song.title_chinese ?? '(Untitled)';
-  const sub = song.title_romanized ?? song.title_chinese;
+  const zhTitle = song.title_chinese ? `(${song.title_chinese})` : '()';
+  const artist = song.artist || 'Unknown artist';
   const ytId = isYouTubeUrl(song.youtube_url) ? getYouTubeId(song.youtube_url!) : null;
   const thumbUrl = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : null;
 
@@ -67,10 +76,17 @@ export default function DemoSongCard({ song, isSelected, onSelect }: Props) {
             <span className="text-white text-lg pl-1" aria-hidden>▶</span>
           </div>
         </div>
-        {/* Language badge */}
+        {/* Language badge (Top Left) */}
         {song.language_claimed && (
-          <span className="relative z-10 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-black/40 backdrop-blur text-white/90 border border-white/20">
+          <span className="absolute top-3 left-3 z-10 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-black/40 backdrop-blur text-white/90 border border-white/20">
             {song.language_claimed}
+          </span>
+        )}
+        
+        {/* Lyrics badge (Bottom Right) */}
+        {song.lyrics?.show_publicly && (
+          <span className="absolute bottom-3 right-3 z-10 px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider bg-black/60 backdrop-blur text-emerald-400 border border-emerald-500/30">
+            ♪ Lyrics
           </span>
         )}
       </div>
@@ -78,14 +94,11 @@ export default function DemoSongCard({ song, isSelected, onSelect }: Props) {
       {/* Meta */}
       <div className="bg-[#1a1a24] group-hover:bg-[#1e1e2a] transition-colors px-3 py-2.5">
         <p className="text-white text-sm font-semibold truncate leading-tight">{title}</p>
-        {sub && sub !== title && <p className="text-stone-400 text-xs truncate mt-0.5">{sub}</p>}
+        <p className="text-stone-400 text-xs truncate mt-0.5">{zhTitle}</p>
         <div className="flex items-center gap-1.5 mt-1.5">
-          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${CONFIDENCE_DOT[song.confidence]}`} title={`Confidence: ${song.confidence}`} />
-          <p className="text-stone-500 text-xs truncate">{song.artist ?? '—'}</p>
+          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${getGenreDot(song.genre)}`} title={`Type: ${song.genre || 'Unknown'}`} />
+          <p className="text-stone-500 text-[11px] truncate">{artist}</p>
         </div>
-        {song.lyrics?.show_publicly && (
-          <span className="inline-block mt-1.5 text-[9px] font-semibold uppercase tracking-wider text-emerald-400/80">♪ Lyrics</span>
-        )}
       </div>
     </button>
   );
