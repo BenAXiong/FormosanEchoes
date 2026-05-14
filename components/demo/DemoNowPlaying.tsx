@@ -125,7 +125,7 @@ export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
 
       {/* Tab bar */}
       <div className="flex gap-0 px-4 pt-2 border-b border-white/5">
-        {(['lyrics', 'evidence'] as const).map((t) => (
+        {(['lyrics'] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
