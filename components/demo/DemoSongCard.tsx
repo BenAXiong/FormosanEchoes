@@ -94,10 +94,10 @@ export default function DemoSongCard({ song, isSelected, onSelect }: Props) {
       {/* Meta */}
       <div className="bg-[#1a1a24] group-hover:bg-[#1e1e2a] transition-colors px-3 py-2.5">
         <div className="flex items-center gap-2">
-          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${getGenreDot(song.genre)}`} title={`Type: ${song.genre || 'Unknown'}`} />
           <p className="text-white text-sm font-semibold truncate leading-tight">{title}</p>
+          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${getGenreDot(song.genre)}`} title={`Type: ${song.genre || 'Unknown'}`} />
         </div>
-        <div className="pl-3.5">
+        <div className="pl-0">
           <p className="text-stone-400 text-xs truncate mt-0.5">{zhTitle}</p>
           <p className="text-stone-300 text-xs font-medium truncate mt-1.5">{artist}</p>
         </div>
