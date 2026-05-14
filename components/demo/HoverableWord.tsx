@@ -11,6 +11,12 @@ function cleanWord(w: string): string {
   return w.replace(/^[,.'";:!?()\[\]{}—–]+|[,.'";:!?()\[\]{}—–]+$/g, '').toLowerCase();
 }
 
+function getShortDialect(full: string): string {
+  let short = full.replace(/語$/, '');
+  short = short.replace(/(阿美|泰雅|排灣|布農|卑南|魯凱|賽夏|達悟|雅美|噶瑪蘭|太魯閣|撒奇萊雅|賽德克|拉阿魯哇|卡那卡那富)$/, '');
+  return short || full.replace(/語$/, '');
+}
+
 interface TooltipPos {
   top?: number;    // fixed from viewport top (below placement)
   bottom?: number; // fixed from viewport bottom (above placement)
@@ -120,7 +126,7 @@ export default function HoverableWord({ word, language }: { word: string; langua
           {/* Header */}
           <span className="flex items-center justify-between px-3 py-2 border-b border-white/10">
             <span className="text-stone-200 font-semibold font-mono">{clean}</span>
-            <span className="text-[9px] text-stone-600 uppercase tracking-wider">{language || 'All'} dict</span>
+            <span className="text-[9px] text-stone-600 uppercase tracking-wider">{language || 'Dictionary'}</span>
           </span>
 
           {/* Body */}
@@ -131,9 +137,9 @@ export default function HoverableWord({ word, language }: { word: string; langua
           ) : (
             <span className="block max-h-44 overflow-y-auto demo-sidebar divide-y divide-white/5">
               {entries.slice(0, 6).map((e, i) => (
-                <span key={i} className="flex items-baseline gap-2 px-3 py-1.5 block">
+                <span key={i} className="flex items-baseline justify-between gap-4 px-3 py-1.5 block">
                   <span className="text-emerald-300 font-medium shrink-0">{e.zh}</span>
-                  <span className="text-stone-500 text-[10px] truncate">{e.dialect_name}</span>
+                  <span className="text-stone-500 text-[10px] truncate text-right">{getShortDialect(e.dialect_name)}</span>
                 </span>
               ))}
             </span>
