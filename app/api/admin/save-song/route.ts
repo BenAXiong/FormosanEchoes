@@ -16,20 +16,39 @@ function buildAliasMap(artists: { id: string; name_display: string; names_zh: st
   return map;
 }
 
-function resolveArtistId(artistStr: string, aliasMap: Map<string, string>): string | null {
-  if (!artistStr || artistStr === 'Unknown / Traditional') return null;
-  const lower = artistStr.toLowerCase().trim();
+function splitArtistString(raw: string): string[] {
+  const parts = raw
+    .split(/\s+(?:feat\.?|ft\.?|and|&|[×x])\s+/i)
+    .map(p => p.trim())
+    .filter(Boolean);
+  return parts.length > 1 ? parts : [raw];
+}
+
+function resolveOne(str: string, aliasMap: Map<string, string>): string | null {
+  const lower = str.toLowerCase().trim();
   let id = aliasMap.get(lower);
   if (id) return id;
-  const noFeat = artistStr.replace(/\s*feat\..*$/i, '').trim();
-  id = aliasMap.get(noFeat.toLowerCase());
+  const noParens = str.replace(/\s*\(.*?\)\s*$/, '').trim();
+  id = aliasMap.get(noParens.toLowerCase());
   if (id) return id;
+  const insideParens = (str.match(/\(([^)]+)\)/) || [])[1]?.trim();
+  if (insideParens) { id = aliasMap.get(insideParens.toLowerCase()); if (id) return id; }
   const tokens = lower.replace(/[()]/g, ' ').split(/\s+/).filter(t => t.length > 2);
   for (const t of tokens) { id = aliasMap.get(t); if (id) return id; }
   for (const [alias, aid] of aliasMap) {
     if (alias.length > 2 && lower.includes(alias)) return aid;
   }
   return null;
+}
+
+function resolveArtistIds(artistStr: string, aliasMap: Map<string, string>): string[] {
+  if (!artistStr || artistStr === 'Unknown / Traditional') return [];
+  const ids: string[] = [];
+  for (const part of splitArtistString(artistStr)) {
+    const id = resolveOne(part, aliasMap);
+    if (id && !ids.includes(id)) ids.push(id);
+  }
+  return ids;
 }
 
 export async function POST(request: Request) {
@@ -54,12 +73,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Duplicate song ID or YouTube URL' }, { status: 409 });
     }
 
-    // Resolve artist_ids
+    // Resolve artist_ids (supports feat./&/and)
     const artistsRaw = await fs.readFile(ARTISTS_PATH, 'utf8');
     const artists = JSON.parse(artistsRaw);
     const aliasMap = buildAliasMap(artists);
-    const artistId = song.artist ? resolveArtistId(song.artist as string, aliasMap) : null;
-    song.artist_ids = artistId ? [artistId] : [];
+    const artistIds = song.artist ? resolveArtistIds(song.artist as string, aliasMap) : [];
+    song.artist_ids = artistIds;
 
     // Ensure required fields
     song.tags = (song.tags as string[]) ?? [];
@@ -77,7 +96,7 @@ export async function POST(request: Request) {
     await fs.writeFile(SONGS_PATH, JSON.stringify(songs, null, 2), 'utf8');
 
     // Write to unlinked queue if artist not resolved
-    if (song.artist && !artistId) {
+    if (song.artist && artistIds.length === 0) {
       const unlinkedPath = path.join(process.cwd(), 'data/artists_unlinked.json');
       let unlinked: { song_artist_string: string; suggested_action: string }[] = [];
       try {
@@ -89,7 +108,7 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ saved: song, artist_linked: !!artistId });
+    return NextResponse.json({ saved: song, artist_linked: artistIds.length > 0 });
   } catch (err) {
     console.error('[save-song]', err);
     return NextResponse.json({ error: 'Failed to save song' }, { status: 500 });
