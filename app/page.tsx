@@ -103,6 +103,12 @@ export default function DemoPage() {
             </svg>
           </button>
 
+          {/* Mobile branding */}
+          <div className="lg:hidden flex items-center gap-2 mr-1">
+            <img src="/FE_logo_1d.png" alt="Logo" className="w-6 h-6 object-contain" />
+            <span className="text-white font-bold text-sm tracking-tight whitespace-nowrap">Formosan Echoes</span>
+          </div>
+
           {/* Search */}
           <div className="relative flex-1 min-w-36 max-w-xs">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3" aria-hidden>
@@ -198,7 +204,7 @@ export default function DemoPage() {
 
       {/* Mobile bottom sheet */}
       {selected && (
-        <div className="lg:hidden fixed inset-x-0 bottom-0 z-30 h-[72vh] rounded-t-2xl overflow-hidden border-t border-white/10 shadow-2xl">
+        <div className="lg:hidden fixed inset-x-0 bottom-0 z-30 h-[90vh] rounded-t-2xl overflow-hidden border-t border-white/10 shadow-2xl">
           <DemoNowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} />
         </div>
       )}
