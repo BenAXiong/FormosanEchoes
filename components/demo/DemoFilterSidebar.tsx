@@ -96,7 +96,7 @@ export default function DemoFilterSidebar({ filters, onChange, resultCount, tota
     <aside className="h-full flex flex-col bg-[#0f0f16] overflow-hidden">
       {/* Title */}
       <div className="px-4 py-4 border-b border-white/5 shrink-0 flex items-center gap-3">
-        <img src="/FE_logo_1c.jpg" alt="Logo" className="w-8 h-8 rounded-full object-cover shadow-lg border border-white/10" />
+        <img src="/FE_logo_1d.png" alt="Logo" className="w-8 h-8 rounded-full object-cover" />
         <p className="text-white font-bold text-sm tracking-tight">Formosan Echoes</p>
       </div>
 
