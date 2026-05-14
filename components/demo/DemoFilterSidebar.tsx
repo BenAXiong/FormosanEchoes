@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import type { FilterState, Song } from '@/lib/types';
 import { DEFAULT_FILTERS, hasActiveFilters } from '@/lib/filters';
+import { getArtistsWithSongs } from '@/lib/artists';
 
 const CIP_LANGUAGES = [
   { value: 'Amis', label: 'Amis 阿美族語' },
@@ -74,20 +75,18 @@ export default function DemoFilterSidebar({ filters, onChange, resultCount, tota
     onChange({ ...filters, [key]: value });
   const active = hasActiveFilters(filters);
 
-  // Derive unique, sorted artists from songs matching the current language filter
+  // Get artists who have at least 1 song in the current language-filtered pool
   const artistOptions = useMemo(() => {
     const pool = filters.language
       ? allSongs.filter((s) => s.language_claimed === filters.language)
       : allSongs;
-    const names = new Set(
-      pool
-        .map((s) => s.artist)
-        .filter((a): a is string => !!a && a !== 'Unknown / Traditional')
-    );
-    return [...names].sort().map((n) => ({ value: n, label: n }));
+    return getArtistsWithSongs(pool).map((a) => ({
+      value: a.id,
+      label: a.name_display,
+    }));
   }, [allSongs, filters.language]);
 
-  // We repurpose the ethnic_group filter as artist filter for now
+  // ethnic_group filter repurposed as artist_id filter
   const artistFilter = filters.ethnic_group;
   const setArtistFilter = (v: string) => set('ethnic_group', v);
 

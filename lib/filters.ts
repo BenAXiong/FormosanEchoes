@@ -4,8 +4,11 @@ import type { Song, FilterState } from './types';
 export function filterSongs(songs: Song[], filters: FilterState): Song[] {
   return songs.filter((song) => {
     if (filters.language && song.language_claimed !== filters.language) return false;
-    // ethnic_group filter is repurposed as artist filter on the public demo
-    if (filters.ethnic_group && song.artist !== filters.ethnic_group) return false;
+    // ethnic_group filter is repurposed as artist_id filter
+    if (filters.ethnic_group) {
+      const linked = (song.artist_ids ?? []).includes(filters.ethnic_group);
+      if (!linked) return false;
+    }
     if (filters.tag && !song.tags?.includes(filters.tag)) return false;
     if (filters.confidence && song.confidence !== filters.confidence) return false;
     if (filters.verification_status && song.verification_status !== filters.verification_status) return false;

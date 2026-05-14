@@ -1,82 +1,2521 @@
 [
   {
     "id": "art-001",
-    "name_display": "Suming Rupi",
-    "names_zh": ["舒米恩"],
-    "names_rom": ["Suming Rupi", "Suming"],
-    "names_indigenous": ["Suming"],
+    "name_display": "郭英男",
+    "names_zh": [
+      "郭英男"
+    ],
+    "names_rom": [
+      "Difang Tuwana",
+      "Difang Duana"
+    ],
+    "names_indigenous": [
+      "Difang na Tuwana"
+    ],
+    "zh_surname": "郭",
     "ethnic_group": "Amis (Pangcah)",
     "language": "Amis",
-    "notes": null
+    "is_group": false,
+    "active_years": "1980s–2002",
+    "bio_zh": "郭英男是臺東馬蘭阿美族長者與領唱者，以傳統複音與古調傳唱聞名，代表作〈老人飲酒歌〉曾在國際間廣為流傳。",
+    "bio_en": "Difang was an Amis elder and lead singer from Malan, Taitung, known for preserving traditional Amis multipart singing. His performance of “Elders’ Drinking Song” became internationally known.",
+    "notable_works": [
+      "老人飲酒歌",
+      "飲酒歡樂歌",
+      "聚會所長歌第二首 ko'edaway a radiw saka tosa"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/郭英男",
+    "sources": [
+      "郭英男 - 維基百科",
+      "台灣原住民族資訊資源網人物條目〈郭英男Difang na Tuwana〉"
+    ],
+    "notes": "國際常見拼寫含 Difang Duana、Difang Tuwana；與《Return to Innocence》取樣事件高度相關。"
   },
   {
     "id": "art-002",
-    "name_display": "Samingad",
-    "names_zh": ["紀曉君"],
-    "names_rom": ["Samingad"],
-    "names_indigenous": ["Samingad"],
-    "ethnic_group": "Puyuma",
-    "language": "Puyuma",
-    "notes": null
+    "name_display": "郭秀珠",
+    "names_zh": [
+      "郭秀珠"
+    ],
+    "names_rom": [
+      "Hongay na Ngiwit"
+    ],
+    "names_indigenous": [
+      "Hongay na Ngiwit",
+      "Ingay"
+    ],
+    "zh_surname": "郭",
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "1980s–2000s",
+    "bio_zh": "郭秀珠是馬蘭阿美族歌者，與郭英男共同參與多次錄音與海外演出，是馬蘭傳統歌謠的重要傳承者。",
+    "bio_en": "Hongay na Ngiwit was an Amis singer from Malan who performed and recorded with Difang, helping carry Malan vocal traditions onto international stages.",
+    "notable_works": [
+      "飲酒歡樂歌",
+      "台灣原住民複音歌唱 Polyphonies Vocales des Aborigènes de Taïwan"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "台灣原住民族資訊資源網人物條目〈郭英男Difang na Tuwana〉"
+    ],
+    "notes": "在法文唱片與田野資料中常與郭英男並列出現。"
   },
   {
     "id": "art-003",
-    "name_display": "Sangpuy",
-    "names_zh": ["桑布伊"],
-    "names_rom": ["Sangpuy"],
-    "names_indigenous": ["Sangpuy"],
-    "ethnic_group": "Puyuma",
-    "language": "Puyuma",
-    "notes": null
+    "name_display": "蔣進興",
+    "names_zh": [
+      "蔣進興"
+    ],
+    "names_rom": [
+      "Chiang Chin-Hsing"
+    ],
+    "names_indigenous": [
+      "Bai Lang"
+    ],
+    "zh_surname": "蔣",
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2000s–present",
+    "bio_zh": "蔣進興是郭英男之子，曾以專輯《My Name Is Bai Lang》入圍金曲獎最佳原住民語歌手獎。",
+    "bio_en": "Chiang Chin-Hsing, son of Difang, was nominated for the Golden Melody Award for Best Indigenous Language Singer with the album “My Name Is Bai Lang.”",
+    "notable_works": [
+      "My Name Is Bai Lang"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "常見以 Bai Lang 為識別名。"
   },
   {
     "id": "art-004",
-    "name_display": "陳建年 Paudull",
-    "names_zh": ["陳建年"],
-    "names_rom": ["Paudull"],
-    "names_indigenous": ["Paudull"],
-    "ethnic_group": "Puyuma",
-    "language": "Puyuma",
-    "notes": null
+    "name_display": "馬蘭吟唱隊",
+    "names_zh": [
+      "馬蘭吟唱隊"
+    ],
+    "names_rom": [
+      "Malan Singing Group"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": true,
+    "active_years": "1980s–2000s",
+    "bio_zh": "馬蘭吟唱隊是以臺東馬蘭阿美族歌者為核心的傳統歌唱群體，與郭英男相關錄音及國際巡演密切相連。",
+    "bio_en": "Malan Singing Group was a traditional Amis vocal ensemble centered on singers from Malan, closely associated with Difang’s recordings and international performances.",
+    "notable_works": [
+      "老人飲酒歌",
+      "台灣原住民複音歌唱 Polyphonies Vocales des Aborigènes de Taïwan"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "郭英男 - 維基百科",
+      "台灣原住民族資訊資源網人物條目〈郭英男Difang na Tuwana〉"
+    ],
+    "notes": "不同資料中成員名單可能略有變動。"
   },
   {
     "id": "art-005",
-    "name_display": "盧靜子",
-    "names_zh": ["盧靜子"],
-    "names_rom": ["Lu Jingzi"],
-    "names_indigenous": [],
-    "ethnic_group": "Amis (Pangcah)",
-    "language": "Amis",
-    "notes": null
+    "name_display": "陸森寶",
+    "names_zh": [
+      "陸森寶"
+    ],
+    "names_rom": [
+      "LU Sen-Bao",
+      "Baliwakes Raera",
+      "BaLiwakes"
+    ],
+    "names_indigenous": [
+      "Baliwakes Raera",
+      "BaLiwakes"
+    ],
+    "zh_surname": "陸",
+    "ethnic_group": "Puyuma",
+    "language": "Puyuma",
+    "is_group": false,
+    "active_years": "1930s–1988",
+    "bio_zh": "陸森寶是卑南族重要作曲家、教育者與歌謠創作者，被譽為「卑南族音樂之父」與「卑南族音樂靈魂」。",
+    "bio_en": "Lu Sen-Bao was a major Pinuyumayan composer, educator, and songwriter, often described as the ‘father’ or ‘soul’ of Pinuyumayan music.",
+    "notable_works": [
+      "美麗的稻穗",
+      "頌祭祖先",
+      "卑南山"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/陸森寶",
+    "sources": [
+      "陸森寶 - 維基百科",
+      "臺灣音樂群像資料庫〈陸森寶〉",
+      "原住民族文獻《卑南族的音樂靈魂——陸森寶》"
+    ],
+    "notes": "卑南語名與漢名都常見於不同資料庫。"
   },
   {
     "id": "art-006",
-    "name_display": "以莉·高露",
-    "names_zh": ["以莉·高露"],
-    "names_rom": ["Ilid Kaolo"],
-    "names_indigenous": ["Ilid Kaolo"],
-    "ethnic_group": "Amis (Pangcah)",
-    "language": "Amis",
-    "notes": null
+    "name_display": "高一生",
+    "names_zh": [
+      "高一生"
+    ],
+    "names_rom": [
+      "GAO Yi-Sheng",
+      "Uyongu Yatauyungana"
+    ],
+    "names_indigenous": [
+      "Uyongu Yatauyungana"
+    ],
+    "zh_surname": "高",
+    "ethnic_group": "Tsou",
+    "language": "Tsou",
+    "is_group": false,
+    "active_years": "1930s–1954",
+    "bio_zh": "高一生是鄒族教師、詩人與作曲家，開啟近代鄒族創作歌曲的重要先河，也是白色恐怖受難者之一。",
+    "bio_en": "Gao Yi-Sheng was a Tsou teacher, poet, and composer who pioneered modern Tsou songwriting and later became one of the Indigenous victims of the White Terror.",
+    "notable_works": [
+      "春之佐保姬",
+      "杜鵑山",
+      "長春花",
+      "古道",
+      "登上玉山",
+      "遷往南方之地"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "臺灣音樂群像資料庫〈高一生〉",
+      "KLOKAH 雲端媒體〈鄒之春神_高一生_歌聲呼喚愛與夢的鄒族音樂家〉"
+    ],
+    "notes": "作品常見日語、鄒語雙重脈絡。"
   },
   {
     "id": "art-007",
-    "name_display": "Ljaucu Talimaraw",
-    "names_zh": [],
-    "names_rom": ["Ljaucu Talimaraw"],
-    "names_indigenous": ["Ljaucu Talimaraw"],
-    "ethnic_group": "Paiwan",
-    "language": "Paiwan",
-    "notes": null
+    "name_display": "盧靜子",
+    "names_zh": [
+      "盧靜子"
+    ],
+    "names_rom": [
+      "Ceko"
+    ],
+    "names_indigenous": [],
+    "zh_surname": "盧",
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "1960s–present",
+    "bio_zh": "盧靜子出身臺東馬蘭部落，是臺灣早期最具代表性的原住民歌星之一，亦長期創作與傳唱原住民歌謠。",
+    "bio_en": "Ceko, from the Malan Amis community in Taitung, is one of the most prominent early Indigenous popular singers in Taiwan and has long composed and carried Indigenous songs.",
+    "notable_works": [
+      "尋樂"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "野火樂集〈盧靜子 Legacy Taipei 演唱會〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "部分資料以「山地歌后」稱之。"
   },
   {
     "id": "art-008",
-    "name_display": "陸森寶",
-    "names_zh": ["陸森寶"],
-    "names_rom": ["Baliw Asiray"],
-    "names_indigenous": ["Baliw Asiray"],
+    "name_display": "撒卡勒",
+    "names_zh": [
+      "撒卡勒"
+    ],
+    "names_rom": [
+      "Sakuli",
+      "Sakale"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Rukai",
+    "language": "Rukai",
+    "is_group": false,
+    "active_years": "2000s",
+    "bio_zh": "撒卡勒以《台灣魯凱族百年前歌謠》獲金曲獎最佳原住民語演唱人獎，屬較早被主流獎項注意到的魯凱族歌者。",
+    "bio_en": "Sakale won the Golden Melody Award’s Indigenous-language singing prize for “A Century-old Rukai Songs of Taiwan,” making him an early high-profile Rukai singer in the awards circuit.",
+    "notable_works": [
+      "台灣魯凱族百年前歌謠"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "羅馬拼寫在不同資料間不一。"
+  },
+  {
+    "id": "art-009",
+    "name_display": "路達瑪幹",
+    "names_zh": [
+      "路達瑪幹"
+    ],
+    "names_rom": [
+      "Ludamagan",
+      "Ludamakan"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": null,
+    "language": null,
+    "is_group": false,
+    "active_years": "2000s",
+    "bio_zh": "路達瑪幹以專輯《哈雷》獲金曲獎最佳原住民語演唱人獎，是早期原住民語流行獎項的重要得主之一。",
+    "bio_en": "Ludamagan won the Golden Melody Award’s Indigenous-language singing prize with the album “Halay,” making the singer one of the notable early award winners in the category.",
+    "notable_works": [
+      "哈雷"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科",
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "本次檢索到的來源未清楚交代其族別與主要語種。"
+  },
+  {
+    "id": "art-010",
+    "name_display": "伊吉",
+    "names_zh": [
+      "伊吉"
+    ],
+    "names_rom": [
+      "Yiji",
+      "Iji"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": null,
+    "language": null,
+    "is_group": false,
+    "active_years": "2000s",
+    "bio_zh": "伊吉以《原住民歌謠1》獲第18屆金曲獎最佳原住民語歌手獎，屬原住民語金曲早期得主。",
+    "bio_en": "Yiji won the 18th Golden Melody Award for Best Indigenous Language Singer with the album “Indigenous Songs 1.”",
+    "notable_works": [
+      "原住民歌謠1"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科",
+      "Hitoradio 專輯頁〈原住民歌謠1 / 伊吉〉"
+    ],
+    "notes": "本次檢索到的來源未能確認其族別。"
+  },
+  {
+    "id": "art-011",
+    "name_display": "于嘉珍",
+    "names_zh": [
+      "于嘉珍",
+      "於嘉珍"
+    ],
+    "names_rom": [],
+    "names_indigenous": [],
+    "zh_surname": "于",
+    "ethnic_group": null,
+    "language": null,
+    "is_group": false,
+    "active_years": "2000s",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "台灣山地原住民情歌4"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科",
+      "Hitoradio 專輯頁〈台灣山地原住民情歌4 / 于嘉珍〉"
+    ],
+    "notes": "本次可確認其曾發行原住民音樂專輯並入圍金曲獎，但族別與語言未明。"
+  },
+  {
+    "id": "art-012",
+    "name_display": "林照明",
+    "names_zh": [
+      "林照明"
+    ],
+    "names_rom": [
+      "Akila"
+    ],
+    "names_indigenous": [
+      "Akila"
+    ],
+    "zh_surname": "林",
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2000s–present",
+    "bio_zh": "林照明是臺東都蘭阿美族歌者與部落領袖人物之一，曾以《原住民創作歌謠15》入圍金曲獎，亦以 Akila 之名見於部落文化報導。",
+    "bio_en": "Lin Chao-Ming is an Amis singer from Dulan, Taitung, and a notable community leader. He was nominated for a Golden Melody Award with “Indigenous Creative Songs 15” and is also referred to by the name Akila.",
+    "notable_works": [
+      "原住民創作歌謠15",
+      "美的都蘭村"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科",
+      "Hitoradio 專輯頁〈原住民創作歌謠15 / 林照明〉",
+      "環境資訊中心〈都蘭的蛻變——從觀光熱點到文化主體，再到土地深耕之路〉"
+    ],
+    "notes": "部落報導中使用 Akila 作族名。"
+  },
+  {
+    "id": "art-013",
+    "name_display": "王福來",
+    "names_zh": [
+      "王福來"
+    ],
+    "names_rom": [],
+    "names_indigenous": [],
+    "zh_surname": "王",
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2000s–2010s",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "台灣山地原住民情歌7",
+      "原音呈現 阿美族複音傳唱"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科",
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "2019年《原音呈現 阿美族複音傳唱》亦列名演唱者之一。"
+  },
+  {
+    "id": "art-014",
+    "name_display": "依拜維吉",
+    "names_zh": [
+      "依拜維吉"
+    ],
+    "names_rom": [
+      "Ipay Vigi",
+      "Yibaiweiji"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": null,
+    "language": null,
+    "is_group": false,
+    "active_years": "2000s–2010s",
+    "bio_zh": "依拜維吉曾以同名專輯《依拜維吉》與後續作品《釋放》活躍於原住民語流行音樂場域，並獲金曲獎肯定。",
+    "bio_en": "Ipay Vigi was active in the Indigenous-language pop scene with the self-titled album “Ipay Vigi” and the later work “Release,” receiving Golden Melody recognition.",
+    "notable_works": [
+      "依拜維吉",
+      "釋放"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/依拜維吉",
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科",
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "本次檢索到的來源未明確標示族別。"
+  },
+  {
+    "id": "art-015",
+    "name_display": "少妮瑤·久分勒分",
+    "names_zh": [
+      "少妮瑤·久分勒分",
+      "少妮瑤"
+    ],
+    "names_rom": [
+      "Sauniaw Tjuvelijevelj",
+      "Sauniaw"
+    ],
+    "names_indigenous": [
+      "Sauniaw Tjuvelijevelj"
+    ],
+    "zh_surname": null,
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "is_group": false,
+    "active_years": "2000s–present",
+    "bio_zh": "少妮瑤·久分勒分是排灣族口鼻笛傳藝師與歌者，也是屏東縣傳統藝術排灣族口鼻笛保存者中唯一女性，曾多次入圍金曲獎。",
+    "bio_en": "Sauniaw Tjuvelijevelj is a Paiwan nose-flute and mouth-flute tradition bearer and singer, recognized as the only female holder of the Paiwan nose-flute preservation designation in Pingtung and a multiple Golden Melody nominee.",
+    "notable_works": [
+      "Nasi 生命",
+      "聽～女人聲音",
+      "從未離開"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "alive〈少妮瑤．久分勒分賦予口鼻笛新意涵〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "其創作與演奏同時涵蓋歌唱與傳統樂器。"
+  },
+  {
+    "id": "art-016",
+    "name_display": "林廣財",
+    "names_zh": [
+      "林廣財",
+      "廣財與老樂手"
+    ],
+    "names_rom": [],
+    "names_indigenous": [],
+    "zh_surname": "林",
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "林廣財以《百年排灣 風華再現》獲金曲獎最佳原住民語歌手肯定，近年又以《黑名單工作室 #3〈浮生錄：廣財與老樂手〉》再度入圍。",
+    "bio_en": "Lin Guang-Cai won the Golden Melody Award for Best Indigenous Language Singer with “A Century of Paiwan Glory Reappears,” and later returned to the shortlist with “Blacklist Studio #3: Floating Life.”",
+    "notable_works": [
+      "百年排灣 風華再現",
+      "黑名單工作室 #3〈浮生錄：廣財與老樂手〉"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/林廣財",
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科",
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "近年作品常見以「廣財與老樂手」發表。"
+  },
+  {
+    "id": "art-017",
+    "name_display": "拉衛士 勞外",
+    "names_zh": [
+      "拉衛士 勞外",
+      "拉衛士勞外"
+    ],
+    "names_rom": [],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2010s",
+    "bio_zh": "拉衛士勞外曾以《美好的日子》入圍金曲獎原住民語相關獎項；出版資訊中明確以「阿美族與新世紀」脈絡介紹其歌聲。",
+    "bio_en": "Lraweis Lawai was nominated in the Golden Melody Indigenous-language field with “Beautiful Days”; release notes explicitly frame his work in an Amis and New Age context.",
+    "notable_works": [
+      "美好的日子"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科",
+      "誠品線上《美好的日子：阿美族與新世紀》"
+    ],
+    "notes": "姓名空格與不空格寫法都可見。"
+  },
+  {
+    "id": "art-018",
+    "name_display": "芮斯",
+    "names_zh": [
+      "芮斯"
+    ],
+    "names_rom": [
+      "Res",
+      "Ruisi"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": null,
+    "language": null,
+    "is_group": false,
+    "active_years": "2010s",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "Miling'an",
+      "美麗的末日預言"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "風潮音樂〈芮斯．米靈岸〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "本次檢索到的來源可確認其屬原住民語專輯與歌手獎脈絡，但族別未明。"
+  },
+  {
+    "id": "art-019",
+    "name_display": "舒米恩",
+    "names_zh": [
+      "舒米恩",
+      "舒米恩·魯碧",
+      "Suming 舒米恩"
+    ],
+    "names_rom": [
+      "Suming",
+      "Suming Rupi"
+    ],
+    "names_indigenous": [
+      "Suming Rupi"
+    ],
+    "zh_surname": null,
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2000s–present",
+    "bio_zh": "舒米恩是臺東都蘭阿美族創作歌手、樂團主唱與阿米斯音樂節創辦人，長期以阿美語創作與推動原住民音樂交流。",
+    "bio_en": "Suming Rupi is an Amis singer-songwriter from Dulan, Taitung, a band frontman, and founder of the Amis Music Festival, long active in Amis-language creation and Indigenous music exchange.",
+    "notable_works": [
+      "Suming",
+      "阿米斯",
+      "美好的日子",
+      "海洋‧森林",
+      "O milaladiway 詠歌者",
+      "Mikerid 引路"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/舒米恩",
+    "sources": [
+      "舒米恩 - 維基百科",
+      "最佳原住民語歌手獎 - 維基百科",
+      "阿米斯音樂節 - 維基百科"
+    ],
+    "notes": "常見英文與中文並列書寫。"
+  },
+  {
+    "id": "art-020",
+    "name_display": "以莉·高露",
+    "names_zh": [
+      "以莉·高露",
+      "以莉高露"
+    ],
+    "names_rom": [
+      "Ilid Kaolo"
+    ],
+    "names_indigenous": [
+      "Ilid Kaolo"
+    ],
+    "zh_surname": null,
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "以莉·高露來自花蓮吉納路安部落，是重要阿美語創作女聲，曾以《輕快的生活》獲金曲獎最佳原住民語歌手與專輯。",
+    "bio_en": "Ilid Kaolo, from Hualien’s Cinalowan community, is a major Amis-language singer-songwriter who won Golden Melody honors with “Lightly Living.”",
+    "notable_works": [
+      "輕快的生活"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "風潮音樂〈以莉高露．輕快的生活〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": null
+  },
+  {
+    "id": "art-021",
+    "name_display": "阿洛·卡力亭·巴奇辣",
+    "names_zh": [
+      "阿洛·卡力亭·巴奇辣",
+      "阿洛"
+    ],
+    "names_rom": [
+      "Ado Kaliting Pacidal"
+    ],
+    "names_indigenous": [
+      "Ado Kaliting Pacidal"
+    ],
+    "zh_surname": null,
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "阿洛來自花蓮馬太鞍部落，兼具歌手、音樂創作人與影像工作者身分，以阿美語創作和南島文化交流見長。",
+    "bio_en": "Ado Kaliting Pacidal is an Amis singer-songwriter and media creator from Mataian, Hualien, noted for Amis-language creation and Austronesian cultural exchange work.",
+    "notable_works": [
+      "太陽月亮",
+      "Sasela'an 氣息",
+      "女人島"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/阿洛·卡力亭·巴奇辣",
+    "sources": [
+      "阿洛·卡力亭·巴奇辣 - 維基百科",
+      "風潮音樂〈阿洛．卡力亭．巴奇辣．太陽月亮〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": null
+  },
+  {
+    "id": "art-022",
+    "name_display": "蘇瓦那·恩木伊·奇拉雅善",
+    "names_zh": [
+      "蘇瓦那·恩木伊·奇拉雅善",
+      "蘇瓦那"
+    ],
+    "names_rom": [
+      "Suana Emuy Cilangasan",
+      "Suana"
+    ],
+    "names_indigenous": [
+      "Suana Emuy Cilangasan"
+    ],
+    "zh_surname": null,
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "蘇瓦那是臺東關山阿美族歌手與製作人，以阿美族語創作為核心，結合古調、西方器樂與當代編曲。",
+    "bio_en": "Suana is an Amis singer and producer from Guanshan, Taitung, whose work centers on Amis-language songwriting while blending old melodies, Western instrumentation, and contemporary arrangement.",
+    "notable_works": [
+      "族語創作與劇場、聲音設計作品"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/蘇瓦那·恩木伊·奇拉雅善",
+    "sources": [
+      "蘇瓦那·恩木伊·奇拉雅善 - 維基百科"
+    ],
+    "notes": "本次檢索到的資料較偏重人物介紹，未集中列出完整正式唱片目錄。"
+  },
+  {
+    "id": "art-023",
+    "name_display": "巴奈",
+    "names_zh": [
+      "巴奈",
+      "巴奈·庫穗",
+      "柯美黛"
+    ],
+    "names_rom": [
+      "Panai",
+      "Panai Kusui"
+    ],
+    "names_indigenous": [
+      "Panai Kusui"
+    ],
+    "zh_surname": "柯",
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "1990s–present",
+    "bio_zh": "巴奈·庫穗是臺灣獨立音樂與社會運動場域的重要原住民女聲，出身阿美族，也曾以母語與部落議題創作。",
+    "bio_en": "Panai Kusui is a major Indigenous voice in Taiwan’s independent music and social movement scenes, of Amis background and active in songs linked to language and community concerns.",
+    "notable_works": [
+      "流浪記",
+      "音樂與現場演唱作品"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/巴奈·庫穗",
+    "sources": [
+      "巴奈·庫穗 - 維基百科"
+    ],
+    "notes": "其作品跨華語與原住民語脈絡。"
+  },
+  {
+    "id": "art-024",
+    "name_display": "桑布伊",
+    "names_zh": [
+      "桑布伊",
+      "盧皆興"
+    ],
+    "names_rom": [
+      "Sangpuy"
+    ],
+    "names_indigenous": [
+      "Sangpuy"
+    ],
+    "zh_surname": "盧",
     "ethnic_group": "Puyuma",
     "language": "Puyuma",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "桑布伊是卑南族代表性創作歌手，曾三度獲金曲獎最佳原住民語歌手獎，作品結合卑南語古調與當代編曲。",
+    "bio_en": "Sangpuy is one of the defining contemporary Pinuyumayan singer-songwriters, a three-time Golden Melody winner whose work blends traditional Pinuyumayan melodies with contemporary production.",
+    "notable_works": [
+      "Dalan 路",
+      "椏幹",
+      "得力量 Pulu'em",
+      "mudalrep 靠近"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "風潮音樂〈桑布伊．靠近〉",
+      "風潮音樂〈桑布伊．椏幹〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
     "notes": null
+  },
+  {
+    "id": "art-025",
+    "name_display": "阿努",
+    "names_zh": [
+      "阿努",
+      "阿努·卡力亭·沙力朋安"
+    ],
+    "names_rom": [
+      "Anu Kaliting Sadipongan",
+      "Anu"
+    ],
+    "names_indigenous": [
+      "Anu Kaliting Sadipongan"
+    ],
+    "zh_surname": null,
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "阿努是阿美族創作歌手，以《Cepo 混濁了》獲金曲獎最佳原住民語歌手獎，後續亦持續推出族語創作專輯。",
+    "bio_en": "Anu is an Amis singer-songwriter who won the Golden Melody Award for Best Indigenous Language Singer with “Cepo,” and has continued releasing Indigenous-language work.",
+    "notable_works": [
+      "Cepo 混濁了",
+      "Laloken Ko Orip 認真生活"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科",
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": null
+  },
+  {
+    "id": "art-026",
+    "name_display": "達卡鬧",
+    "names_zh": [
+      "達卡鬧"
+    ],
+    "names_rom": [
+      "Dakanow",
+      "Daka Now"
+    ],
+    "names_indigenous": [
+      "Dakanow"
+    ],
+    "zh_surname": null,
+    "ethnic_group": "Paiwan",
+    "language": null,
+    "is_group": false,
+    "active_years": "1990s–present",
+    "bio_zh": "達卡鬧是兼具歌手、創作者與社運脈絡的音樂人，資料中多標示為排灣族，並說明其具排灣族與魯凱族血統，創作語言跨原住民語與多語種。",
+    "bio_en": "Dakanow is a singer-songwriter with strong links to social movements; consulted sources describe him primarily as Paiwan while also noting Paiwan and Rukai heritage. His songwriting spans Indigenous and multiple other languages.",
+    "notable_works": [
+      "Calisi 斜坡",
+      "流浪的Naluwan"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "飛魚雲豹音樂工團〈達卡鬧Dakanow〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "族群欄位依主要標示填 Paiwan；混合血統另記於此。"
+  },
+  {
+    "id": "art-027",
+    "name_display": "阿爆",
+    "names_zh": [
+      "阿爆",
+      "阿爆（阿仍仍）"
+    ],
+    "names_rom": [
+      "ABAO",
+      "Abao"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "is_group": false,
+    "active_years": "2000s–present",
+    "bio_zh": "阿爆是當代排灣族流行音樂最具影響力的創作歌手之一，曾以《vavayan 女人》與《Kinakaian 母親的舌頭》續創高峰，並以那屋瓦推動新世代原民創作。",
+    "bio_en": "ABAO is one of the most influential contemporary Paiwan pop creators, reaching major milestones with “Vavayan” and “Kinakaian,” while also fostering a new generation of Indigenous artists through her label, Nanguaq.",
+    "notable_works": [
+      "vavayan 女人",
+      "Kinakaian 母親的舌頭"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/阿爆",
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科",
+      "最佳原住民語專輯獎 - 維基百科",
+      "第28屆金曲獎得獎名單 - Tavis"
+    ],
+    "notes": "中文常加註「阿仍仍」。"
+  },
+  {
+    "id": "art-028",
+    "name_display": "戴曉君",
+    "names_zh": [
+      "戴曉君"
+    ],
+    "names_rom": [
+      "Sauljaljui",
+      "Sauljaljui Dai"
+    ],
+    "names_indigenous": [
+      "Sauljaljui"
+    ],
+    "zh_surname": "戴",
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "戴曉君是排灣族創作歌手，長期在傳統古調與跨域樂風之間實驗，近作《VAIVAIK 尋走》入圍多項金曲大獎。",
+    "bio_en": "Sauljaljui is a Paiwan singer-songwriter known for working between traditional melodies and cross-genre experimentation; her recent album “VAIVAIK” was shortlisted in multiple Golden Melody categories.",
+    "notable_works": [
+      "順著河流走",
+      "裡面的外面",
+      "VAIVAIK 尋走"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "風潮音樂〈戴曉君．VAIVAIK 尋走〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "多以族名 Sauljaljui 並列。"
+  },
+  {
+    "id": "art-029",
+    "name_display": "雲力思",
+    "names_zh": [
+      "雲力思"
+    ],
+    "names_rom": [
+      "Inka Mbing",
+      "Yun Li-Si"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Truku",
+    "language": "Truku",
+    "is_group": false,
+    "active_years": "2000s–present",
+    "bio_zh": "雲力思是太魯閣族歌手與創作人，其專輯《GAGA》曾獲金曲獎最佳原住民語歌手獎提名並獲獎。",
+    "bio_en": "Yun Li-Si is a Truku singer-songwriter whose album “GAGA” received and won major Golden Melody recognition in the Indigenous-language field.",
+    "notable_works": [
+      "GAGA",
+      "Ima Lalu Su 你叫什麼名字"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "風潮音樂〈雲力思．GAGA〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "部分資料以藝名「雲力思」、部分以羅馬拼寫識別。"
+  },
+  {
+    "id": "art-030",
+    "name_display": "王宏恩",
+    "names_zh": [
+      "王宏恩"
+    ],
+    "names_rom": [
+      "Biung Wang",
+      "Wang Hong-en"
+    ],
+    "names_indigenous": [],
+    "zh_surname": "王",
+    "ethnic_group": "Bunun",
+    "language": "Bunun",
+    "is_group": false,
+    "active_years": "2000s–present",
+    "bio_zh": "王宏恩是布農族創作歌手，早年即獲金曲獎最佳原住民語歌手獎，近年持續推出布農語創作。",
+    "bio_en": "Wang Hong-En is a Bunun singer-songwriter who won an early Golden Melody Award for Best Indigenous Language Singer and continues to release Bunun-language work.",
+    "notable_works": [
+      "Muskun Kata 一起我們"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科",
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "本次檢索到的直接資料以獎項與作品資訊為主。"
+  },
+  {
+    "id": "art-031",
+    "name_display": "陳建年",
+    "names_zh": [
+      "陳建年"
+    ],
+    "names_rom": [
+      "Purdur",
+      "Chen Chien-nien"
+    ],
+    "names_indigenous": [],
+    "zh_surname": "陳",
+    "ethnic_group": "Tao (Yami)",
+    "language": "Tao (Yami)",
+    "is_group": false,
+    "active_years": "1990s–present",
+    "bio_zh": "陳建年是達悟族代表性音樂人，曾以《pongso no Tao 人之島》獲金曲獎最佳原住民語歌手獎，作品深受蘭嶼文化與海洋意象影響。",
+    "bio_en": "Chen Jian-Nian is a landmark Tao musician whose album “pongso no Tao” won the Golden Melody Award for Best Indigenous Language Singer and is deeply shaped by Lanyu and maritime culture.",
+    "notable_works": [
+      "pongso no Tao 人之島"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科",
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "常見藝名 Purdur。"
+  },
+  {
+    "id": "art-032",
+    "name_display": "拉卡·巫茂",
+    "names_zh": [
+      "拉卡·巫茂",
+      "拉卡巫茂",
+      "洛佳巫茂",
+      "阿飛"
+    ],
+    "names_rom": [
+      "Laka Umaw"
+    ],
+    "names_indigenous": [
+      "Laka Umaw"
+    ],
+    "zh_surname": "洛",
+    "ethnic_group": "Seediq",
+    "language": "Seediq",
+    "is_group": false,
+    "active_years": "1990s–present",
+    "bio_zh": "拉卡·巫茂是花蓮萬榮賽德克族創作歌手，亦曾以阿飛之名出道，後來更名為洛佳巫茂。",
+    "bio_en": "Laka Umaw is a Seediq singer-songwriter from Wanrong, Hualien, who debuted under the name A-Fei and later changed his Chinese name to Luo Jia-Wumao.",
+    "notable_works": [
+      "流浪的歌"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/拉卡·巫茂",
+    "sources": [
+      "拉卡·巫茂 - 維基百科",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "2024年後資料有「洛佳巫茂」新姓名。"
+  },
+  {
+    "id": "art-033",
+    "name_display": "雅維·茉芮",
+    "names_zh": [
+      "雅維·茉芮",
+      "雅維．茉芮",
+      "林佳霏"
+    ],
+    "names_rom": [
+      "Yaway Mawring",
+      "Yaway Mauy"
+    ],
+    "names_indigenous": [
+      "Yaway Mawring"
+    ],
+    "zh_surname": "林",
+    "ethnic_group": "Atayal",
+    "language": "Atayal",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "雅維·茉芮出生於苗栗泰安斯瓦細格部落，以泰雅語創作，曾以《斯瓦細格》獲金曲獎最佳原住民語專輯與歌手。",
+    "bio_en": "Yaway Mawring is an Atayal singer-songwriter from Swaisig, Taian, Miaoli, who creates in Atayal and won Golden Melody honors with “Swaisig.”",
+    "notable_works": [
+      "斯瓦細格",
+      "wahi藤蔓",
+      "世界和我一起跳舞"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/雅維·茉芮",
+    "sources": [
+      "雅維·茉芮 - 國家文化記憶庫",
+      "雅維·茉芮 - 維基百科",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "部分社群與媒體把 Mawring 寫成 Mauy。"
+  },
+  {
+    "id": "art-034",
+    "name_display": "舞思愛",
+    "names_zh": [
+      "舞思愛"
+    ],
+    "names_rom": [
+      "Usay Kawlu",
+      "Usay",
+      "舞思愛 Usay"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": "舞思愛以阿美語創作專輯《那葡萄樹上的女孩》與《美感 Harateng no Pangcah》獲得金曲獎高度肯定，為近年阿美語女聲代表之一。",
+    "bio_en": "Usay emerged as a leading recent Amis female voice with the albums “The Girl on the Vine” and “Beauty / Harateng no Pangcah,” both recognized in the Golden Melody Awards.",
+    "notable_works": [
+      "那葡萄樹上的女孩",
+      "美感 Harateng no Pangcah"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "風潮音樂〈舞思愛．美感 Harateng no Pangcah〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": null
+  },
+  {
+    "id": "art-035",
+    "name_display": "葛西瓦",
+    "names_zh": [
+      "葛西瓦"
+    ],
+    "names_rom": [
+      "Kasiwa",
+      "Kasiwa Mafaladay"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "葛西瓦以阿美語創作與樂團經驗進入主流視野，曾以《我這裡有一批很純的你要不要 Ita》獲金曲獎最佳原住民語歌手獎。",
+    "bio_en": "Kasiwa came into wider view through Amis-language songwriting and band work, later winning the Golden Melody Award for Best Indigenous Language Singer with “Ita.”",
+    "notable_works": [
+      "Maya Maluqem 別退縮",
+      "我這裡有一批很純的你要不要 Ita"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "常見與 BOXING 樂團脈絡並列。"
+  },
+  {
+    "id": "art-036",
+    "name_display": "Matzka",
+    "names_zh": [
+      "Matzka",
+      "瑪斯卡"
+    ],
+    "names_rom": [
+      "Matzka"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "Matzka 是排灣族創作歌手，近年以《cinevuan 7鄰86號》與《djekuacan 年少不努力》連續於原住民語金曲獎項獲提名。",
+    "bio_en": "Matzka is a Paiwan singer-songwriter whose recent albums “cinevuan” and “djekuacan” have kept him prominent in the Golden Melody Indigenous-language categories.",
+    "notable_works": [
+      "cinevuan 7鄰86號",
+      "djekuacan 年少不努力"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": null
+  },
+  {
+    "id": "art-037",
+    "name_display": "舞炯恩·加以法利得",
+    "names_zh": [
+      "舞炯恩·加以法利得",
+      "舞炯恩"
+    ],
+    "names_rom": [
+      "Utjung Tjakivalid",
+      "Kris Wu Chiungen"
+    ],
+    "names_indigenous": [
+      "Utjung Tjakivalid"
+    ],
+    "zh_surname": "舞",
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "舞炯恩是排灣族創作歌手、演員與編曲者，近年以《Vusam 種子》入圍金曲獎原住民語歌手與專輯相關獎項。",
+    "bio_en": "Utjung Tjakivalid is a Paiwan singer-songwriter, actor, and arranger whose album “Vusam” was nominated in the Golden Melody Indigenous-language field.",
+    "notable_works": [
+      "Vusam 種子"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/舞炯恩",
+    "sources": [
+      "舞炯恩 - 維基百科",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "演藝圈亦常以 Kris Wu Chiungen 出現。"
+  },
+  {
+    "id": "art-038",
+    "name_display": "阿布絲",
+    "names_zh": [
+      "阿布絲",
+      "阿布絲・塔娜比瑪",
+      "阿布絲．塔娜比瑪"
+    ],
+    "names_rom": [
+      "Abus",
+      "Abus Tanapima"
+    ],
+    "names_indigenous": [
+      "Abus"
+    ],
+    "zh_surname": null,
+    "ethnic_group": "Bunun",
+    "language": null,
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": "阿布絲・塔娜比瑪是新生代原民創作歌手，受訪資料指出其具有布農族與阿美族血統，近年以《ABUS》《QUEENDOM》連續入圍金曲獎。",
+    "bio_en": "Abus Tanapima is a younger-generation Indigenous singer-songwriter. Interview sources describe her as having both Bunun and Amis heritage, and her albums “ABUS” and “QUEENDOM” were consecutively nominated for Golden Melody honors.",
+    "notable_works": [
+      "ABUS",
+      "QUEENDOM"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "Vogue Taiwan〈專訪金曲獎新星Abus阿布絲〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "族群欄位以其名字來源與常見標示先填 Bunun；實際為 Bunun／Amis 混合血統。"
+  },
+  {
+    "id": "art-039",
+    "name_display": "姑慕·巴紹",
+    "names_zh": [
+      "姑慕·巴紹"
+    ],
+    "names_rom": [
+      "Kumu Basaw"
+    ],
+    "names_indigenous": [
+      "Kumu Basaw"
+    ],
+    "zh_surname": null,
+    "ethnic_group": "Seediq",
+    "language": "Seediq",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": "姑慕·巴紹來自南投廬山部落，2025年以首張族語創作專輯《Qrasun 格拉孫》獲金曲獎最佳原住民語歌手獎。",
+    "bio_en": "Kumu Basaw, from Lushan in Nantou, won the 2025 Golden Melody Award for Best Indigenous Language Singer with the debut album “Qrasun.”",
+    "notable_works": [
+      "Qrasun 格拉孫"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/姑慕·巴紹",
+    "sources": [
+      "姑慕·巴紹 - 維基百科",
+      "水沙連雜誌〈堅持與勇敢，留住部落的聲音── Kumu Basaw 專訪〉"
+    ],
+    "notes": "來源亦指出其具賽德克與太魯閣雙重族群背景；此處以首要標示 Seediq 歸類。"
+  },
+  {
+    "id": "art-040",
+    "name_display": "Makav 真愛",
+    "names_zh": [
+      "Makav 真愛",
+      "真愛",
+      "李真愛"
+    ],
+    "names_rom": [
+      "Makav Malivayan",
+      "Makav"
+    ],
+    "names_indigenous": [
+      "Makav Malivayan"
+    ],
+    "zh_surname": "李",
+    "ethnic_group": "Bunun",
+    "language": "Bunun",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": "Makav 真愛是布農族創作女聲，首張專輯《寶藏 Treasure》即奪下金曲獎最佳原住民語專輯，並獲最佳新人獎。",
+    "bio_en": "Makav is a Bunun singer-songwriter whose debut album “Treasure” won the Golden Melody Award for Best Indigenous Language Album and also earned Best New Artist.",
+    "notable_works": [
+      "寶藏 Treasure"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/真愛_(女歌手)",
+    "sources": [
+      "真愛(女歌手) - 維基百科",
+      "國立臺南藝術大學電子報〈寶藏女孩嶄露頭角〉"
+    ],
+    "notes": "部分來源以「真愛」簡稱，部分以 Makav 為主。"
+  },
+  {
+    "id": "art-041",
+    "name_display": "Kivi",
+    "names_zh": [
+      "Kivi",
+      "給菲伊巴蘇里發依"
+    ],
+    "names_rom": [
+      "Kivi Pasulivai"
+    ],
+    "names_indigenous": [
+      "Kivi Pasulivai"
+    ],
+    "zh_surname": null,
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": "Kivi 是近年迅速受到關注的排灣族歌手，以《分水嶺Parius》入圍金曲獎最佳原住民語歌手與專輯等獎項。",
+    "bio_en": "Kivi is a fast-rising Paiwan singer who was nominated for major Golden Melody prizes with “Parius.”",
+    "notable_works": [
+      "分水嶺Parius"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "原住民族語言研究發展基金會〈族語也可以很創新▷ 排灣族歌手Kivi〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "社群帳號多使用 Kivi Pasulivai。"
+  },
+  {
+    "id": "art-042",
+    "name_display": "曾妮",
+    "names_zh": [
+      "曾妮",
+      "曾妮 Dremedreman"
+    ],
+    "names_rom": [
+      "Dremedreman"
+    ],
+    "names_indigenous": [
+      "Dremedreman"
+    ],
+    "zh_surname": "曾",
+    "ethnic_group": null,
+    "language": null,
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "N1 那屋瓦一號作品",
+      "全村的希望"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語專輯獎 - 維基百科",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "在那屋瓦相關作品中活躍；本次檢索資料未能穩定確認族別。"
+  },
+  {
+    "id": "art-043",
+    "name_display": "Arase 阿拉斯",
+    "names_zh": [
+      "Arase 阿拉斯",
+      "阿拉斯"
+    ],
+    "names_rom": [
+      "Arase",
+      "Arase Parele"
+    ],
+    "names_indigenous": [
+      "Arase"
+    ],
+    "zh_surname": null,
+    "ethnic_group": "Rukai",
+    "language": "Rukai",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": "阿拉斯是近年受到矚目的魯凱族新世代創作者，也以 YouTuber、主持人與 KOL 身分被原民音樂推介。",
+    "bio_en": "Arase is a younger-generation Rukai creator who is also introduced in Indigenous music promotion as a YouTuber, host, and opinion leader.",
+    "notable_works": [
+      "AKA",
+      "N1 那屋瓦一號作品"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "國立臺灣大學原住民族學生資源中心〈你所不知道的阿拉斯 Arase〉",
+      "Instagram／活動文案〈Arase 阿拉斯〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "本次檢索到的主要來源偏活動與社群介紹。"
+  },
+  {
+    "id": "art-044",
+    "name_display": "Morikilr 孔亞明",
+    "names_zh": [
+      "Morikilr 孔亞明",
+      "孔亞明"
+    ],
+    "names_rom": [
+      "Morikilr",
+      "Kong Ya-Ming"
+    ],
+    "names_indigenous": [
+      "Morikilr"
+    ],
+    "zh_surname": "孔",
+    "ethnic_group": "Puyuma",
+    "language": "Puyuma",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": "孔亞明出身臺東卑南族利嘉部落，2024年推出首張族語創作專輯《kamawan za kavung 像帽子一樣》，並入圍多項金曲獎。",
+    "bio_en": "Morikilr is from the Pinuyumayan Likavung community in Taitung. His debut Indigenous-language album “Like a Hat” drew multiple Golden Melody nominations.",
+    "notable_works": [
+      "kamawan za kavung 像帽子一樣"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "Ho-Hai-Yan 臉書貼文〈孔亞明 Morikilr——成為自己所愛的人〉",
+      "MTV Taiwan〈卑南族「溫柔聲線」Morikilr孔亞明首張創作專輯《像帽子一樣》〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "中文與羅馬拼寫常並列。"
+  },
+  {
+    "id": "art-045",
+    "name_display": "Kerekelj 沈昉禎",
+    "names_zh": [
+      "Kerekelj 沈昉禎",
+      "沈昉禎",
+      "禎禎"
+    ],
+    "names_rom": [
+      "Kerekelj"
+    ],
+    "names_indigenous": [
+      "Kerekelj"
+    ],
+    "zh_surname": "沈",
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": "沈昉禎是屏東春日鄉排灣族歌手，以《iya manu maitucu 我以為我不知道》入圍金曲獎多項大獎。",
+    "bio_en": "Kerekelj is a Paiwan singer from Chunri, Pingtung, whose album “iya manu maitucu” brought multiple Golden Melody nominations.",
+    "notable_works": [
+      "iya manu maitucu 我以為我不知道",
+      "Ti Cemelesai Ata Salasalad 阿新與他的朋友們"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "原住民族語言研究發展基金會〈金曲獎最神秘的原住民歌手-禎禎是誰？〉",
+      "Paiwan 臺灣原住民族資訊匯流平台〈沈昉禎Kerekelj…〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "常以 Kerekelj 或「禎禎」被介紹。"
+  },
+  {
+    "id": "art-046",
+    "name_display": "Teymu Ukah 德伊木",
+    "names_zh": [
+      "德伊木",
+      "德伊木．巫卡"
+    ],
+    "names_rom": [
+      "Teymu Ukah"
+    ],
+    "names_indigenous": [
+      "Teymu Ukah"
+    ],
+    "zh_surname": null,
+    "ethnic_group": "Seediq",
+    "language": "Seediq",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": "德伊木來自南投仁愛的賽德克都達部落，是創作歌手、演員與舞者，2022年推出賽德克語創作專輯《Lmiqu 山》。",
+    "bio_en": "Teymu Ukah, from the Sediq Toda community in Ren’ai, Nantou, is a singer-songwriter, actor, and dancer who released the Sediq-language album “Lmiqu” in 2022.",
+    "notable_works": [
+      "Lmiqu 山"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "原視新聞〈賽德克青年Teymu首發專輯 療癒歌聲傳遞文化〉",
+      "台北畫刊〈傳承美麗賽德克 知道自己從哪裡來〉"
+    ],
+    "notes": "部分社群帳號會附註 Sediq Toda。"
+  },
+  {
+    "id": "art-047",
+    "name_display": "謝皓成",
+    "names_zh": [
+      "謝皓成"
+    ],
+    "names_rom": [
+      "Labaga Taru"
+    ],
+    "names_indigenous": [
+      "Labaga Taru"
+    ],
+    "zh_surname": "謝",
+    "ethnic_group": "Truku",
+    "language": "Truku",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "謝皓成是太魯閣族傳統樂器演奏家與創作者，2018年發行《獵首笛》，2022年再推演奏專輯《還能當多久原住民》。",
+    "bio_en": "Labaga Taru is a Truku traditional-instrument performer and creator who released “Headhunting Flute” in 2018 and the instrumental album “How Long Can I Still Be Indigenous” in 2022.",
+    "notable_works": [
+      "獵首笛",
+      "還能當多久原住民",
+      "太魯閣傳奇"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "五大唱片〈謝皓成Labaga Taru 還能當多久原住民〉",
+      "謝皓成官方社群資料"
+    ],
+    "notes": "以器樂與太魯閣族傳統樂器演奏見長。"
+  },
+  {
+    "id": "art-048",
+    "name_display": "基姜 Kincyang",
+    "names_zh": [
+      "基姜",
+      "呂文翔"
+    ],
+    "names_rom": [
+      "Kincyang"
+    ],
+    "names_indigenous": [
+      "Kincyang"
+    ],
+    "zh_surname": "呂",
+    "ethnic_group": "Truku",
+    "language": "Truku",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": "基姜是來自花蓮的創作歌手，來源指出其父為阿美族、母為太魯閣族，並以族語創作與自我認同主題受到關注。",
+    "bio_en": "Kincyang is a singer-songwriter from Hualien; consulted sources describe him as the child of an Amis father and a Truku mother, and note his focus on Indigenous-language creation and identity.",
+    "notable_works": [
+      "Rmngaw 說"
+    ],
+    "youtube_channel": "https://www.youtube.com/@kincyang.lihang",
+    "wikipedia_url": null,
+    "sources": [
+      "原住民族廣播電臺〈阿美x太魯閣歌手基姜Kincyang出專輯《Rmngaw 說》〉",
+      "StreetVoice〈基姜Kincyang〉",
+      "YouTube〈基姜Kincyang〉"
+    ],
+    "notes": "族群欄位基於其太魯閣語創作定位填 Truku；另具 Amis／Truku 雙重背景。"
+  },
+  {
+    "id": "art-049",
+    "name_display": "Akua",
+    "names_zh": [
+      "Akua"
+    ],
+    "names_rom": [
+      "Akua",
+      "Akua Pang"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Kavalan",
+    "language": "Kavalan",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": "Akua 是近年活動文宣與廣播節目中可見的噶瑪蘭族歌手，以吉他自彈自唱、土地與族群記憶為主要形象。",
+    "bio_en": "Akua is a recent Kavalan singer appearing in event promotions and Indigenous radio contexts, presented as a guitar-based singer of land, life, and ethnic memory.",
+    "notable_works": [
+      "現場演出與母語創作作品"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "活動文案〈來自山海之間的噶瑪蘭族歌手 Akua〉",
+      "Instagram／Threads 活動資訊〈Akua〉"
+    ],
+    "notes": "目前本次檢索到的主要可驗證來源為活動與社群文案，正式唱片資訊仍待補。"
+  },
+  {
+    "id": "art-050",
+    "name_display": "海子Haiz",
+    "names_zh": [
+      "海子Haiz",
+      "海子樂團"
+    ],
+    "names_rom": [
+      "Haiz"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Kavalan",
+    "language": "Kavalan",
+    "is_group": true,
+    "active_years": "2020s–present",
+    "bio_zh": "海子Haiz是花蓮新社噶瑪蘭青年母語創作團隊，近年在地方音樂活動與跨年舞台可見其演出。",
+    "bio_en": "Haiz is a Kavalan youth band from Xinshe, Hualien, creating in the mother tongue and appearing in local music events and public festival stages.",
+    "notable_works": [
+      "meRaqat",
+      "噶瑪蘭族復名22週年紀念曲相關演出"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "高鐵《TLife》〈在花蓮，每一刻都是Live 現場，張開耳朵聽見洄瀾〉",
+      "Instagram／Facebook〈海子Haiz〉"
+    ],
+    "notes": "目前本次檢索到的明確來源以演出與社群資料為主。"
+  },
+  {
+    "id": "art-051",
+    "name_display": "瑪蓋丹",
+    "names_zh": [
+      "瑪蓋丹",
+      "瑪蓋丹．石卡達法度"
+    ],
+    "names_rom": [
+      "Magaitan",
+      "Magaitan Lhkatafatu"
+    ],
+    "names_indigenous": [
+      "Magaitan Lhkatafatu"
+    ],
+    "zh_surname": null,
+    "ethnic_group": "Thao",
+    "language": "Thao",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "瑪蓋丹是邵族創作歌手，其《美好的，怎麼了？》被介紹為邵族第一張創作音樂專輯，對邵語流行創作具有里程碑意義。",
+    "bio_en": "Magaitan is a Thao singer-songwriter whose album “What Happened to the Good Things?” has been described as the first Thao original songwriting album, making it a milestone in Thao-language popular creation.",
+    "notable_works": [
+      "美好的，怎麼了？"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "alive〈瑪蓋丹．石卡達法度唱出邵族之聲〉",
+      "博客來〈瑪蓋丹．石卡達法度 / 美好的，怎麼了？〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": null
+  },
+  {
+    "id": "art-052",
+    "name_display": "南投縣魚池鄉邵族文化發展協會",
+    "names_zh": [
+      "南投縣魚池鄉邵族文化發展協會",
+      "邵族文化發展協會"
+    ],
+    "names_rom": [
+      "Thao Cultural Development Association"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Thao",
+    "language": "Thao",
+    "is_group": true,
+    "active_years": "2020s–present",
+    "bio_zh": "此協會以族人、頭人、女祭司、長老與年輕人共同參與之名義出版《聽邵在歌唱》，屬重要的邵語歌謠保存與再現集體。",
+    "bio_en": "This Thao association issued “Listen to Thao Singing,” a major collective preservation-and-performance project involving elders, ritual specialists, leaders, and younger singers.",
+    "notable_works": [
+      "聽邵在歌唱"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "五大唱片〈南投縣魚池鄉邵族文化發展協會《聽邵在歌唱》〉",
+      "台灣原住民族資訊資源網〈邵族音樂〉"
+    ],
+    "notes": "屬文化協會型集體，而非一般商業樂團。"
+  },
+  {
+    "id": "art-053",
+    "name_display": "高郅程",
+    "names_zh": [
+      "高郅程"
+    ],
+    "names_rom": [
+      "'itih"
+    ],
+    "names_indigenous": [
+      "'itih"
+    ],
+    "zh_surname": "高",
+    "ethnic_group": "Saisiyat",
+    "language": "Saisiyat",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": "高郅程是苗栗南庄八卦力部落賽夏族青年，原視報導指出其透過返鄉學習賽夏古調後展開創作道路。",
+    "bio_en": "Kao Chih-Cheng, also introduced as ’itih, is a young Saisiyat from Baguali, Nanzhuang, who turned to songwriting after returning home to learn traditional Saisiyat melodies.",
+    "notable_works": [
+      "kiSba:aw（聚）"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "原視新聞〈音樂創作者返鄉學習賽夏古調開啟創作之路〉",
+      "YouTube／原視族語新聞〈賽夏族祭歌莊嚴肅穆青年返鄉學習傳唱〉"
+    ],
+    "notes": "目前可檢索到的正式錄音資訊仍有限。"
+  },
+  {
+    "id": "art-054",
+    "name_display": "蓬萊國小",
+    "names_zh": [
+      "蓬萊國小",
+      "苗栗縣南庄鄉蓬萊國小"
+    ],
+    "names_rom": [
+      "Penglai Elementary School"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Saisiyat",
+    "language": "Saisiyat",
+    "is_group": true,
+    "active_years": "2010s–present",
+    "bio_zh": "蓬萊國小學生群體是《傳唱賽夏之歌》音樂會的核心演出單位之一，具明確賽夏歌謠傳唱與影音實錄紀錄。",
+    "bio_en": "Students from Penglai Elementary School were one of the core performing bodies in “Passing on Saisiyat Songs,” with a clear record in concert and audiovisual preservation projects.",
+    "notable_works": [
+      "傳唱賽夏之歌 kiS no SaySiyat"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "文化部 iMedia〈2018世代之聲─臺灣族群音樂紀實系列《傳唱賽夏之歌》〉",
+      "政府出版品資訊網〈世代之聲－傳唱賽夏之歌〉"
+    ],
+    "notes": "屬學校演出群體。"
+  },
+  {
+    "id": "art-055",
+    "name_display": "苗栗縣賽夏文化藝術協會",
+    "names_zh": [
+      "苗栗縣賽夏文化藝術協會",
+      "賽夏文化藝術協會"
+    ],
+    "names_rom": [
+      "Miaoli Saisiyat Cultural and Arts Association"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Saisiyat",
+    "language": "Saisiyat",
+    "is_group": true,
+    "active_years": "2010s–present",
+    "bio_zh": "苗栗縣賽夏文化藝術協會與蓬萊國小共同擔綱《傳唱賽夏之歌》演出，是賽夏歌謠實作與展演的重要集體。",
+    "bio_en": "The Miaoli Saisiyat Cultural and Arts Association co-led “Passing on Saisiyat Songs” with Penglai Elementary School and is an important collective in Saisiyat song performance and preservation.",
+    "notable_works": [
+      "傳唱賽夏之歌 kiS no SaySiyat"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "文化部 iMedia〈2018世代之聲─臺灣族群音樂紀實系列《傳唱賽夏之歌》〉",
+      "政府出版品資訊網〈世代之聲－傳唱賽夏之歌〉"
+    ],
+    "notes": "屬文化協會型集體。"
+  },
+  {
+    "id": "art-056",
+    "name_display": "傳源文化藝術團",
+    "names_zh": [
+      "傳源文化藝術團"
+    ],
+    "names_rom": [
+      "Chuan Yuan Cultural Arts Troupe"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Atayal",
+    "language": "Atayal",
+    "is_group": true,
+    "active_years": "2010s–present",
+    "bio_zh": "傳源文化藝術團以泰雅族傳統樂舞為核心，代表作品包括《織．泰雅族樂舞》等，多次透過舞臺重現泰雅古謠與樂舞文化。",
+    "bio_en": "Chuan Yuan Cultural Arts Troupe centers on Atayal performing traditions, with works such as “Weaving: Atayal Song and Dance,” repeatedly bringing Atayal songs and dance culture onto the stage.",
+    "notable_works": [
+      "織．泰雅族樂舞",
+      "原音重現 泰美麗",
+      "溯 Lyus"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "傳源文化藝術團官方簡介",
+      "國家文化記憶庫〈傳源文化藝術團〉"
+    ],
+    "notes": "屬樂舞團，核心表現形式為傳統歌舞與再創作。"
+  },
+  {
+    "id": "art-057",
+    "name_display": "謝水能",
+    "names_zh": [
+      "謝水能"
+    ],
+    "names_rom": [
+      "Gilegilau Pavalius"
+    ],
+    "names_indigenous": [
+      "Gilegilau Pavalius"
+    ],
+    "zh_surname": "謝",
+    "ethnic_group": "Rukai",
+    "language": "Rukai",
+    "is_group": false,
+    "active_years": "1970s–present",
+    "bio_zh": "謝水能是魯凱族雙管鼻笛藝師、製笛師與鼻笛音樂創作者，長期致力於鼻笛音樂推廣與傳習。",
+    "bio_en": "Gilegilau Pavalius is a Rukai double-pipe nose-flute master, instrument maker, and composer who has worked extensively in transmission and promotion of nose-flute music.",
+    "notable_works": [
+      "魯凱族鼻笛演奏與創作曲目"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "臺灣音樂館開放博物館〈謝水能〉"
+    ],
+    "notes": "以器樂傳承為主，為本名單納入的重要魯凱族音樂家。"
+  },
+  {
+    "id": "art-058",
+    "name_display": "泰武古謠傳唱",
+    "names_zh": [
+      "泰武古謠傳唱"
+    ],
+    "names_rom": [
+      "Taiwu Ballads Troupe"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "is_group": true,
+    "active_years": "2010s–present",
+    "bio_zh": "泰武古謠傳唱是近年最具影響力的排灣古謠傳唱團之一，以《歌，飛過群山》獲金曲獎最佳原住民語專輯。",
+    "bio_en": "Taiwu Ballads Troupe is one of the most influential recent Paiwan traditional song ensembles, winning the Golden Melody Award for Best Indigenous Language Album with “Songs Fly Over the Mountains.”",
+    "notable_works": [
+      "歌，飛過群山"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": "https://zh.wikipedia.org/wiki/泰武古謠傳唱",
+    "sources": [
+      "最佳原住民語專輯獎 - 維基百科",
+      "風潮音樂相關資料",
+      "金曲36風潮音樂新聞稿"
+    ],
+    "notes": null
+  },
+  {
+    "id": "art-059",
+    "name_display": "草埔國小排灣兒童合唱團",
+    "names_zh": [
+      "草埔國小排灣兒童合唱團",
+      "草埔國小排灣兒童合唱團"
+    ],
+    "names_rom": [
+      "Caopu Elementary School Paiwan Children's Choir"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "is_group": true,
+    "active_years": "2000s",
+    "bio_zh": "草埔國小排灣兒童合唱團以《山上的百靈鳥》獲金曲獎最佳原住民語流行音樂演唱專輯獎，是校園型族語合唱的重要案例。",
+    "bio_en": "The Caopu Elementary School Paiwan Children’s Choir won the Golden Melody Award for Best Indigenous-language Pop Vocal Album with “Mountain Skylark,” making it an important school-based Indigenous choir case.",
+    "notable_works": [
+      "山上的百靈鳥"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "屬學校兒童合唱團。"
+  },
+  {
+    "id": "art-060",
+    "name_display": "BOXING樂團",
+    "names_zh": [
+      "BOXING樂團",
+      "BOXING"
+    ],
+    "names_rom": [
+      "BOXING"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Bunun",
+    "language": "Bunun",
+    "is_group": true,
+    "active_years": "2010s–present",
+    "bio_zh": "BOXING 樂團以布農族語搖滾與流行融合著稱，專輯《野生BOXING》及主唱葛西瓦皆曾在金曲獎獲得高度關注。",
+    "bio_en": "BOXING is known for blending Bunun-language rock and pop; the album “Wild BOXING” and frontman Kasiwa have both drawn strong Golden Melody attention.",
+    "notable_works": [
+      "野生BOXING",
+      "Maya Maluqem 別退縮"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科",
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "主唱葛西瓦後續亦以個人名義發展。"
+  },
+  {
+    "id": "art-061",
+    "name_display": "布農山地傳統音樂團",
+    "names_zh": [
+      "布農山地傳統音樂團"
+    ],
+    "names_rom": [
+      "Bunun Traditional Music Troupe"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Bunun",
+    "language": "Bunun",
+    "is_group": true,
+    "active_years": "2010s",
+    "bio_zh": "布農山地傳統音樂團以《八部傳說．布農》獲金曲獎最佳原住民語專輯獎，是布農傳統歌唱錄音的重要成果。",
+    "bio_en": "Bunun Traditional Music Troupe won the Golden Melody Award for Best Indigenous Language Album with “Legend of Eight Parts: Bunun,” an important recording of Bunun traditional singing.",
+    "notable_works": [
+      "八部傳說．布農"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語歌手獎 - 維基百科",
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": null
+  },
+  {
+    "id": "art-062",
+    "name_display": "Paliulius/8664樂團",
+    "names_zh": [
+      "Paliulius樂團",
+      "Paliulius/8664樂團",
+      "8664樂團"
+    ],
+    "names_rom": [
+      "Paliulius/8664"
+    ],
+    "names_indigenous": [
+      "Paliulius"
+    ],
+    "zh_surname": null,
+    "ethnic_group": null,
+    "language": null,
+    "is_group": true,
+    "active_years": "2000s–present",
+    "bio_zh": "Paliulius/8664 樂團由原民青年組成，團名為卑南語「圍坐在一起」，近年以部落故事創作和國際音樂獎項受到關注。",
+    "bio_en": "Paliulius/8664 is an Indigenous youth band whose name means ‘sit together’ in Pinuyumayan; it has gained attention for songs rooted in community stories and for international music awards.",
+    "notable_works": [
+      "圍坐在一起",
+      "田野調查",
+      "來自花蓮的祝福"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "alive〈Paliulius/8664樂團-走啊一起我們〉",
+      "原視新聞〈Paliulius唱出部落故事連獲2國際音樂大獎〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "族語與族別在團員之間可能為多族混合，故欄位留空。"
+  },
+  {
+    "id": "art-063",
+    "name_display": "台玖線樂團",
+    "names_zh": [
+      "台玖線樂團",
+      "台玖線"
+    ],
+    "names_rom": [
+      "Tai 9 Line"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": null,
+    "language": null,
+    "is_group": true,
+    "active_years": "2000s–present",
+    "bio_zh": "台玖線樂團由原住民青年音樂人組成，以東部公路與部落生活經驗為創作背景，專輯《有我陪伴》曾入圍金曲獎。",
+    "bio_en": "Tai 9 Line is an Indigenous youth band shaped by eastern Taiwan road culture and village life; its album “With Me Beside You” was nominated for a Golden Melody Award.",
+    "notable_works": [
+      "有我陪伴"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "Vocus〈金曲原民篇──專訪瑪蓋丹、台玖線樂團馬詠恩〉",
+      "Facebook 摘要〈台玖線樂團創立於2007年〉",
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "團體族群構成可能多元，故 ethnic_group 與 language 留空。"
+  },
+  {
+    "id": "art-064",
+    "name_display": "馬詠恩",
+    "names_zh": [
+      "馬詠恩"
+    ],
+    "names_rom": [],
+    "names_indigenous": [],
+    "zh_surname": "馬",
+    "ethnic_group": "Bunun",
+    "language": "Bunun",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "馬詠恩是台玖線樂團重要成員之一，受訪時表示未來希望持續帶給大家以族語創作為主的音樂；社群脈絡亦可見其與布農歌謠隊連結。",
+    "bio_en": "Ma Yong-En is a key member of Tai 9 Line and has stated in interview that he wants to keep focusing on mother-tongue songwriting; social traces also connect him to Bunun song teams.",
+    "notable_works": [
+      "看月亮 Sadu Kata Buan",
+      "有我陪伴"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "聯合報 Women 版〈馬詠恩：眼前的東西顧好〉",
+      "Instagram 摘要〈布農丹群青年歌謠隊〉",
+      "最佳原住民語歌手獎 - 維基百科"
+    ],
+    "notes": "族群欄位依目前檢索到的布農歌謠脈絡填寫，若後續有更精確來源可再校正。"
+  },
+  {
+    "id": "art-065",
+    "name_display": "沐妮悠",
+    "names_zh": [
+      "沐妮悠",
+      "妞妞"
+    ],
+    "names_rom": [
+      "Muniyu"
+    ],
+    "names_indigenous": [
+      "Muniyu"
+    ],
+    "zh_surname": null,
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "is_group": false,
+    "active_years": "2010s–present",
+    "bio_zh": "沐妮悠來自屏東來義文樂部落，是排灣族新生代女聲，曾獲臺灣原創流行音樂大獎原住民組首獎並入圍金曲獎。",
+    "bio_en": "Muniyu is a younger Paiwan female singer from Wenle, Laiyi, Pingtung, winner of a Taiwan Original Pop Music Award Indigenous division prize and later a Golden Melody nominee.",
+    "notable_works": [
+      "思念南大武山",
+      "蝴蝶",
+      "思念"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "Legacy mini〈沐妮悠-思念南大武山〉",
+      "北區區域原住民族學生資源中心〈沐妮悠的原式音符〉",
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": null
+  },
+  {
+    "id": "art-066",
+    "name_display": "何祖伶",
+    "names_zh": [
+      "何祖伶"
+    ],
+    "names_rom": [
+      "Aruway Livulivuwan"
+    ],
+    "names_indigenous": [
+      "Aruway Livulivuwan"
+    ],
+    "zh_surname": "何",
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "saljauljaceng 戀人",
+      "lalayan 完美對象"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "五大唱片〈唱VUVU的歌3〉"
+    ],
+    "notes": "《唱VUVU的歌3》曲目明確標示為排灣族演唱者。"
+  },
+  {
+    "id": "art-067",
+    "name_display": "張意皎",
+    "names_zh": [
+      "張意皎"
+    ],
+    "names_rom": [
+      "Tjuku"
+    ],
+    "names_indigenous": [
+      "Tjuku"
+    ],
+    "zh_surname": "張",
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "kivala 探訪情人"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "五大唱片〈唱VUVU的歌3〉"
+    ],
+    "notes": "同曲另有白中皇 Kuljelje Qaluan 合唱。"
+  },
+  {
+    "id": "art-068",
+    "name_display": "杜佳慧",
+    "names_zh": [
+      "杜佳慧"
+    ],
+    "names_rom": [
+      "Piligu Kaviyangan"
+    ],
+    "names_indigenous": [
+      "Piligu Kaviyangan"
+    ],
+    "zh_surname": "杜",
+    "ethnic_group": "Paiwan",
+    "language": "Paiwan",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "i i ya 跳傳統舞的歌"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "五大唱片〈唱VUVU的歌3〉"
+    ],
+    "notes": null
+  },
+  {
+    "id": "art-069",
+    "name_display": "翁心蕙",
+    "names_zh": [
+      "翁心蕙"
+    ],
+    "names_rom": [
+      "Na’u Ka ’angena Mu’u"
+    ],
+    "names_indigenous": [
+      "Na’u Ka ’angena Mu’u"
+    ],
+    "zh_surname": "翁",
+    "ethnic_group": "Kanakanavu",
+    "language": "Kanakanavu",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": "翁心蕙是《唱VUVU的歌3》中明確標示的卡那卡那富族演唱者之一，也是新聞報導中被點名的素人歌手。",
+    "bio_en": "Weng Xin-Hui is one of the clearly identified Kanakanavu singers on “Singing VUVU’s Songs III,” and is also named in related news coverage as one of the featured non-professional singers.",
+    "notable_works": [
+      "cani pa kita 快樂相見歌"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "五大唱片〈唱VUVU的歌3〉",
+      "原視／屏東大學 SDG 消息〈走入部落採集古謠《唱vuvu的歌3》發行〉"
+    ],
+    "notes": "人名與族語名拼法含標點差異。"
+  },
+  {
+    "id": "art-070",
+    "name_display": "翁詩瑢",
+    "names_zh": [
+      "翁詩瑢"
+    ],
+    "names_rom": [
+      "Kiuua Ka ’angena"
+    ],
+    "names_indigenous": [
+      "Kiuua Ka ’angena"
+    ],
+    "zh_surname": "翁",
+    "ethnic_group": "Kanakanavu",
+    "language": "Kanakanavu",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": "翁詩瑢是《唱VUVU的歌3》中卡那卡那富族演唱者之一，相關新聞亦引其談及希望青年學習族內歌謠。",
+    "bio_en": "Weng Shi-Rong is one of the Kanakanavu singers on “Singing VUVU’s Songs III”; related news quotes her hope that younger people will learn their community’s songs.",
+    "notable_works": [
+      "topento 呼喚歌"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "五大唱片〈唱VUVU的歌3〉",
+      "原視／屏東大學 SDG 消息〈走入部落採集古謠《唱vuvu的歌3》發行〉"
+    ],
+    "notes": null
+  },
+  {
+    "id": "art-071",
+    "name_display": "邱皓恩",
+    "names_zh": [
+      "邱皓恩"
+    ],
+    "names_rom": [
+      "Sapu Tanah"
+    ],
+    "names_indigenous": [
+      "Sapu Tanah"
+    ],
+    "zh_surname": "邱",
+    "ethnic_group": "Seediq",
+    "language": "Seediq",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "uyas rmeri 跳舞歌"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "五大唱片〈唱VUVU的歌3〉"
+    ],
+    "notes": "曲目標示為賽德克族演唱者。"
+  },
+  {
+    "id": "art-072",
+    "name_display": "胡懷恩",
+    "names_zh": [
+      "胡懷恩"
+    ],
+    "names_rom": [
+      "Salizan Istanta"
+    ],
+    "names_indigenous": [
+      "Salizan Istanta"
+    ],
+    "zh_surname": "胡",
+    "ethnic_group": "Hla'alua",
+    "language": "Hla'alua",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "sahli `apasʉ 螃蟹歌"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "五大唱片〈唱VUVU的歌3〉"
+    ],
+    "notes": "本次資料中屬少見可直接定位為拉阿魯哇族的錄音演唱者。"
+  },
+  {
+    "id": "art-073",
+    "name_display": "黃恩敏",
+    "names_zh": [
+      "黃恩敏"
+    ],
+    "names_rom": [
+      "Haisul Takistahaiian"
+    ],
+    "names_indigenous": [
+      "Haisul Takistahaiian"
+    ],
+    "zh_surname": "黃",
+    "ethnic_group": "Bunun",
+    "language": "Bunun",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "mal-kakiv mal-vanis 山豬陷阱歌"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "五大唱片〈唱VUVU的歌3〉"
+    ],
+    "notes": null
+  },
+  {
+    "id": "art-074",
+    "name_display": "王敏宣",
+    "names_zh": [
+      "王敏宣"
+    ],
+    "names_rom": [
+      "Piyaw"
+    ],
+    "names_indigenous": [
+      "Piyaw"
+    ],
+    "zh_surname": "王",
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2020s–present",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "folad ato fo'is 月亮與星星"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "五大唱片〈唱VUVU的歌3〉"
+    ],
+    "notes": null
+  },
+  {
+    "id": "art-075",
+    "name_display": "謝永泉",
+    "names_zh": [
+      "謝永泉"
+    ],
+    "names_rom": [],
+    "names_indigenous": [],
+    "zh_surname": "謝",
+    "ethnic_group": null,
+    "language": null,
+    "is_group": false,
+    "active_years": "2020s",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "Akokey 親愛的你好嗎"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "入圍金曲獎原住民語專輯；本次檢索來源未穩定標明族別。"
+  },
+  {
+    "id": "art-076",
+    "name_display": "吳家祿",
+    "names_zh": [
+      "吳家祿"
+    ],
+    "names_rom": [],
+    "names_indigenous": [],
+    "zh_surname": "吳",
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2010s",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "原音呈現 阿美族複音傳唱"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "2019年阿美族複音傳唱專輯所列演唱者之一。"
+  },
+  {
+    "id": "art-077",
+    "name_display": "曾光復",
+    "names_zh": [
+      "曾光復"
+    ],
+    "names_rom": [],
+    "names_indigenous": [],
+    "zh_surname": "曾",
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2010s",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "原音呈現 阿美族複音傳唱"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "2019年阿美族複音傳唱專輯所列演唱者之一。"
+  },
+  {
+    "id": "art-078",
+    "name_display": "楊拾妹",
+    "names_zh": [
+      "楊拾妹"
+    ],
+    "names_rom": [],
+    "names_indigenous": [],
+    "zh_surname": "楊",
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2010s",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "原音呈現 阿美族複音傳唱"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "2019年阿美族複音傳唱專輯所列演唱者之一。"
+  },
+  {
+    "id": "art-079",
+    "name_display": "林榮妹",
+    "names_zh": [
+      "林榮妹"
+    ],
+    "names_rom": [],
+    "names_indigenous": [],
+    "zh_surname": "林",
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2010s",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "原音呈現 阿美族複音傳唱"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "2019年阿美族複音傳唱專輯所列演唱者之一。"
+  },
+  {
+    "id": "art-080",
+    "name_display": "郭美玉",
+    "names_zh": [
+      "郭美玉"
+    ],
+    "names_rom": [],
+    "names_indigenous": [],
+    "zh_surname": "郭",
+    "ethnic_group": "Amis (Pangcah)",
+    "language": "Amis",
+    "is_group": false,
+    "active_years": "2010s",
+    "bio_zh": null,
+    "bio_en": null,
+    "notable_works": [
+      "原音呈現 阿美族複音傳唱"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "2019年阿美族複音傳唱專輯所列演唱者之一。"
+  },
+  {
+    "id": "art-081",
+    "name_display": "南王姐妹花",
+    "names_zh": [
+      "南王姐妹花"
+    ],
+    "names_rom": [
+      "Nanwang Sisters"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Puyuma",
+    "language": "Puyuma",
+    "is_group": true,
+    "active_years": "2000s–2010s",
+    "bio_zh": "南王姐妹花是與臺東南王部落聲音傳統高度相關的女子組合，專輯《南王姐妹花》與《BaLiwakes》皆入圍並獲得金曲肯定。",
+    "bio_en": "Nanwang Sisters is a female vocal act closely linked to the sound traditions of Nanwang in Taitung; both the self-titled album and “BaLiwakes” were recognized in the Golden Melody Awards.",
+    "notable_works": [
+      "南王姐妹花",
+      "BaLiwakes"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語專輯獎 - 維基百科"
+    ],
+    "notes": "團名與南王部落（卑南族）強連結。"
+  },
+  {
+    "id": "art-082",
+    "name_display": "漂流出口",
+    "names_zh": [
+      "漂流出口"
+    ],
+    "names_rom": [
+      "Outlet Drift"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": null,
+    "language": null,
+    "is_group": true,
+    "active_years": "2020s–present",
+    "bio_zh": "漂流出口近年以《海女》獲金曲獎最佳原住民語專輯獎，後續作品《Masonolay i Cepo'》再入圍第37屆金曲獎。",
+    "bio_en": "Outlet Drift won the Golden Melody Award for Best Indigenous Language Album with “Sea Woman,” and later returned to the shortlist with “Masonolay i Cepo’.”",
+    "notable_works": [
+      "海女",
+      "Masonolay i Cepo'"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "最佳原住民語專輯獎 - 維基百科",
+      "2026 金曲獎入圍名單新聞彙整"
+    ],
+    "notes": "本次檢索來源可確認其為原住民語專輯得主與入圍團體，但未穩定標示其單一族別。"
+  },
+  {
+    "id": "art-083",
+    "name_display": "帝瓦伊撒耘文化藝術基金會",
+    "names_zh": [
+      "財團法人花蓮縣帝瓦伊撒耘文化藝術基金會",
+      "帝瓦伊撒耘文化藝術基金會"
+    ],
+    "names_rom": [
+      "Tiway Isayuan Cultural Arts Foundation"
+    ],
+    "names_indigenous": [],
+    "zh_surname": null,
+    "ethnic_group": "Sakizaya",
+    "language": "Sakizaya",
+    "is_group": true,
+    "active_years": "2000s–present",
+    "bio_zh": "帝瓦伊撒耘文化藝術基金會曾執行《撒奇萊雅族祭典暨歌謠數位典藏計畫》，屬撒奇萊雅族歌謠保存與再現的重要文化集體。",
+    "bio_en": "The Tiway Isayuan Cultural Arts Foundation carried out a digital archiving project for Sakizaya ceremonies and songs, making it an important collective in Sakizaya song preservation and revival.",
+    "notable_works": [
+      "撒奇萊雅族祭典暨歌謠數位典藏計畫"
+    ],
+    "youtube_channel": null,
+    "wikipedia_url": null,
+    "sources": [
+      "台灣原住民族資訊資源網〈撒奇萊雅族音樂〉"
+    ],
+    "notes": "此條目屬保存／展演型文化集體，而非一般流行音樂團體；納入理由是其在撒奇萊雅歌謠保存上的實際作用。"
   }
 ]

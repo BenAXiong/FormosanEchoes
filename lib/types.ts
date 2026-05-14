@@ -74,7 +74,31 @@ export interface Song {
   needs_manual_verification: boolean;
   checked_by_me: boolean;
   date_added?: string;
+  artist_ids?: string[];          // resolved links into artists.json
   lyrics?: LyricsData;
+}
+
+// ─── Artist ───────────────────────────────────────────────────────────────────
+// Matches the schema produced by GPT deep research & data/artists.json
+
+export interface Artist {
+  id: string;
+  name_display: string;
+  names_zh: string[];
+  names_rom: string[];
+  names_indigenous: string[];
+  zh_surname: string | null;
+  ethnic_group: string | null;
+  language: string | null;
+  is_group: boolean;
+  active_years: string | null;
+  bio_zh: string | null;
+  bio_en: string | null;
+  notable_works: string[];
+  youtube_channel: string | null;
+  wikipedia_url: string | null;
+  sources: string[];
+  notes: string | null;
 }
 
 // ─── Filters ──────────────────────────────────────────────────────────────────
