@@ -10,11 +10,12 @@ import SongCard from '@/components/SongCard';
 import SongDetailPanel from '@/components/SongDetailPanel';
 import AddSongPanel from '@/components/admin/AddSongPanel';
 import ArtistAuditPanel from '@/components/admin/ArtistAuditPanel';
+import MetricsPanel from '@/components/admin/MetricsPanel';
 import vocab from '@/data/controlled-vocab.json';
 
 const typedVocab = vocab as ControlledVocab;
 
-type Tab = 'browse' | 'add' | 'artists';
+type Tab = 'browse' | 'add' | 'artists' | 'metrics';
 
 interface Props {
   songs: Song[];
@@ -45,7 +46,7 @@ export default function CurationView({ songs }: Props) {
           </div>
           {/* Tab switcher */}
           <div className="flex gap-1 bg-stone-100 rounded-lg p-1">
-            {(['browse', 'add', 'artists'] as Tab[]).map(t => (
+            {(['browse', 'add', 'artists', 'metrics'] as Tab[]).map(t => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
@@ -55,7 +56,7 @@ export default function CurationView({ songs }: Props) {
                     : 'text-stone-500 hover:text-stone-700'
                 }`}
               >
-                {t === 'browse' ? 'Browse' : t === 'add' ? '+ Add Song' : 'Artists Audit'}
+                {t === 'browse' ? 'Browse' : t === 'add' ? '+ Add Song' : t === 'artists' ? 'Artists Audit' : 'Metrics'}
               </button>
             ))}
           </div>
@@ -82,6 +83,13 @@ export default function CurationView({ songs }: Props) {
         {tab === 'artists' && (
           <div className="bg-[#0f0f16] rounded-xl border border-white/10 p-6 min-h-[400px]">
             <ArtistAuditPanel />
+          </div>
+        )}
+
+        {/* ── Metrics tab ── */}
+        {tab === 'metrics' && (
+          <div className="bg-[#0f0f16] rounded-xl border border-white/10 min-h-[400px]">
+            <MetricsPanel />
           </div>
         )}
 
