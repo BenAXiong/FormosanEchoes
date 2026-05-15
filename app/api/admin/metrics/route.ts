@@ -25,6 +25,14 @@ export async function GET() {
   const songs = data ?? [];
   const total = songs.length;
 
+  // Supabase returns lyrics as a single object or null (UNIQUE FK = one-to-one),
+  // and song_artists as an array. Normalise both to arrays defensively.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function toArray(val: any): any[] {
+    if (!val) return [];
+    return Array.isArray(val) ? val : [val];
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const gaps = {
     no_language:     songs.filter((s: any) => !s.language).length,
@@ -32,8 +40,8 @@ export async function GET() {
     no_year:         songs.filter((s: any) => !s.year).length,
     no_genre:        songs.filter((s: any) => !s.genre).length,
     no_title_zh:     songs.filter((s: any) => !s.title_zh).length,
-    no_artist_link:  songs.filter((s: any) => !(s.song_artists as any[]).length).length,
-    no_lyrics:       songs.filter((s: any) => !(s.lyrics as any[]).length).length,
+    no_artist_link:  songs.filter((s: any) => !toArray(s.song_artists).length).length,
+    no_lyrics:       songs.filter((s: any) => !toArray(s.lyrics).length).length,
   };
 
   const verification: Record<string, number> = {};
@@ -44,7 +52,7 @@ export async function GET() {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const lyricRows = (songs as any[]).flatMap(s => s.lyrics ?? []);
+  const lyricRows = (songs as any[]).flatMap(s => toArray(s.lyrics));
   const lyrics = {
     total:            lyricRows.length,
     not_public:       lyricRows.filter((l: any) => !l.show_publicly).length,

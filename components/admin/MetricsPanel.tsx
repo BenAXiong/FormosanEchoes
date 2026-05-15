@@ -68,9 +68,16 @@ export default function MetricsPanel() {
 
   useEffect(() => {
     fetch('/api/admin/metrics')
-      .then(r => r.json())
+      .then(async r => {
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error ?? `HTTP ${r.status}`);
+        return data;
+      })
       .then(data => { setMetrics(data); setLoading(false); })
-      .catch(() => { setError('Failed to load metrics'); setLoading(false); });
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : 'Failed to load metrics');
+        setLoading(false);
+      });
   }, []);
 
   if (loading) return <p className="text-stone-400 text-sm p-6">Loading…</p>;
