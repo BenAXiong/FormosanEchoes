@@ -19,10 +19,19 @@ export const metadata: Metadata = {
   },
 };
 
+import { PlayerProvider } from '@/lib/PlayerContext';
+import PlayerBar from '@/components/PlayerBar';
+import GlobalPlayer from '@/components/GlobalPlayer';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-TW" className={geist.variable}>
-      <body className="antialiased bg-stone-50 text-stone-800" suppressHydrationWarning>{children}</body>
+      <body className="antialiased bg-stone-50 text-stone-800" suppressHydrationWarning>
+        <PlayerProvider>
+          {children}
+          <PlayerBar />
+        </PlayerProvider>
+      </body>
     </html>
   );
 }

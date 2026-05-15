@@ -10,7 +10,7 @@ function safe(val: unknown): string {
 /** Normalize a song — fill in defaults for missing optional fields. */
 export function normalizeSong(raw: Partial<Song>): Song {
   return {
-    id: raw.id ?? `sof-unknown-${Math.random().toString(36).slice(2, 7)}`,
+    id: raw.id ?? `sof-unknown-${raw.title_original?.length ?? 0}`,
     title_original: raw.title_original ?? undefined,
     title_romanized: raw.title_romanized ?? undefined,
     title_chinese: raw.title_chinese ?? undefined,

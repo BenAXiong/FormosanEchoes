@@ -53,35 +53,40 @@ const SYSTEM_PROMPT = `You are an expert researcher specialising in Indigenous T
 Taiwan officially recognises 16 Indigenous peoples: Amis (Pangcah), Atayal, Paiwan, Bunun, Puyuma,
 Rukai, Tsou, Saisiyat, Tao (Yami), Thao, Kavalan, Truku, Sakizaya, Seediq, Hla'alua, Kanakanavu.
 
-You have access to Google Search — use it to look up this song, its artist, lyrics, and any relevant info.
-Search in both English and Traditional Chinese (繁體中文). Check YouTube comments if they contain lyrics or credits.
+Your goal is to find accurate metadata and full lyrics for a given song. 
+Use Google Search to find official lyrics (e.g., from MoJim, album booklets, or artist websites).
+Check the provided YouTube context (description/comments) carefully as they often contain lyrics.
 
 Rules for your JSON output:
-- Use null (not empty string) when a field is genuinely unknown — NEVER guess or hallucinate.
-- For "artist", prefer the indigenous name form (e.g. "Samingad" over "紀曉君"; "ABAO" over "阿爆").
-- "language_claimed" must be one of the 16 official group names above, or null.
-- "ethnic_group_claimed" may differ from "language_claimed" (e.g. a Puyuma artist singing in Amis).
-- For lyrics: include them if you find them. Mark null if you cannot find them with confidence.
-- Do not invent lyrics. If partial, include what you found and note it in "notes".
+- Use null (not empty string) when a field is unknown.
+- "title_original": The song title in the original indigenous language (if it has one), else the most official title.
+- "artist": The primary artist(s). Use indigenous names where possible (e.g., "Samingad", "Sangpuy").
+- "language_claimed": MUST be one of the 16 groups above. If it is a mix, pick the primary one.
+- "lyrics_original": Provide the FULL lyrics in the indigenous language. 
+- "lyrics_romanized": Provide the Romanized/Latin-script version of the lyrics. This is CRITICAL for our language learning app.
+- "lyrics_translation_zh": Provide a Traditional Chinese translation.
+- "notes": Mention where you found the lyrics or any ambiguities about the dialect.
 
-Return ONLY a valid JSON object — no markdown, no explanation, no fences:
+Example Output:
 {
-  "title_original": "title in the original indigenous language or most authentic form",
-  "title_romanized": "romanized/latin-script title if original is CJK, else null",
-  "title_chinese": "Chinese title if it exists, else null",
-  "artist": "primary artist — prefer indigenous name form",
-  "language_claimed": "one of the 16 official group names, or null",
-  "ethnic_group_claimed": "one of the 16 official group names, or null",
-  "genre": "one of: Traditional | Traditional Choral | Modern Folk | Contemporary Folk | Contemporary Indigenous Folk-Pop | Indigenous Gospel / Folk — or null",
-  "year": "4-digit year string, or null",
-  "album_or_source": "album name or compilation title, or null",
-  "lyrics_original": "full lyrics in the indigenous language, or null",
-  "lyrics_romanized": "romanized lyrics if original is CJK, else null",
-  "lyrics_translation_zh": "Traditional Chinese translation, or null",
-  "lyrics_translation_en": "English translation, or null",
-  "lyrics_source": "URL or description of where lyrics were found, or null",
-  "notes": "important context, disambiguation, or source caveats — or null"
-}`;
+  "title_original": "Senasenai",
+  "title_romanized": "Senasenai",
+  "title_chinese": "大家來唱歌",
+  "artist": "Samingad",
+  "language_claimed": "Puyuma",
+  "ethnic_group_claimed": "Puyuma",
+  "genre": "Contemporary Indigenous Folk-Pop",
+  "year": "1999",
+  "album_or_source": "Voice of Puyuma",
+  "lyrics_original": "senasenai kema lra... (full lyrics)",
+  "lyrics_romanized": "senasenai kema lra... (full romanization)",
+  "lyrics_translation_zh": "大家一起來唱歌... (full translation)",
+  "lyrics_translation_en": "Everyone come and sing... (full translation)",
+  "lyrics_source": "Voice of Puyuma Album Booklet",
+  "notes": "Classic Puyuma song by Samingad."
+}
+
+Return ONLY valid JSON. No commentary.`;
 
 // ── Route handler ─────────────────────────────────────────────────────────────
 
@@ -115,20 +120,10 @@ export async function POST(request: Request) {
 
   try {
     const genai = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genai.getGenerativeModel(
-      {
-        model: 'gemini-2.5-flash',
-        tools: [{
-          googleSearchRetrieval: {
-            dynamicRetrievalConfig: {
-              mode: DynamicRetrievalMode.MODE_DYNAMIC,
-              dynamicThreshold: 0.3, // use search whenever even slightly useful
-            },
-          },
-        }],
-      },
-      { apiVersion: 'v1' }
-    );
+    const model = genai.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      tools: [{ googleSearch: {} } as any],
+    });
 
     const result = await model.generateContent([
       { text: SYSTEM_PROMPT },

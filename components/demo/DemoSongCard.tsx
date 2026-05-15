@@ -1,5 +1,6 @@
 import type { Song } from '@/lib/types';
 import { getYouTubeId, isYouTubeUrl } from '@/lib/normalize';
+import { usePlayer } from '@/lib/PlayerContext';
 
 const LANG_GRADIENT: Record<string, string> = {
   Amis: 'from-amber-700 via-rose-800 to-red-900',
@@ -33,11 +34,13 @@ function getGenreDot(genre?: string | null) {
 interface Props {
   song: Song;
   isSelected: boolean;
+  isPlaying?: boolean;
   onSelect: (song: Song) => void;
   compact?: boolean;
 }
 
-export default function DemoSongCard({ song, isSelected, onSelect, compact = false }: Props) {
+export default function DemoSongCard({ song, isSelected, isPlaying, onSelect, compact = false }: Props) {
+  const { isPlaying: globalIsPlaying, togglePlay, playTrack } = usePlayer();
   const gradient = getLangGradient(song.language_claimed);
   const title = song.title_original ?? song.title_romanized ?? song.title_chinese ?? '(Untitled)';
   const zhTitle = song.title_chinese ? `(${song.title_chinese})` : '()';
@@ -50,7 +53,13 @@ export default function DemoSongCard({ song, isSelected, onSelect, compact = fal
     return (
       <button
         id={`demo-card-${song.id}`}
-        onClick={() => onSelect(song)}
+        onClick={(e) => {
+          if (isPlaying) {
+            togglePlay();
+          } else {
+            onSelect(song);
+          }
+        }}
         aria-pressed={isSelected}
         className={`group w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-150
           ${isSelected ? 'bg-white/10' : 'hover:bg-white/5'}`}
@@ -71,14 +80,22 @@ export default function DemoSongCard({ song, isSelected, onSelect, compact = fal
           )}
           {/* play overlay */}
           <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-150
-            ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-            <span className="text-white text-xs pl-0.5" aria-hidden>▶</span>
+            ${isSelected || isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+            {isPlaying && globalIsPlaying ? (
+              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            ) : isPlaying && !globalIsPlaying ? (
+              <span className="text-white text-xs pl-0.5" aria-hidden>▶</span>
+            ) : (
+              <span className="text-white text-xs pl-0.5" aria-hidden>▶</span>
+            )}
           </div>
         </div>
 
         {/* Text */}
         <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-semibold truncate leading-tight">{title}</p>
+          <p className={`text-sm font-semibold truncate leading-tight ${isPlaying ? 'text-emerald-500' : 'text-white'}`}>{title}</p>
           <p className="text-stone-400 text-xs truncate mt-0.5">{artist}</p>
         </div>
 
@@ -97,7 +114,13 @@ export default function DemoSongCard({ song, isSelected, onSelect, compact = fal
   return (
     <button
       id={`demo-card-${song.id}`}
-      onClick={() => onSelect(song)}
+      onClick={(e) => {
+        if (isPlaying) {
+          togglePlay();
+        } else {
+          onSelect(song);
+        }
+      }}
       aria-pressed={isSelected}
       className={`group w-full text-left rounded-xl overflow-hidden transition-all duration-200
         ${isSelected ? 'ring-2 ring-white/40 shadow-2xl scale-[1.02]' : 'hover:scale-[1.02] hover:shadow-xl'}`}
@@ -109,7 +132,7 @@ export default function DemoSongCard({ song, isSelected, onSelect, compact = fal
             src={thumbUrl}
             alt=""
             aria-hidden
-            className="absolute inset-0 w-full h-full object-cover opacity-60"
+            className="absolute inset-0 w-full h-full object-cover"
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
           />
         )}
@@ -117,9 +140,15 @@ export default function DemoSongCard({ song, isSelected, onSelect, compact = fal
           <div className="absolute inset-0 flex items-center justify-center opacity-10 text-white text-7xl select-none" aria-hidden>♪</div>
         )}
         <div className={`absolute inset-0 flex items-center justify-center bg-black/30
-          transition-opacity duration-150 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+          transition-opacity duration-150 ${isSelected || isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
           <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur flex items-center justify-center border border-white/30 shadow-lg">
-            <span className="text-white text-lg pl-1" aria-hidden>▶</span>
+            {isPlaying && globalIsPlaying ? (
+              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            ) : (
+              <span className="text-white text-lg pl-1" aria-hidden>▶</span>
+            )}
           </div>
         </div>
         {song.language_claimed && (
@@ -137,7 +166,7 @@ export default function DemoSongCard({ song, isSelected, onSelect, compact = fal
       {/* Meta */}
       <div className="bg-[#1a1a24] group-hover:bg-[#1e1e2a] transition-colors px-3 py-2.5">
         <div className="flex items-center gap-2">
-          <p className="text-white text-sm font-semibold truncate leading-tight">{title}</p>
+          <p className={`text-sm font-semibold truncate leading-tight ${isPlaying ? 'text-emerald-500' : 'text-white'}`}>{title}</p>
           <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${getGenreDot(song.genre)}`} title={`Type: ${song.genre || 'Unknown'}`} />
         </div>
         <div className="pl-0">

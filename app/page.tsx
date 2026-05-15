@@ -8,6 +8,7 @@ import { filterSongs, DEFAULT_FILTERS } from '@/lib/filters';
 import DemoSongCard from '@/components/demo/DemoSongCard';
 import DemoNowPlaying from '@/components/demo/DemoNowPlaying';
 import DemoFilterSidebar from '@/components/demo/DemoFilterSidebar';
+import { usePlayer } from '@/lib/PlayerContext';
 
 const allSongs = getSongs();
 
@@ -47,6 +48,12 @@ export default function DemoPage() {
   const [autoplay, setAutoplay] = useState(false);
   const [compact, setCompact] = useState(false); // set per viewport in effect below
   const [panelWidth, setPanelWidth] = useState(640);
+  const [mounted, setMounted] = useState(false);
+  const { playingTrack, playTrack, setQueue } = usePlayer();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Default to compact on mobile (< lg breakpoint)
   useEffect(() => {
@@ -58,8 +65,14 @@ export default function DemoPage() {
 
   const results = useMemo(() => {
     const searched = searchSongs(allSongs, query);
-    return filterSongs(searched, filters);
+    const filtered = filterSongs(searched, filters);
+    return filtered;
   }, [query, filters]);
+
+  // Sync queue with results when they change
+  useEffect(() => {
+    setQueue(results);
+  }, [results, setQueue]);
 
   // Resizable panel drag
   const dragStart = useRef({ x: 0, w: 0 });
@@ -79,7 +92,7 @@ export default function DemoPage() {
   }, [panelWidth]);
 
   return (
-    <div className="h-screen flex overflow-hidden bg-[#0a0a0f] text-white select-none">
+    <div className={`h-screen flex overflow-hidden bg-[#0a0a0f] text-white select-none ${(mounted && playingTrack) ? 'pb-20' : ''}`}>
 
       {/* Sidebar */}
       {sidebarOpen && (
@@ -99,15 +112,18 @@ export default function DemoPage() {
       {/* Center */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
-        {/* ── Mobile Header Row: logo + title | profile ───────────────── */}
-        <div className="lg:hidden flex items-center px-4 py-3 border-b border-white/5 bg-[#0f0f16]/95 backdrop-blur-sm sticky top-0 z-20">
-          <img src="/FE_logo_1d.png" alt="Logo" className="w-7 h-7 object-contain mr-2" />
-          <span className="text-white font-bold text-sm tracking-tight">Formosan Echoes</span>
-          <div className="ml-auto w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-xs font-bold text-white shrink-0">B</div>
-        </div>
+        {/* ── Sticky header wrapper (mobile: two rows; desktop: toolbar only) ── */}
+        <div className="sticky top-0 z-20 bg-[#0f0f16] border-b border-white/5">
 
-        {/* ── Toolbar Row ──────────────────────────────────────────────── */}
-        <div className="flex items-center gap-2 px-4 sm:px-5 py-2.5 border-b border-white/5 bg-[#0f0f16]/80 backdrop-blur-sm sticky top-0 lg:top-0 z-10">
+          {/* Mobile Header Row: logo + title | profile */}
+          <div className="lg:hidden flex items-center px-4 py-3 border-b border-white/5">
+            <img src="/FE_logo_1d.png" alt="Logo" className="w-7 h-7 object-contain mr-2" />
+            <span className="text-white font-bold text-sm tracking-tight">Formosan Echoes</span>
+            <div className="ml-auto w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-xs font-bold text-white shrink-0">B</div>
+          </div>
+
+          {/* Toolbar Row */}
+          <div className="flex items-center gap-2 px-4 sm:px-5 py-2.5">
 
           {/* Filter pane toggle — mobile only */}
           <button
@@ -186,8 +202,9 @@ export default function DemoPage() {
                 <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${autoplay ? 'translate-x-4' : ''}`} />
               </button>
             </div>
-          </div>
-        </div>
+          </div>{/* /compact+autoplay */}
+          </div>{/* /toolbar row */}
+        </div>{/* /sticky wrapper */}
 
         {/* Grid */}
         <div className="flex-1 overflow-y-auto demo-sidebar px-4 sm:px-5 py-5">
@@ -204,7 +221,16 @@ export default function DemoPage() {
             <ul className="flex flex-col" role="list">
               {results.map((song) => (
                 <li key={song.id}>
-                  <DemoSongCard song={song} isSelected={selected?.id === song.id} onSelect={setSelected} compact />
+                  <DemoSongCard 
+                    song={song} 
+                    isSelected={selected?.id === song.id} 
+                    isPlaying={playingTrack?.id === song.id}
+                    onSelect={(s) => {
+                      setSelected(s);
+                      playTrack(s, results);
+                    } } 
+                    compact 
+                  />
                 </li>
               ))}
             </ul>
@@ -216,7 +242,15 @@ export default function DemoPage() {
             >
               {results.map((song) => (
                 <li key={song.id}>
-                  <DemoSongCard song={song} isSelected={selected?.id === song.id} onSelect={setSelected} />
+                  <DemoSongCard 
+                    song={song} 
+                    isSelected={selected?.id === song.id} 
+                    isPlaying={playingTrack?.id === song.id}
+                    onSelect={(s) => {
+                      setSelected(s);
+                      playTrack(s, results);
+                    }} 
+                  />
                 </li>
               ))}
             </ul>

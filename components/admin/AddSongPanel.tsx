@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -107,6 +107,20 @@ export default function AddSongPanel() {
   // Generic draft field updater
   const setField = (key: keyof DraftSong, value: unknown) =>
     setDraft(d => d ? { ...d, [key]: value } : d);
+
+  // Auto-fetch on URL paste
+  useEffect(() => {
+    const trimmed = url.trim();
+    if (trimmed && (trimmed.includes('youtube.com/') || trimmed.includes('youtu.be/'))) {
+      // Small timeout to ensure the paste is complete/valid
+      const timer = setTimeout(() => {
+        if (status === 'idle' && !draft) {
+          handleFetch();
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [url]);
 
   // ── Step 1: Fetch YouTube metadata ─────────────────────────────────────────
   async function handleFetch() {

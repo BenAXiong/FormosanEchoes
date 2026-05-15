@@ -1,12 +1,13 @@
 import CurationView from './CurationView';
 import { redirect } from 'next/navigation';
 
-export default function AdminPage({
+export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: { key?: string };
+  searchParams: Promise<{ key?: string }>;
 }) {
-  if (searchParams.key !== '654321') {
+  const { key } = await searchParams;
+  if (key !== '654321') {
     redirect('/');
   }
 

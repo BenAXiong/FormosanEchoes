@@ -3,6 +3,10 @@ import { useState } from 'react';
 import type { Song } from '@/lib/types';
 import { getDisplayTitle, isYouTubeUrl, getYouTubeId, getYouTubeStartTime } from '@/lib/normalize';
 import HoverableWord from '@/components/demo/HoverableWord';
+import { usePlayer } from '@/lib/PlayerContext';
+import { useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 function RomLyrics({ text, language }: { text: string; language?: string | null }) {
   return (
@@ -40,6 +44,28 @@ type Tab = 'lyrics' | 'evidence';
 interface Props { song: Song; onClose: () => void; autoplay: boolean; }
 
 export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
+  const { 
+    playingTrack, playTrack, isPlaying, progress, setIsPanelOpen 
+  } = usePlayer();
+  const playerRef = useRef<any>(null);
+  
+  useEffect(() => {
+    // If the song being viewed isn't the one playing, we should start it
+    if (playingTrack?.id !== song.id) {
+      playTrack(song);
+    }
+    
+    setIsPanelOpen(true);
+    return () => setIsPanelOpen(false);
+  }, [song.id, playTrack, setIsPanelOpen, playingTrack?.id]);
+
+  // Sync the visual mirror with the master audio player on mount
+  useEffect(() => {
+    if (playerRef.current && progress > 0) {
+      playerRef.current.seekTo(progress, 'seconds');
+    }
+  }, []); // only on mount
+
   const [tab, setTab] = useState<Tab>('lyrics');
   const [mode, setMode] = useState<LyricsMode>('rom');
   const [showInfo, setShowInfo] = useState(false);
@@ -66,14 +92,20 @@ export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
       {/* Embed */}
       <div className="px-4 pb-3 pt-3">
         {youtubeId ? (
-          <div className="w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl">
-            <iframe
-              key={youtubeId}
-              title={title}
-              src={`https://www.youtube.com/embed/${youtubeId}?rel=0${autoplay ? '&autoplay=1' : ''}${startTime ? `&start=${startTime}` : ''}`}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="w-full h-full"
+          <div className="w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl relative">
+            <ReactPlayer
+              ref={playerRef}
+              url={song.youtube_url || ''}
+              playing={isPlaying}
+              muted={true} // SILENT MIRROR - Audio comes from the PlayerBar
+              width="100%"
+              height="100%"
+              controls={true}
+              config={{
+                youtube: {
+                  playerVars: { autoplay: 1, rel: 0 }
+                }
+              }}
             />
           </div>
         ) : (
