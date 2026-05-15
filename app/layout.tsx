@@ -21,7 +21,6 @@ export const metadata: Metadata = {
 
 import { PlayerProvider } from '@/lib/PlayerContext';
 import PlayerBar from '@/components/PlayerBar';
-import GlobalPlayer from '@/components/GlobalPlayer';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

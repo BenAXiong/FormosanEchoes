@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { Song, FilterState } from '@/lib/types';
-import { getSongs } from '@/lib/data';
+import type { Song, FilterState, ControlledVocab } from '@/lib/types';
 import { searchSongs } from '@/lib/search';
 import { filterSongs, DEFAULT_FILTERS } from '@/lib/filters';
 import SearchBar from '@/components/SearchBar';
@@ -12,23 +11,25 @@ import SongDetailPanel from '@/components/SongDetailPanel';
 import AddSongPanel from '@/components/admin/AddSongPanel';
 import ArtistAuditPanel from '@/components/admin/ArtistAuditPanel';
 import vocab from '@/data/controlled-vocab.json';
-import type { ControlledVocab } from '@/lib/types';
 
 const typedVocab = vocab as ControlledVocab;
-const allSongs = getSongs();
 
 type Tab = 'browse' | 'add' | 'artists';
 
-export default function CurationView() {
+interface Props {
+  songs: Song[];
+}
+
+export default function CurationView({ songs }: Props) {
   const [tab, setTab] = useState<Tab>('browse');
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
 
   const results = useMemo(() => {
-    const searched = searchSongs(allSongs, query);
+    const searched = searchSongs(songs, query);
     return filterSongs(searched, filters);
-  }, [query, filters]);
+  }, [songs, query, filters]);
 
   return (
     <div className="min-h-screen bg-stone-50">
@@ -58,7 +59,7 @@ export default function CurationView() {
               </button>
             ))}
           </div>
-          <span className="text-xs text-stone-400 tabular-nums hidden sm:inline">{results.length} / {allSongs.length}</span>
+          <span className="text-xs text-stone-400 tabular-nums hidden sm:inline">{results.length} / {songs.length}</span>
           <a
             href="/"
             className="text-xs px-3 py-1.5 rounded-full bg-stone-800 text-stone-300 hover:bg-stone-700 hover:text-white border border-stone-700 transition-colors"

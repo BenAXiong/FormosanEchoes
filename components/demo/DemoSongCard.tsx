@@ -40,7 +40,7 @@ interface Props {
 }
 
 export default function DemoSongCard({ song, isSelected, isPlaying, onSelect, compact = false }: Props) {
-  const { isPlaying: globalIsPlaying, togglePlay, playTrack } = usePlayer();
+  const { isPlaying: globalIsPlaying, togglePlay, toggleFavorite, isFavorite } = usePlayer();
   const gradient = getLangGradient(song.language_claimed);
   const title = song.title_original ?? song.title_romanized ?? song.title_chinese ?? '(Untitled)';
   const zhTitle = song.title_chinese ? `(${song.title_chinese})` : '()';
@@ -51,7 +51,7 @@ export default function DemoSongCard({ song, isSelected, isPlaying, onSelect, co
   // ── Compact / list row layout ────────────────────────────────────────
   if (compact) {
     return (
-      <button
+      <div
         id={`demo-card-${song.id}`}
         onClick={(e) => {
           if (isPlaying) {
@@ -60,8 +60,10 @@ export default function DemoSongCard({ song, isSelected, isPlaying, onSelect, co
             onSelect(song);
           }
         }}
+        role="button"
+        tabIndex={0}
         aria-pressed={isSelected}
-        className={`group w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-150
+        className={`group w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-150 cursor-pointer
           ${isSelected ? 'bg-white/10' : 'hover:bg-white/5'}`}
       >
         {/* Square thumbnail */}
@@ -91,6 +93,20 @@ export default function DemoSongCard({ song, isSelected, isPlaying, onSelect, co
               <span className="text-white text-xs pl-0.5" aria-hidden>▶</span>
             )}
           </div>
+
+          {/* Fav Toggle */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFavorite(song.id);
+            }}
+            className={`absolute top-1.5 right-1.5 transition-all duration-200 z-10
+              ${isFavorite(song.id) ? 'text-emerald-500 scale-110' : 'text-white/40 hover:text-white opacity-0 group-hover:opacity-100'}`}
+          >
+            <svg className="w-4 h-4" fill={isFavorite(song.id) ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </button>
         </div>
 
         {/* Text */}
@@ -106,13 +122,13 @@ export default function DemoSongCard({ song, isSelected, isPlaying, onSelect, co
           )}
           <span className={`w-1.5 h-1.5 rounded-full ${getGenreDot(song.genre)}`} title={song.genre || 'Unknown type'} />
         </div>
-      </button>
+      </div>
     );
   }
 
   // ── Default card layout ──────────────────────────────────────────────
   return (
-    <button
+    <div
       id={`demo-card-${song.id}`}
       onClick={(e) => {
         if (isPlaying) {
@@ -121,8 +137,10 @@ export default function DemoSongCard({ song, isSelected, isPlaying, onSelect, co
           onSelect(song);
         }
       }}
+      role="button"
+      tabIndex={0}
       aria-pressed={isSelected}
-      className={`group w-full text-left rounded-xl overflow-hidden transition-all duration-200
+      className={`group w-full text-left rounded-xl overflow-hidden transition-all duration-200 cursor-pointer
         ${isSelected ? 'ring-2 ring-white/40 shadow-2xl scale-[1.02]' : 'hover:scale-[1.02] hover:shadow-xl'}`}
     >
       {/* Artwork area */}
@@ -151,6 +169,21 @@ export default function DemoSongCard({ song, isSelected, isPlaying, onSelect, co
             )}
           </div>
         </div>
+
+        {/* Fav Toggle (Normal) */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFavorite(song.id);
+          }}
+          className={`absolute top-4 right-4 transition-all duration-200 z-10
+            ${isFavorite(song.id) ? 'text-emerald-500 scale-110 drop-shadow-lg' : 'text-white/40 hover:text-white opacity-0 group-hover:opacity-100'}`}
+        >
+          <svg className="w-6 h-6" fill={isFavorite(song.id) ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </button>
+
         {song.language_claimed && (
           <span className="absolute bottom-3 left-3 z-10 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-black/40 backdrop-blur text-white/90 border border-white/20">
             {song.language_claimed}
@@ -174,6 +207,6 @@ export default function DemoSongCard({ song, isSelected, isPlaying, onSelect, co
           <p className="text-stone-300 text-xs font-medium truncate mt-1.5">{artist}</p>
         </div>
       </div>
-    </button>
+    </div>
   );
 }

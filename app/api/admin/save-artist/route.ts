@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { createServerClient } from '@/lib/supabase';
 
-const execAsync = promisify(exec);
-const ARTISTS_PATH = path.join(process.cwd(), 'data/artists.json');
+function inferScript(name: string): string {
+  return /[一-鿿㐀-䶿]/.test(name) ? 'zh' : 'ab';
+}
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function POST(request: Request) {
   let artist: Record<string, any>;
   try {
@@ -15,38 +14,48 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  try {
-    const raw = await fs.readFile(ARTISTS_PATH, 'utf8');
-    const artists = JSON.parse(raw);
-
-    // Generate ID if missing
-    if (!artist.id) {
-      const lastId = artists.length > 0
-        ? Math.max(...artists.map((a: any) => parseInt(a.id.split('-')[1]) || 0))
-        : 0;
-      artist.id = `art-${(lastId + 1).toString().padStart(3, '0')}`;
-    }
-
-    // Check for duplicate ID
-    if (artists.find((a: any) => a.id === artist.id)) {
-      return NextResponse.json({ error: 'Duplicate artist ID' }, { status: 409 });
-    }
-
-    // Append and write
-    artists.push(artist);
-    await fs.writeFile(ARTISTS_PATH, JSON.stringify(artists, null, 2), 'utf8');
-
-    // Run the linker script to update songs.json
-    try {
-      await execAsync('node scripts/link-artists.js');
-    } catch (linkErr) {
-      console.error('[save-artist] Linker failed:', linkErr);
-      // Not fatal to the save, but good to know
-    }
-
-    return NextResponse.json({ saved: artist });
-  } catch (err) {
-    console.error('[save-artist]', err);
-    return NextResponse.json({ error: 'Failed to save artist' }, { status: 500 });
+  if (!artist.name_display) {
+    return NextResponse.json({ error: 'Artist must have name_display' }, { status: 400 });
   }
+
+  const supabase = createServerClient();
+
+  const { data: saved, error } = await supabase
+    .from('artists')
+    .insert({
+      name_display:    artist.name_display,
+      ethnic_group:    artist.ethnic_group    ?? null,
+      language:        artist.language        ?? null,
+      is_group:        artist.is_group        ?? false,
+      active_years:    artist.active_years    ?? null,
+      bio_zh:          artist.bio_zh          ?? null,
+      bio_en:          artist.bio_en          ?? null,
+      zh_surname:      artist.zh_surname      ?? null,
+      youtube_channel: artist.youtube_channel ?? null,
+      wikipedia_url:   artist.wikipedia_url   ?? null,
+      notes:           artist.notes           ?? null,
+    })
+    .select('id')
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // Insert all name variants for search/linking
+  const names: { artist_id: string; name: string; script: string }[] = [];
+  for (const n of (artist.names_zh as string[]) ?? []) {
+    names.push({ artist_id: saved.id, name: n, script: 'zh' });
+  }
+  for (const n of (artist.names_rom as string[]) ?? []) {
+    names.push({ artist_id: saved.id, name: n, script: 'ab' });
+  }
+  for (const n of (artist.names_indigenous as string[]) ?? []) {
+    names.push({ artist_id: saved.id, name: n, script: 'ab' });
+  }
+  names.push({ artist_id: saved.id, name: artist.name_display, script: inferScript(artist.name_display) });
+
+  await supabase.from('artist_names').insert(names);
+
+  return NextResponse.json({ saved: { id: saved.id, name_display: artist.name_display } });
 }

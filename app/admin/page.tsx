@@ -1,5 +1,8 @@
-import CurationView from './CurationView';
 import { redirect } from 'next/navigation';
+import { getSongs } from '@/lib/db';
+import CurationView from './CurationView';
+
+export const revalidate = 30;
 
 export default async function AdminPage({
   searchParams,
@@ -11,5 +14,6 @@ export default async function AdminPage({
     redirect('/');
   }
 
-  return <CurationView />;
+  const songs = await getSongs();
+  return <CurationView songs={songs} />;
 }

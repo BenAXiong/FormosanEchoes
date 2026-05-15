@@ -34,40 +34,20 @@ export function buildAliasMap(): Map<string, string> {
 
 /**
  * Given a list of songs, return the subset of artists who have ≥1 linked song.
- * Uses artist_ids if present; falls back to alias matching for unlinked songs.
+ * Only uses artist_ids — intentionally no alias fallback, so the sidebar only
+ * shows artists whose filter will actually return results.
+ * Pass a runtime `artists` array (e.g. from Supabase) to override the static JSON pool.
  */
-export function getArtistsWithSongs(songs: Song[]): Artist[] {
+export function getArtistsWithSongs(songs: Song[], artists: Artist[] = allArtists): Artist[] {
   const artistIdsWithSongs = new Set<string>();
-  const aliasMap = buildAliasMap();
 
   for (const song of songs) {
-    // Prefer explicit artist_ids links
-    if (song.artist_ids && song.artist_ids.length > 0) {
-      for (const id of song.artist_ids) artistIdsWithSongs.add(id);
-      continue;
-    }
-    // Fall back to alias matching for unlinked songs
-    if (song.artist) {
-      const lower = song.artist.toLowerCase().trim();
-      // Try full string, then tokens
-      let id = aliasMap.get(lower);
-      if (!id) {
-        const tokens = lower.replace(/[()]/g, ' ').split(/\s+/).filter(t => t.length > 2);
-        for (const token of tokens) {
-          id = aliasMap.get(token);
-          if (id) break;
-        }
-      }
-      if (!id) {
-        for (const [alias, aid] of aliasMap) {
-          if (alias.length > 2 && lower.includes(alias)) { id = aid; break; }
-        }
-      }
-      if (id) artistIdsWithSongs.add(id);
+    for (const id of song.artist_ids ?? []) {
+      artistIdsWithSongs.add(id);
     }
   }
 
-  return allArtists
+  return artists
     .filter(a => artistIdsWithSongs.has(a.id))
     .sort((a, b) => a.name_display.localeCompare(b.name_display, 'zh'));
 }

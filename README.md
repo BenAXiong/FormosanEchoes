@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Formosan Echoes
 
-## Getting Started
+A curated browser and discovery platform for **Formosan-language (Indigenous Taiwanese) music**. Covers songs in Amis, Bunun, Paiwan, Atayal, Puyuma, Seediq, Rukai, Saisiyat, Tao, Thao, Kavalan, and other CIP languages.
 
-First, run the development server:
+## Stack
+
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 16.2.6 (App Router) |
+| UI | React 19 + Tailwind CSS 4 |
+| Language | TypeScript (strict) |
+| AI enrichment | Google Gemini 2.5 Flash |
+| Audio/video | ReactPlayer |
+| Data | JSON files (no database yet) |
+
+## Running locally
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3002
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Required env vars** (`.env.local`):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+GEMINI_API_KEY=...        # Admin song enrichment via Gemini
+YOUTUBE_API_KEY=...       # Optional — enables description/comment fetching during enrichment
+PORTAL_URL=...            # Dictionary API (default: https://ycm-citadel.vercel.app)
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Routes
 
-## Learn More
+| Route | Description |
+|---|---|
+| `/` | Public demo — dark-themed song browser with persistent bottom player |
+| `/admin?key=654321` | Admin curation panel (Browse / Add Song / Artist Audit) |
 
-To learn more about Next.js, take a look at the following resources:
+## Data files
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| File | Contents |
+|---|---|
+| `data/songs.json` | ~400+ song records |
+| `data/artists.json` | ~100 artist profiles |
+| `data/artists_unlinked.json` | Artist strings awaiting manual linking |
+| `data/controlled-vocab.json` | Allowed values: languages, tags, confidence, status |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Key scripts
 
-## Deploy on Vercel
+```bash
+npm run link    # Re-run artist linker (idempotent — safe to run anytime)
+npm run build   # Runs linker then Next.js build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Artist linking** (`scripts/link-artists.js`) runs at build time. It resolves `song.artist` strings to `artist_ids` by matching against all name variants (Chinese, romanized, indigenous) in `artists.json`. Unmatched strings land in `artists_unlinked.json`. Re-run it after any edit to either data file.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Lyrics rights
+
+All lyrics display is gated by `lyrics.show_publicly === true`. If that flag is false or absent, lyrics are never rendered — even if the data exists in the JSON.

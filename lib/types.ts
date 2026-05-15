@@ -105,11 +105,14 @@ export interface Artist {
 
 export interface FilterState {
   language: string;
-  ethnic_group: string;       // was people_group — filters by ethnic/cultural origin
+  ethnic_group: string;       // filters by song.ethnic_group_claimed
+  artist_id: string;          // filters by song.artist_ids membership
   tag: string;
   confidence: string;
   verification_status: string;
   has_lyrics: boolean | null;
+  only_favorites: boolean;
+  playlist_id: string | null;
 }
 
 // ─── Vocabulary ───────────────────────────────────────────────────────────────
@@ -135,4 +138,12 @@ export interface ControlledVocab {
   tags: Tag[];
   confidence_levels: { value: ConfidenceLevel; label: string }[];
   verification_statuses: { value: VerificationStatus; label: string }[];
+}
+
+// ─── Playlists ────────────────────────────────────────────────────────────────
+
+export interface Playlist {
+  id: string;
+  name: string;
+  songIds: string[];
 }

@@ -57,16 +57,15 @@ export default function HoverableWord({ word, language }: { word: string; langua
   const clean = cleanWord(word);
   const lookupable = clean.length >= 2;
 
-  const handleEnter = useCallback(async () => {
+  const handleEnter = useCallback(() => {
     if (!lookupable) return;
     if (hideTimer.current) clearTimeout(hideTimer.current);
+    if (fetchTimer.current) clearTimeout(fetchTimer.current);
 
-    // Compute fixed position from bounding rect — avoids any overflow/clip context
+    // Compute position immediately so it's ready when the tooltip appears
     if (wordRef.current) {
       const rect = wordRef.current.getBoundingClientRect();
-      // Clamp left so tooltip doesn't overflow viewport right edge
       const left = Math.max(8, Math.min(rect.left, window.innerWidth - 252));
-      // Flip: show below if word is in top 220px of viewport (toolbar area), else above
       if (rect.top < 220) {
         setPos({ top: rect.bottom + 6, left });
       } else {
@@ -74,10 +73,11 @@ export default function HoverableWord({ word, language }: { word: string; langua
       }
     }
 
-    setShow(true);
-    if (fetched.current) return;
-
+    // Debounce: show tooltip only after dwell — avoids flash on fast cursor passes
     fetchTimer.current = setTimeout(async () => {
+      setShow(true);
+      if (fetched.current) return;
+
       setLoading(true);
       try {
         let url = `/api/dict?q=${encodeURIComponent(clean)}`;
@@ -92,8 +92,8 @@ export default function HoverableWord({ word, language }: { word: string; langua
         setEntries([]);
       }
       setLoading(false);
-    }, 350);
-  }, [clean, lookupable]);
+    }, 300);
+  }, [clean, language, lookupable]);
 
   const handleLeave = useCallback(() => {
     if (fetchTimer.current) clearTimeout(fetchTimer.current);

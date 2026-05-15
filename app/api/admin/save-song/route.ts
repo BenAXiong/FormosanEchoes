@@ -1,19 +1,12 @@
 import { NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
-import type { Song } from '@/lib/types';
+import { createServerClient } from '@/lib/supabase';
 
-const SONGS_PATH = path.join(process.cwd(), 'data/songs.json');
-const ARTISTS_PATH = path.join(process.cwd(), 'data/artists.json');
-
-// Inline alias resolution (mirrors link-artists.js logic)
-function buildAliasMap(artists: { id: string; name_display: string; names_zh: string[]; names_rom: string[]; names_indigenous: string[] }[]) {
-  const map = new Map<string, string>();
-  for (const a of artists) {
-    const aliases = [a.name_display, ...a.names_zh, ...a.names_rom, ...a.names_indigenous].filter(Boolean);
-    for (const alias of aliases) map.set(alias.toLowerCase().trim(), a.id);
-  }
-  return map;
+function getYouTubeId(url: string): string | null {
+  const w = url.match(/youtube\.com\/watch\?v=([^&]+)/);
+  if (w) return w[1];
+  const s = url.match(/youtu\.be\/([^?]+)/);
+  if (s) return s[1];
+  return null;
 }
 
 function splitArtistString(raw: string): string[] {
@@ -24,93 +17,121 @@ function splitArtistString(raw: string): string[] {
   return parts.length > 1 ? parts : [raw];
 }
 
-function resolveOne(str: string, aliasMap: Map<string, string>): string | null {
-  const lower = str.toLowerCase().trim();
-  let id = aliasMap.get(lower);
-  if (id) return id;
-  const noParens = str.replace(/\s*\(.*?\)\s*$/, '').trim();
-  id = aliasMap.get(noParens.toLowerCase());
-  if (id) return id;
-  const insideParens = (str.match(/\(([^)]+)\)/) || [])[1]?.trim();
-  if (insideParens) { id = aliasMap.get(insideParens.toLowerCase()); if (id) return id; }
-  const tokens = lower.replace(/[()]/g, ' ').split(/\s+/).filter(t => t.length > 2);
-  for (const t of tokens) { id = aliasMap.get(t); if (id) return id; }
-  for (const [alias, aid] of aliasMap) {
-    if (alias.length > 2 && lower.includes(alias)) return aid;
-  }
-  return null;
+function toLabel(value: string): string {
+  return value.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-function resolveArtistIds(artistStr: string, aliasMap: Map<string, string>): string[] {
-  if (!artistStr || artistStr === 'Unknown / Traditional') return [];
-  const ids: string[] = [];
-  for (const part of splitArtistString(artistStr)) {
-    const id = resolveOne(part, aliasMap);
-    if (id && !ids.includes(id)) ids.push(id);
-  }
-  return ids;
-}
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function POST(request: Request) {
-  let song: Partial<Song> & Record<string, unknown>;
+  let song: Record<string, any>;
   try {
     song = await request.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  if (!song.id || !song.youtube_url) {
-    return NextResponse.json({ error: 'Song must have id and youtube_url' }, { status: 400 });
+  if (!song.youtube_url) {
+    return NextResponse.json({ error: 'Song must have youtube_url' }, { status: 400 });
   }
 
-  try {
-    // Read current songs
-    const songsRaw = await fs.readFile(SONGS_PATH, 'utf8');
-    const songs: Song[] = JSON.parse(songsRaw);
+  const supabase = createServerClient();
 
-    // Check for duplicate
-    if (songs.find(s => s.id === song.id || s.youtube_url === song.youtube_url)) {
-      return NextResponse.json({ error: 'Duplicate song ID or YouTube URL' }, { status: 409 });
-    }
+  // Duplicate check
+  const { data: existing } = await supabase
+    .from('songs')
+    .select('id')
+    .eq('yt_url', song.youtube_url)
+    .maybeSingle();
+  if (existing) {
+    return NextResponse.json({ error: 'Duplicate YouTube URL' }, { status: 409 });
+  }
 
-    // Resolve artist_ids (supports feat./&/and)
-    const artistsRaw = await fs.readFile(ARTISTS_PATH, 'utf8');
-    const artists = JSON.parse(artistsRaw);
-    const aliasMap = buildAliasMap(artists);
-    const artistIds = song.artist ? resolveArtistIds(song.artist as string, aliasMap) : [];
-    song.artist_ids = artistIds;
-
-    // Ensure required fields
-    song.tags = (song.tags as string[]) ?? [];
-    song.confidence = ((song.confidence as string) ?? 'low') as 'low';
-    song.verification_status = ((song.verification_status as string) ?? 'candidate') as 'candidate';
-    song.needs_manual_verification = true;
-    song.checked_by_me = false;
-    song.date_added = new Date().toISOString().split('T')[0];
-
-    // Remove internal draft fields
-    delete song._oembed;
-
-    // Append and write back
-    songs.push(song as Song);
-    await fs.writeFile(SONGS_PATH, JSON.stringify(songs, null, 2), 'utf8');
-
-    // Write to unlinked queue if artist not resolved
-    if (song.artist && artistIds.length === 0) {
-      const unlinkedPath = path.join(process.cwd(), 'data/artists_unlinked.json');
-      let unlinked: { song_artist_string: string; suggested_action: string }[] = [];
-      try {
-        unlinked = JSON.parse(await fs.readFile(unlinkedPath, 'utf8'));
-      } catch { /* file may not exist */ }
-      if (!unlinked.find(u => u.song_artist_string === song.artist)) {
-        unlinked.push({ song_artist_string: song.artist as string, suggested_action: 'add to artists.json or manually set artist_ids on songs' });
-        await fs.writeFile(unlinkedPath, JSON.stringify(unlinked, null, 2), 'utf8');
+  // Resolve artist IDs by querying artist_names
+  const artistIds: string[] = [];
+  if (song.artist) {
+    for (const part of splitArtistString(String(song.artist))) {
+      const { data } = await supabase
+        .from('artist_names')
+        .select('artist_id')
+        .ilike('name', part.trim())
+        .limit(1)
+        .maybeSingle();
+      if (data?.artist_id && !artistIds.includes(data.artist_id)) {
+        artistIds.push(data.artist_id);
       }
     }
-
-    return NextResponse.json({ saved: song, artist_linked: artistIds.length > 0 });
-  } catch (err) {
-    console.error('[save-song]', err);
-    return NextResponse.json({ error: 'Failed to save song' }, { status: 500 });
   }
+
+  // Merge notes fields
+  const notes = [song.verification_notes, song.source_snippets, song.notes]
+    .filter(Boolean).join('\n\n') || null;
+
+  // Insert song
+  const { data: savedSong, error: songError } = await supabase
+    .from('songs')
+    .insert({
+      title_original:      song.title_original      ?? null,
+      title_zh:            song.title_chinese        ?? null,
+      artist_credit:       song.artist               ?? null,
+      yt_url:              song.youtube_url,
+      yt_video_id:         getYouTubeId(String(song.youtube_url)),
+      url:                 song.url                  ?? null,
+      album:               song.album_or_source      ?? null,
+      year:                song.year != null ? String(song.year) : null,
+      language:            song.language_claimed     ?? null,
+      ethnic_group:        song.ethnic_group_claimed ?? null,
+      region:              song.region               ?? null,
+      location:            song.location_claimed     ?? null,
+      genre:               song.genre                ?? null,
+      notes,
+      verification_status: song.verification_status  ?? 'candidate',
+    })
+    .select('id')
+    .single();
+
+  if (songError) {
+    return NextResponse.json({ error: songError.message }, { status: 500 });
+  }
+
+  const songId = savedSong.id;
+
+  // song_artists
+  if (artistIds.length > 0) {
+    await supabase.from('song_artists').insert(
+      artistIds.map(artist_id => ({ song_id: songId, artist_id }))
+    );
+  }
+
+  // tags — upsert each value, then link
+  const tags: string[] = Array.isArray(song.tags) ? song.tags : [];
+  if (tags.length > 0) {
+    for (const value of tags) {
+      await supabase.from('tags').upsert({ value, label: toLabel(value) }, { onConflict: 'value' });
+    }
+    const { data: tagRows } = await supabase.from('tags').select('id').in('value', tags);
+    if (tagRows?.length) {
+      await supabase.from('song_tags').insert(
+        tagRows.map((t: { id: string }) => ({ song_id: songId, tag_id: t.id }))
+      );
+    }
+  }
+
+  // lyrics (nested object from AddSongPanel)
+  const lyrics = song.lyrics as Record<string, unknown> | null;
+  if (lyrics && (lyrics.lyrics_original || lyrics.lyrics_translation_zh || lyrics.lyrics_translation_en)) {
+    await supabase.from('lyrics').insert({
+      song_id:         songId,
+      lyrics_original: lyrics.lyrics_original        ?? null,
+      lyrics_zh:       lyrics.lyrics_translation_zh  ?? null,
+      lyrics_en:       lyrics.lyrics_translation_en  ?? null,
+      source:          lyrics.lyrics_source          ?? null,
+      show_publicly:   false,
+    });
+  }
+
+  return NextResponse.json({
+    saved: { id: songId },
+    artist_linked: artistIds.length > 0,
+    unlinked_artist: artistIds.length === 0 && song.artist ? song.artist : null,
+  });
 }

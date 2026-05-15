@@ -10,13 +10,31 @@ import { createPortal } from 'react-dom';
 export default function PlayerBar() {
   const { 
     playingTrack, isPlaying, togglePlay, nextTrack, prevTrack, 
-    progress, setProgress, duration, setDuration 
+    progress, setProgress, duration, setDuration,
+    volume, setVolume, toggleFavorite, isFavorite,
+    playlists, addSongToPlaylist, createPlaylist
   } = usePlayer();
+  const [showPlaylistDropdown, setShowPlaylistDropdown] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState('');
   const [mounted, setMounted] = useState(false);
+  const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowPlaylistDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const showToast = (message: string) => {
+    setToast({ message, visible: true });
+    setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 2500);
+  };
 
   if (!mounted) return null;
 
@@ -45,6 +63,7 @@ export default function PlayerBar() {
             onEnded={nextTrack}
             onProgress={(state) => setProgress(state.playedSeconds)}
             onDuration={(d) => setDuration(d)}
+            volume={volume}
             config={{
               youtube: {
                 playerVars: { autoplay: 1, controls: 0 }
@@ -71,13 +90,98 @@ export default function PlayerBar() {
           <h4 className="text-sm font-bold text-white truncate hover:underline cursor-pointer">{title}</h4>
           <p className="text-xs text-stone-400 truncate">{playingTrack?.artist || 'Unknown Artist'}</p>
         </div>
-        {/* Fav Button (future) */}
-        <button className="text-stone-500 hover:text-emerald-500 transition-colors ml-2">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-2 ml-2 relative" ref={dropdownRef}>
+          {/* Fav Button */}
+          <button 
+            onClick={() => playingTrack && toggleFavorite(playingTrack.id)}
+            className={`transition-colors p-1 rounded-full hover:bg-white/5 ${playingTrack && isFavorite(playingTrack.id) ? 'text-emerald-500' : 'text-stone-500 hover:text-white'}`}
+          >
+            <svg className="w-5 h-5" fill={playingTrack && isFavorite(playingTrack.id) ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </button>
+
+          {/* Add to Playlist Button */}
+          <button 
+            onClick={() => setShowPlaylistDropdown(!showPlaylistDropdown)}
+            className={`transition-colors p-1 rounded-full hover:bg-white/5 ${showPlaylistDropdown ? 'text-white bg-white/10' : 'text-stone-500 hover:text-white'}`}
+            title="Add to playlist"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+
+          {showPlaylistDropdown && (
+            <div className="absolute bottom-full left-0 mb-4 w-56 bg-[#12121a] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-[70] animate-in fade-in slide-in-from-bottom-2 duration-200">
+              <div className="p-3 border-b border-white/5">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">Add to Playlist</p>
+              </div>
+              <div className="max-h-48 overflow-y-auto py-1">
+                {playlists.length === 0 ? (
+                  <p className="px-4 py-3 text-[11px] text-stone-600 italic">No custom playlists yet</p>
+                ) : (
+                  playlists.map(p => (
+                    <button
+                      key={p.id}
+                      onClick={() => {
+                        if (playingTrack) {
+                          addSongToPlaylist(p.id, playingTrack.id);
+                          showToast(`Added to ${p.name}`);
+                        }
+                        setShowPlaylistDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs text-stone-300 hover:text-white hover:bg-white/5 transition-colors flex items-center justify-between group"
+                    >
+                      <span>{p.name}</span>
+                      {playingTrack && p.songIds.includes(playingTrack.id) && (
+                        <span className="text-emerald-500">✓</span>
+                      )}
+                    </button>
+                  ))
+                )}
+              </div>
+              <div className="p-2 border-t border-white/5 bg-white/[0.02]">
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (newPlaylistName.trim()) {
+                      createPlaylist(newPlaylistName.trim());
+                      showToast(`Created ${newPlaylistName.trim()}`);
+                      setNewPlaylistName('');
+                      setShowPlaylistDropdown(false);
+                    }
+                  }}
+                  className="flex gap-1"
+                >
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="New playlist..."
+                    value={newPlaylistName}
+                    onChange={(e) => setNewPlaylistName(e.target.value)}
+                    className="flex-1 bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
+                  />
+                  <button 
+                    type="submit"
+                    disabled={!newPlaylistName.trim()}
+                    className="px-2 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-[10px] font-bold hover:bg-emerald-500/20 disabled:opacity-50 transition-colors"
+                  >
+                    Add
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast.visible && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 bg-emerald-500 text-white text-xs font-bold rounded-full shadow-2xl z-[100] animate-in fade-in slide-in-from-bottom-4 duration-300">
+          {toast.message}
+        </div>
+      )}
 
       {/* Center: Controls */}
       <div className="flex flex-col items-center gap-2 flex-1 max-w-xl">
@@ -123,15 +227,29 @@ export default function PlayerBar() {
         </div>
       </div>
 
-      {/* Right: Options */}
+      {/* Right: Options & Volume */}
       <div className="flex items-center justify-end gap-3 w-1/3">
-        <button className="text-stone-400 hover:text-white transition-colors">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+        {/* Removed mic/lyrics icon per request */}
+        
+        <div className="flex items-center gap-2 group w-32">
+          <svg className="w-4 h-4 text-stone-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
           </svg>
-        </button>
-        <div className="w-24 h-1 bg-white/10 rounded-full relative overflow-hidden cursor-pointer group">
-          <div className="absolute top-0 left-0 h-full w-2/3 bg-stone-400 group-hover:bg-emerald-500 transition-colors" />
+          <div className="flex-1 h-1 bg-white/10 rounded-full relative group cursor-pointer">
+            <div 
+              className="absolute top-0 left-0 h-full bg-stone-400 group-hover:bg-emerald-500 transition-colors rounded-full" 
+              style={{ width: `${volume * 100}%` }}
+            />
+            <input 
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={volume}
+              onChange={(e) => setVolume(parseFloat(e.target.value))}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+          </div>
         </div>
       </div>
     </div>
