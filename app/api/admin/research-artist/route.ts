@@ -52,7 +52,7 @@ export async function POST(request: Request) {
   try {
     const genai = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genai.getGenerativeModel({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.5-pro',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       tools: [{ googleSearch: {} } as any],
     });
