@@ -5,6 +5,14 @@ function inferScript(name: string): string {
   return /[一-鿿㐀-䶿]/.test(name) ? 'zh' : 'ab';
 }
 
+function splitArtistString(raw: string): string[] {
+  const parts = raw
+    .split(/\s+(?:feat\.?|ft\.?|and|&|[×x])\s+/i)
+    .map(p => p.trim())
+    .filter(Boolean);
+  return parts.length > 1 ? parts : [raw];
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function POST(request: Request) {
   let artist: Record<string, any>;
@@ -54,8 +62,31 @@ export async function POST(request: Request) {
     names.push({ artist_id: saved.id, name: n, script: 'ab' });
   }
   names.push({ artist_id: saved.id, name: artist.name_display, script: inferScript(artist.name_display) });
-
   await supabase.from('artist_names').insert(names);
 
-  return NextResponse.json({ saved: { id: saved.id, name_display: artist.name_display } });
+  // Re-link existing songs whose artist_credit matches any of this artist's aliases
+  const allAliases = names.map(n => n.name.toLowerCase().trim());
+
+  const { data: songRows } = await supabase
+    .from('songs')
+    .select('id, artist_credit')
+    .not('artist_credit', 'is', null);
+
+  const toLink: { song_id: string; artist_id: string }[] = [];
+  for (const song of songRows ?? []) {
+    const parts = splitArtistString(song.artist_credit).map((p: string) => p.toLowerCase().trim());
+    if (parts.some(p => allAliases.includes(p))) {
+      toLink.push({ song_id: song.id, artist_id: saved.id });
+    }
+  }
+
+  let songs_linked = 0;
+  if (toLink.length > 0) {
+    const { error: linkError } = await supabase
+      .from('song_artists')
+      .upsert(toLink, { onConflict: 'song_id,artist_id', ignoreDuplicates: true });
+    if (!linkError) songs_linked = toLink.length;
+  }
+
+  return NextResponse.json({ saved: { id: saved.id, name_display: artist.name_display }, songs_linked });
 }
