@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI, DynamicRetrievalMode } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? '';
 
@@ -51,20 +51,11 @@ export async function POST(request: Request) {
 
   try {
     const genai = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genai.getGenerativeModel(
-      {
-        model: 'gemini-2.0-flash', // fast enough for artist lookup
-        tools: [{
-          googleSearchRetrieval: {
-            dynamicRetrievalConfig: {
-              mode: DynamicRetrievalMode.MODE_DYNAMIC,
-              dynamicThreshold: 0.1, // definitely use search for artist research
-            },
-          },
-        }],
-      },
-      { apiVersion: 'v1' }
-    );
+    const model = genai.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      tools: [{ googleSearch: {} } as any],
+    });
 
     const result = await model.generateContent([
       { text: SYSTEM_PROMPT },
@@ -89,6 +80,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ research });
   } catch (err: unknown) {
     console.error('[research-artist]', err);
-    return NextResponse.json({ error: 'Gemini API error' }, { status: 500 });
+    if (err && typeof err === 'object' && 'status' in err) {
+      const e = err as { status: number; statusText: string };
+      if (e.status === 429) return NextResponse.json({ error: 'Rate limited — wait ~30s and try again.' }, { status: 429 });
+      return NextResponse.json({ error: `Gemini error: ${e.status} ${e.statusText}` }, { status: 502 });
+    }
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Gemini API error' }, { status: 500 });
   }
 }
