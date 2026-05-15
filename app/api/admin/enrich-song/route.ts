@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI, DynamicRetrievalMode } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const GEMINI_API_KEY   = process.env.GEMINI_API_KEY ?? '';
 const YOUTUBE_API_KEY  = process.env.YOUTUBE_API_KEY ?? ''; // optional — enables description + comments
@@ -121,7 +121,7 @@ export async function POST(request: Request) {
   try {
     const genai = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genai.getGenerativeModel({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-3.1-pro',
       tools: [{ googleSearch: {} } as any],
     });
 
