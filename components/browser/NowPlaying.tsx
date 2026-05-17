@@ -8,9 +8,9 @@ import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
-function RomLyrics({ text, language }: { text: string; language?: string | null }) {
+function RomLyrics({ text, language, large }: { text: string; language?: string | null; large?: boolean }) {
   return (
-    <div className="leading-loose text-sm">
+    <div className={`leading-loose ${large ? 'text-base' : 'text-sm'}`}>
       {text.split('\n').map((line, li) => (
         <div key={li} className="min-h-[1.5rem]">
           {line.split(' ').filter(Boolean).map((word, wi) => (
@@ -38,12 +38,17 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   duplicate: { label: 'Duplicate', className: 'bg-stone-800 text-stone-400 border-stone-700' },
 };
 
-type LyricsMode = 'original' | 'zh' | 'side' | 'seq';
-type Tab = 'lyrics' | 'notes';
+type ActiveMode = 'original' | 'zh' | 'side' | 'seq' | 'notes';
 
-interface Props { song: Song; onClose: () => void; autoplay: boolean; }
+interface Props {
+  song: Song;
+  onClose: () => void;
+  autoplay: boolean;
+  karaokeMode: boolean;
+  onKaraokeToggle: () => void;
+}
 
-export default function NowPlaying({ song, onClose, autoplay }: Props) {
+export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKaraokeToggle }: Props) {
   const {
     playingTrack, playTrack, isPlaying, pauseTrack, resumeTrack, progress, setIsPanelOpen, seekTo, registerMirrorSeekFn,
   } = usePlayer();
@@ -52,7 +57,7 @@ export default function NowPlaying({ song, onClose, autoplay }: Props) {
   // Tracks actual master intent; guards onPlay from YouTube's auto-play after seekMirror(0)
   const isPlayingRef = useRef(false);
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
-  
+
   useEffect(() => {
     // Start this song only when the panel opens for a new song.
     // Do NOT include playingTrack?.id in deps — reacting to external track changes
@@ -78,8 +83,7 @@ export default function NowPlaying({ song, onClose, autoplay }: Props) {
     }
   }, []); // only on mount
 
-  const [tab, setTab] = useState<Tab>('lyrics');
-  const [mode, setMode] = useState<LyricsMode>('original');
+  const [activeMode, setActiveMode] = useState<ActiveMode>('original');
   const [showInfo, setShowInfo] = useState(false);
 
   const title = getDisplayTitle(song);
@@ -93,16 +97,32 @@ export default function NowPlaying({ song, onClose, autoplay }: Props) {
   const romLines = romText.split('\n');
   const zhLines = zhText.split('\n');
 
+  const MODE_OPTIONS = [
+    { id: 'original' as const, label: 'Rom',   needsLyrics: true  },
+    { id: 'zh'       as const, label: '中文',  needsLyrics: true  },
+    { id: 'side'     as const, label: '⊞',    needsLyrics: true  },
+    { id: 'seq'      as const, label: '≡',    needsLyrics: true  },
+    { id: 'notes'    as const, label: 'Notes', needsLyrics: false },
+  ];
+
   return (
     <div className="flex flex-col h-full bg-[#0f0f16] overflow-hidden">
-      {/* Mobile close */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-1 lg:hidden">
-        <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">Now Playing</span>
-        <button onClick={onClose} className="text-stone-500 hover:text-white transition-colors text-sm">✕</button>
+
+      {/* Mobile: handle pill (tap to expand/collapse) + close button */}
+      <div className="lg:hidden relative flex items-center justify-center px-4 pt-3 pb-1">
+        <button
+          onClick={onKaraokeToggle}
+          aria-label={karaokeMode ? 'Collapse' : 'Expand to karaoke mode'}
+          className="w-10 h-1 rounded-full bg-white/20 active:bg-white/40 transition-colors"
+        />
+        <button
+          onClick={onClose}
+          className="absolute right-4 text-stone-500 hover:text-white transition-colors text-sm"
+        >✕</button>
       </div>
 
-      {/* Embed */}
-      <div className="px-4 pb-3 pt-3">
+      {/* Embed — hidden in karaoke mode */}
+      <div className={karaokeMode ? 'hidden' : 'px-4 pb-3 pt-3'}>
         {youtubeId ? (
           <div className="w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl relative">
             <ReactPlayer
@@ -179,90 +199,26 @@ export default function NowPlaying({ song, onClose, autoplay }: Props) {
         </div>
       </div>
 
-      {/* Tab bar */}
-      <div className="flex gap-0 px-4 pt-2 border-b border-white/5">
-        {(['lyrics', 'notes'] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => t !== 'notes' && setTab(t)}
-            disabled={t === 'notes'}
-            title={t === 'notes' ? 'Currently unavailable' : undefined}
-            className={`px-3 pb-2 text-xs font-semibold border-b-2 transition-colors capitalize
-              ${tab === t ? 'border-white text-white' : 'border-transparent text-stone-500'}
-              ${t === 'notes' ? 'opacity-40 cursor-not-allowed' : 'hover:text-stone-300'}`}
-          >
-            {t}
-          </button>
-        ))}
+      {/* Single-row mode + notes selector */}
+      <div className="flex gap-1 px-4 py-2 border-b border-white/5">
+        {MODE_OPTIONS.map((m) => {
+          const disabled = m.needsLyrics && !hasLyrics;
+          return (
+            <button
+              key={m.id}
+              onClick={() => !disabled && setActiveMode(m.id)}
+              disabled={disabled}
+              className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-colors flex-1
+                ${activeMode === m.id ? 'bg-white/15 text-white' : 'text-stone-500'}
+                ${disabled ? 'opacity-30 cursor-not-allowed' : 'hover:text-stone-300 hover:bg-white/5'}`}
+            >{m.label}</button>
+          );
+        })}
       </div>
 
-      {/* Tab content */}
+      {/* Content */}
       <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3">
-        {tab === 'lyrics' && (
-          <>
-            {/* Mode toggles */}
-            {hasLyrics && (
-              <div className="flex gap-1 mb-3">
-                {([
-                  { id: 'original', label: 'Original' },
-                  { id: 'zh', label: '中文' },
-                  { id: 'side', label: '⊞ Side' },
-                  { id: 'seq', label: '≡ Seq' },
-                ] as const).map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => setMode(m.id)}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-colors
-                      ${mode === m.id ? 'bg-white/15 text-white' : 'text-stone-500 hover:text-stone-300 hover:bg-white/5'}`}
-                  >{m.label}</button>
-                ))}
-              </div>
-            )}
-
-            {!hasLyrics ? (
-              <p className="text-stone-600 italic text-sm">
-                {song.lyrics && !song.lyrics.show_publicly
-                  ? 'Lyrics are not available for public display.'
-                  : 'No lyrics recorded for this song.'}
-              </p>
-            ) : mode === 'original' ? (
-              romText
-                ? <RomLyrics text={romText} language={song.language_claimed} />
-                : <p className="text-stone-600 italic text-sm">No romanization available.</p>
-            ) : mode === 'zh' ? (
-              zhText
-                ? <pre className="whitespace-pre-wrap font-sans text-stone-200 leading-relaxed text-sm">{zhText}</pre>
-                : <p className="text-stone-600 italic text-sm">No Chinese translation available.</p>
-            ) : mode === 'side' ? (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 mb-1.5">Original</p>
-                  {romText ? <RomLyrics text={romText} language={song.language_claimed} /> : <p className="text-stone-500 text-xs">—</p>}
-                </div>
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 mb-1.5">中文</p>
-                  <pre className="whitespace-pre-wrap font-sans text-stone-300 leading-relaxed text-xs">{zhText || '—'}</pre>
-                </div>
-              </div>
-            ) : (
-              /* Sequential */
-              <div className="space-y-2">
-                {romLines.map((line, i) => (
-                  <div key={i}>
-                    <div className="text-sm leading-snug">
-                      {line.split(' ').filter(Boolean).map((word, wi) => (
-                        <HoverableWord key={wi} word={word} language={song.language_claimed} />
-                      ))}
-                    </div>
-                    {zhLines[i] && <p className="text-stone-500 text-xs leading-snug mt-0.5">{zhLines[i]}</p>}
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {tab === 'notes' && (
+        {activeMode === 'notes' ? (
           <div className="space-y-3">
             {[
               { label: 'Language', value: song.language_claimed, note: song.language_evidence },
@@ -298,6 +254,45 @@ export default function NowPlaying({ song, onClose, autoplay }: Props) {
                 <p className="text-stone-500 text-xs">{song.source_snippets}</p>
               </div>
             )}
+          </div>
+        ) : !hasLyrics ? (
+          <p className="text-stone-600 italic text-sm">
+            {song.lyrics && !song.lyrics.show_publicly
+              ? 'Lyrics are not available for public display.'
+              : 'No lyrics recorded for this song.'}
+          </p>
+        ) : activeMode === 'original' ? (
+          romText
+            ? <RomLyrics text={romText} language={song.language_claimed} large={karaokeMode} />
+            : <p className="text-stone-600 italic text-sm">No romanization available.</p>
+        ) : activeMode === 'zh' ? (
+          zhText
+            ? <pre className={`whitespace-pre-wrap font-sans text-stone-200 leading-relaxed ${karaokeMode ? 'text-base' : 'text-sm'}`}>{zhText}</pre>
+            : <p className="text-stone-600 italic text-sm">No Chinese translation available.</p>
+        ) : activeMode === 'side' ? (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 mb-1.5">Original</p>
+              {romText ? <RomLyrics text={romText} language={song.language_claimed} /> : <p className="text-stone-500 text-xs">—</p>}
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 mb-1.5">中文</p>
+              <pre className="whitespace-pre-wrap font-sans text-stone-300 leading-relaxed text-xs">{zhText || '—'}</pre>
+            </div>
+          </div>
+        ) : (
+          /* Sequential */
+          <div className="space-y-2">
+            {romLines.map((line, i) => (
+              <div key={i}>
+                <div className={karaokeMode ? 'text-base leading-snug' : 'text-sm leading-snug'}>
+                  {line.split(' ').filter(Boolean).map((word, wi) => (
+                    <HoverableWord key={wi} word={word} language={song.language_claimed} />
+                  ))}
+                </div>
+                {zhLines[i] && <p className={`text-stone-500 leading-snug mt-0.5 ${karaokeMode ? 'text-sm' : 'text-xs'}`}>{zhLines[i]}</p>}
+              </div>
+            ))}
           </div>
         )}
       </div>

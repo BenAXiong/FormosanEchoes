@@ -80,6 +80,7 @@ export default function BrowserPage({ songs, artists }: Props) {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [searchFocused, setSearchFocused] = useState(false);
   const [recentVisibleCount, setRecentVisibleCount] = useState(10);
+  const [karaokeMode, setKaraokeMode] = useState(false);
   const { playingTrack, playTrack, setQueue, setAutoAdvance, isFavorite, playlists } = usePlayer();
 
   useEffect(() => {
@@ -140,6 +141,7 @@ export default function BrowserPage({ songs, artists }: Props) {
 
   useEffect(() => { setQueue(results); }, [results, setQueue]);
   useEffect(() => { setAutoAdvance(autoplay); }, [autoplay, setAutoAdvance]);
+  useEffect(() => { setKaraokeMode(false); }, [selected?.id]);
 
   const songById = useMemo(() => {
     const m = new Map<string, Song>();
@@ -458,7 +460,7 @@ export default function BrowserPage({ songs, artists }: Props) {
         />
         <div className="flex-1 border-l border-white/5 overflow-hidden flex flex-col">
           {selected ? (
-            <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} />
+            <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} karaokeMode={false} onKaraokeToggle={() => {}} />
           ) : (
             <div className="relative flex flex-col items-center justify-center h-full px-8 text-center bg-[#07070a] overflow-hidden">
               <div className="absolute inset-0 opacity-[0.04] pointer-events-none select-none">
@@ -476,8 +478,12 @@ export default function BrowserPage({ songs, artists }: Props) {
 
       {/* Mobile bottom sheet — only mount when not on a large screen to avoid dual NowPlaying registration */}
       {!isLargeScreen && selected && (
-        <div className={`lg:hidden fixed inset-x-0 z-30 rounded-t-2xl overflow-hidden border-t border-white/10 shadow-2xl ${playingTrack ? 'bottom-[116px] sm:bottom-0 h-[calc(90vh-116px)] sm:h-[90vh]' : 'bottom-0 h-[90vh]'}`}>
-          <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} />
+        <div className={`lg:hidden fixed inset-x-0 z-30 overflow-hidden border-t border-white/10 shadow-2xl transition-all duration-300 ${
+          karaokeMode
+            ? 'top-[52px] bottom-[116px] sm:bottom-0 rounded-none'
+            : `rounded-t-2xl ${playingTrack ? 'bottom-[116px] sm:bottom-0 h-[calc(90vh-116px)] sm:h-[90vh]' : 'bottom-0 h-[90vh]'}`
+        }`}>
+          <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} karaokeMode={karaokeMode} onKaraokeToggle={() => setKaraokeMode(v => !v)} />
         </div>
       )}
     </div>
