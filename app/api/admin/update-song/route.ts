@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 
 export async function POST(request: Request) {
-  let body: { song_id: string; enriched?: Record<string, unknown>; fields?: Record<string, string> };
+  let body: { song_id: string; enriched?: Record<string, unknown>; fields?: Record<string, string | boolean> };
   try {
     body = await request.json();
   } catch {
@@ -16,7 +16,8 @@ export async function POST(request: Request) {
 
   // ── Direct form save (from editor) ──────────────────────────────────────────
   if (fields) {
-    const f = fields;
+    const { lyrics_show_publicly, ...strFields } = fields as Record<string, string | boolean>;
+    const f = strFields as Record<string, string>;
     const songUpdate: Record<string, string | null> = {
       title_original: f.title_original  || null,
       title_zh:       f.title_zh        || null,
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
         lyrics_zh:       f.lyrics_zh       || null,
         lyrics_en:       f.lyrics_en       || null,
         source:          f.lyrics_source   || null,
-        show_publicly:   false,
+        show_publicly:   lyrics_show_publicly === true,
       }, { onConflict: 'song_id', ignoreDuplicates: false });
       if (lyricsErr) return NextResponse.json({ error: lyricsErr.message }, { status: 500 });
     }

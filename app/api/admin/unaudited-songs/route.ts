@@ -38,9 +38,10 @@ export async function GET() {
       album:          (s.album          ?? null) as string | null,
       description:    (s.description    ?? null) as string | null,
       notes:          (s.notes          ?? null) as string | null,
-      lyrics_original:(s.lyrics?.lyrics_original ?? null) as string | null,
-      lyrics_zh:      (s.lyrics?.lyrics_zh       ?? null) as string | null,
-      lyrics_en:      (s.lyrics?.lyrics_en       ?? null) as string | null,
+      lyrics_original:    (s.lyrics?.lyrics_original ?? null) as string | null,
+      lyrics_zh:          (s.lyrics?.lyrics_zh       ?? null) as string | null,
+      lyrics_en:          (s.lyrics?.lyrics_en       ?? null) as string | null,
+      lyrics_show_publicly: (s.lyrics?.show_publicly  ?? false) as boolean,
       missing,
     }];
   });

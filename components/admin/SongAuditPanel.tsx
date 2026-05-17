@@ -38,6 +38,7 @@ type UnauditedSong = {
   lyrics_original: string | null;
   lyrics_zh: string | null;
   lyrics_en: string | null;
+  lyrics_show_publicly: boolean;
   missing: string[];
 };
 
@@ -57,6 +58,7 @@ type DraftForm = {
   lyrics_zh: string;
   lyrics_en: string;
   lyrics_source: string;
+  lyrics_show_publicly: boolean;
 };
 
 function draftFromSong(s: UnauditedSong): DraftForm {
@@ -72,10 +74,11 @@ function draftFromSong(s: UnauditedSong): DraftForm {
     album:          s.album          ?? '',
     description:    s.description    ?? '',
     notes:          s.notes          ?? '',
-    lyrics_original: s.lyrics_original ?? '',
-    lyrics_zh:       s.lyrics_zh       ?? '',
-    lyrics_en:       s.lyrics_en       ?? '',
-    lyrics_source:   '',
+    lyrics_original:      s.lyrics_original      ?? '',
+    lyrics_zh:            s.lyrics_zh            ?? '',
+    lyrics_en:            s.lyrics_en            ?? '',
+    lyrics_source:        '',
+    lyrics_show_publicly: s.lyrics_show_publicly ?? false,
   };
 }
 
@@ -469,6 +472,16 @@ export default function SongAuditPanel() {
                     <Field label="Chinese translation"  value={draft.lyrics_zh}       onChange={v => setField('lyrics_zh', v)}       multiline />
                     <Field label="English translation"  value={draft.lyrics_en}       onChange={v => setField('lyrics_en', v)}       multiline />
                     <Field label="Lyrics source"        value={draft.lyrics_source}   onChange={v => setField('lyrics_source', v)}   placeholder="URL or description" />
+                    <button
+                      type="button"
+                      onClick={() => setDraft(d => d ? { ...d, lyrics_show_publicly: !d.lyrics_show_publicly } : d)}
+                      className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/8 transition-colors"
+                    >
+                      <span className="text-xs text-stone-300">Approve lyrics for public display</span>
+                      <div className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ml-3 ${draft.lyrics_show_publicly ? 'bg-emerald-500' : 'bg-white/10'}`}>
+                        <span className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white shadow transition-transform duration-200 ${draft.lyrics_show_publicly ? 'translate-x-4' : ''}`} />
+                      </div>
+                    </button>
                   </div>
                 </div>
 
