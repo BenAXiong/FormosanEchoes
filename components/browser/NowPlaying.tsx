@@ -38,7 +38,7 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   duplicate: { label: 'Duplicate', className: 'bg-stone-800 text-stone-400 border-stone-700' },
 };
 
-type ActiveMode = 'original' | 'zh' | 'side' | 'seq' | 'notes';
+type ActiveMode = 'original' | 'zh' | 'en' | 'seq' | 'side' | 'notes';
 
 interface Props {
   song: Song;
@@ -94,15 +94,22 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
   const hasLyrics = !!song.lyrics?.show_publicly;
   const romText = song.lyrics?.lyrics_original ?? '';
   const zhText = song.lyrics?.lyrics_translation_zh ?? '';
+  const enText = song.lyrics?.lyrics_translation_en ?? '';
   const romLines = romText.split('\n');
   const zhLines = zhText.split('\n');
 
   const MODE_OPTIONS = [
-    { id: 'original' as const, label: 'Rom',   needsLyrics: true,  alwaysDisabled: false },
-    { id: 'zh'       as const, label: '中文',  needsLyrics: true,  alwaysDisabled: false },
-    { id: 'side'     as const, label: '⊞',    needsLyrics: true,  alwaysDisabled: false },
-    { id: 'seq'      as const, label: '≡',    needsLyrics: true,  alwaysDisabled: false },
-    { id: 'notes'    as const, label: 'Notes', needsLyrics: false, alwaysDisabled: true  },
+    { id: 'original' as const, label: 'Original', needsLyrics: true,  alwaysDisabled: false },
+    { id: 'zh'       as const, label: '中文',     needsLyrics: true,  alwaysDisabled: false },
+    { id: 'en'       as const, label: 'EN',       needsLyrics: true,  alwaysDisabled: false },
+    { id: 'seq'      as const, label: '≡',        needsLyrics: true,  alwaysDisabled: false },
+    { id: 'side'     as const, label: (
+        <svg viewBox="0 0 16 10" className="w-4 h-2.5 inline-block" fill="currentColor">
+          <rect x="0" y="0" width="7" height="10" rx="1.5" />
+          <rect x="9" y="0" width="7" height="10" rx="1.5" />
+        </svg>
+      ), needsLyrics: true, alwaysDisabled: false },
+    { id: 'notes'    as const, label: 'Notes',    needsLyrics: false, alwaysDisabled: true  },
   ];
 
   return (
@@ -156,9 +163,6 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
               <p className="text-stone-400 text-xs mt-0.5 truncate">{song.title_romanized}</p>
             )}
             {song.artist && <p className="text-stone-300 text-sm mt-1 font-medium truncate">{song.artist}</p>}
-            {(song.year || song.album_or_source) && (
-              <p className="text-stone-500 text-xs mt-0.5 truncate">{[song.year, song.album_or_source].filter(Boolean).join(' · ')}</p>
-            )}
           </div>
 
           <div className="relative shrink-0 mt-0.5">
@@ -279,6 +283,10 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
           zhText
             ? <pre className={`whitespace-pre-wrap font-sans text-stone-200 leading-relaxed ${karaokeMode ? 'text-xl text-center' : 'text-sm'}`}>{zhText}</pre>
             : <p className="text-stone-600 italic text-sm">No Chinese translation available.</p>
+        ) : activeMode === 'en' ? (
+          enText
+            ? <pre className={`whitespace-pre-wrap font-sans text-stone-200 leading-relaxed ${karaokeMode ? 'text-xl text-center' : 'text-sm'}`}>{enText}</pre>
+            : <p className="text-stone-600 italic text-sm">No English translation available.</p>
         ) : activeMode === 'side' ? (
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -292,15 +300,15 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
           </div>
         ) : (
           /* Sequential */
-          <div className="space-y-2">
+          <div className={`space-y-2 ${karaokeMode ? 'text-center' : ''}`}>
             {romLines.map((line, i) => (
               <div key={i}>
-                <div className={karaokeMode ? 'text-base leading-snug' : 'text-sm leading-snug'}>
+                <div className={karaokeMode ? 'text-xl leading-snug' : 'text-sm leading-snug'}>
                   {line.split(' ').filter(Boolean).map((word, wi) => (
                     <HoverableWord key={wi} word={word} language={song.language_claimed} />
                   ))}
                 </div>
-                {zhLines[i] && <p className={`text-stone-500 leading-snug mt-0.5 ${karaokeMode ? 'text-sm' : 'text-xs'}`}>{zhLines[i]}</p>}
+                {zhLines[i] && <p className={`text-stone-500 leading-snug mt-0.5 ${karaokeMode ? 'text-base' : 'text-xs'}`}>{zhLines[i]}</p>}
               </div>
             ))}
           </div>
