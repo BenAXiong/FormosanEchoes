@@ -73,6 +73,7 @@ export default function BrowserPage({ songs, artists }: Props) {
   const [compact, setCompact] = useState(false);
   const [panelWidth, setPanelWidth] = useState(640);
   const [mounted, setMounted] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
   const [showSongZh, setShowSongZh] = useState(true);
   const [showArtistZh, setShowArtistZh] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -84,6 +85,7 @@ export default function BrowserPage({ songs, artists }: Props) {
   useEffect(() => {
     setMounted(true);
     if (window.innerWidth < 1024) setCompact(true);
+    setIsLargeScreen(window.innerWidth >= 1024);
     setShowSongZh(localStorage.getItem('fe-show-song-zh') !== 'false');
     setShowArtistZh(localStorage.getItem('fe-show-artist-zh') === 'true');
     const saved = localStorage.getItem('fe-recent-searches');
@@ -472,8 +474,8 @@ export default function BrowserPage({ songs, artists }: Props) {
         </div>
       </div>
 
-      {/* Mobile bottom sheet */}
-      {selected && (
+      {/* Mobile bottom sheet — only mount when not on a large screen to avoid dual NowPlaying registration */}
+      {!isLargeScreen && selected && (
         <div className={`lg:hidden fixed inset-x-0 z-30 rounded-t-2xl overflow-hidden border-t border-white/10 shadow-2xl ${playingTrack ? 'bottom-[116px] sm:bottom-0 h-[calc(90vh-116px)] sm:h-[90vh]' : 'bottom-0 h-[90vh]'}`}>
           <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} />
         </div>

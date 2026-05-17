@@ -26,6 +26,8 @@ interface PlayerContextType {
   setProgress: (p: number) => void;
   seekTo: (seconds: number) => void;
   registerSeekFn: (fn: (s: number) => void) => void;
+  seekMirror: (seconds: number) => void;
+  registerMirrorSeekFn: (fn: ((s: number) => void) | null) => void;
   favorites: string[];
   toggleFavorite: (songId: string) => void;
   isFavorite: (songId: string) => boolean;
@@ -47,8 +49,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.7);
   const seekFnRef = useRef<((s: number) => void) | null>(null);
+  const mirrorSeekFnRef = useRef<((s: number) => void) | null>(null);
   const seekTo = useCallback((seconds: number) => seekFnRef.current?.(seconds), []);
+  const seekMirror = useCallback((seconds: number) => mirrorSeekFnRef.current?.(seconds), []);
   const registerSeekFn = useCallback((fn: (s: number) => void) => { seekFnRef.current = fn; }, []);
+  const registerMirrorSeekFn = useCallback((fn: ((s: number) => void) | null) => { mirrorSeekFnRef.current = fn; }, []);
 
   const [autoAdvance, setAutoAdvance] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -171,6 +176,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setQueue,
     seekTo,
     registerSeekFn,
+    seekMirror,
+    registerMirrorSeekFn,
     isPanelOpen,
     setIsPanelOpen,
     progress,
@@ -202,6 +209,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setQueue,
     seekTo,
     registerSeekFn,
+    seekMirror,
+    registerMirrorSeekFn,
     isPanelOpen,
     progress,
     duration,

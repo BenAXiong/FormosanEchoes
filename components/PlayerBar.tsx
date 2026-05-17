@@ -12,7 +12,7 @@ export default function PlayerBar() {
     progress, setProgress, duration, setDuration,
     volume, setVolume, toggleFavorite, isFavorite,
     playlists, addSongToPlaylist, createPlaylist,
-    registerSeekFn, autoAdvance,
+    registerSeekFn, seekTo, seekMirror, autoAdvance,
   } = usePlayer();
   const playerRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -66,7 +66,7 @@ export default function PlayerBar() {
             ref={playerRef}
             url={cleanUrl}
             playing={isPlaying}
-            onEnded={() => { if (autoAdvance) nextTrack(); else { pauseTrack(); setProgress(0); } }}
+            onEnded={() => { if (autoAdvance) nextTrack(); else { pauseTrack(); seekTo(0); seekMirror(0); setProgress(0); } }}
             onProgress={(state) => setProgress(state.playedSeconds)}
             onDuration={(d) => setDuration(d)}
             volume={volume}
@@ -158,7 +158,8 @@ export default function PlayerBar() {
             <div className="absolute top-0 left-0 h-full bg-white rounded-full pointer-events-none"
               style={{ width: `${duration ? (progress / duration) * 100 : 0}%` }} />
             <input type="range" min="0" max={duration || 100} step="0.5" value={progress}
-              onChange={e => { const s = parseFloat(e.target.value); setProgress(s); playerRef.current?.seekTo(s, 'seconds'); }}
+              onChange={e => { const s = parseFloat(e.target.value); setProgress(s); seekTo(s); }}
+              onPointerUp={e => seekMirror(parseFloat((e.target as HTMLInputElement).value))}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
           </div>
           <div className="flex justify-between mt-1.5">
@@ -329,8 +330,9 @@ export default function PlayerBar() {
               onChange={(e) => {
                 const seconds = parseFloat(e.target.value);
                 setProgress(seconds);
-                playerRef.current?.seekTo(seconds, 'seconds');
+                seekTo(seconds);
               }}
+              onPointerUp={(e) => seekMirror(parseFloat((e.target as HTMLInputElement).value))}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
           </div>

@@ -45,10 +45,13 @@ interface Props { song: Song; onClose: () => void; autoplay: boolean; }
 
 export default function NowPlaying({ song, onClose, autoplay }: Props) {
   const {
-    playingTrack, playTrack, isPlaying, pauseTrack, resumeTrack, progress, setIsPanelOpen, seekTo,
+    playingTrack, playTrack, isPlaying, pauseTrack, resumeTrack, progress, setIsPanelOpen, seekTo, registerMirrorSeekFn,
   } = usePlayer();
   const playerRef = useRef<any>(null);   // eslint-disable-line @typescript-eslint/no-explicit-any
   const lastMirrorTime = useRef(0);
+  // Tracks actual master intent; guards onPlay from YouTube's auto-play after seekMirror(0)
+  const isPlayingRef = useRef(false);
+  useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
   
   useEffect(() => {
     // Start this song only when the panel opens for a new song.
@@ -61,6 +64,12 @@ export default function NowPlaying({ song, onClose, autoplay }: Props) {
     return () => setIsPanelOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [song.id]);
+
+  // Register this embed as the mirror so PlayerBar seeks can reach it
+  useEffect(() => {
+    registerMirrorSeekFn((s) => playerRef.current?.seekTo(s, 'seconds'));
+    return () => registerMirrorSeekFn(null);
+  }, [registerMirrorSeekFn]);
 
   // Sync the visual mirror with the master audio player on mount
   useEffect(() => {
@@ -114,7 +123,7 @@ export default function NowPlaying({ song, onClose, autoplay }: Props) {
                 lastMirrorTime.current = playedSeconds;
               }}
               onPause={() => pauseTrack()}
-              onPlay={() => resumeTrack()}
+              onPlay={() => { if (isPlayingRef.current) resumeTrack(); }}
               config={{
                 youtube: {
                   playerVars: { autoplay: 1, rel: 0 }
