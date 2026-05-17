@@ -102,7 +102,12 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
     { id: 'original' as const, label: song.language_claimed || 'Original', needsLyrics: true,  alwaysDisabled: false },
     { id: 'zh'       as const, label: '中文',     needsLyrics: true,  alwaysDisabled: false },
     { id: 'en'       as const, label: 'EN',       needsLyrics: true,  alwaysDisabled: false },
-    { id: 'seq'      as const, label: '≡',        needsLyrics: true,  alwaysDisabled: false },
+    { id: 'seq'      as const, label: (
+        <svg viewBox="0 0 10 16" className="w-2.5 h-4 inline-block" fill="currentColor">
+          <rect x="0" y="0" width="10" height="7" rx="1.5" />
+          <rect x="0" y="9" width="10" height="7" rx="1.5" />
+        </svg>
+      ), needsLyrics: true, alwaysDisabled: false },
     { id: 'side'     as const, label: (
         <svg viewBox="0 0 16 10" className="w-4 h-2.5 inline-block" fill="currentColor">
           <rect x="0" y="0" width="7" height="10" rx="1.5" />
