@@ -39,7 +39,7 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
 };
 
 type LyricsMode = 'original' | 'zh' | 'side' | 'seq';
-type Tab = 'lyrics' | 'evidence';
+type Tab = 'lyrics' | 'notes';
 
 interface Props { song: Song; onClose: () => void; autoplay: boolean; }
 
@@ -181,15 +181,15 @@ export default function NowPlaying({ song, onClose, autoplay }: Props) {
 
       {/* Tab bar */}
       <div className="flex gap-0 px-4 pt-2 border-b border-white/5">
-        {(['lyrics', 'evidence'] as const).map((t) => (
+        {(['lyrics', 'notes'] as const).map((t) => (
           <button
             key={t}
-            onClick={() => t !== 'evidence' && setTab(t)}
-            disabled={t === 'evidence'}
-            title={t === 'evidence' ? 'Currently unavailable' : undefined}
+            onClick={() => t !== 'notes' && setTab(t)}
+            disabled={t === 'notes'}
+            title={t === 'notes' ? 'Currently unavailable' : undefined}
             className={`px-3 pb-2 text-xs font-semibold border-b-2 transition-colors capitalize
               ${tab === t ? 'border-white text-white' : 'border-transparent text-stone-500'}
-              ${t === 'evidence' ? 'opacity-40 cursor-not-allowed' : 'hover:text-stone-300'}`}
+              ${t === 'notes' ? 'opacity-40 cursor-not-allowed' : 'hover:text-stone-300'}`}
           >
             {t}
           </button>
@@ -262,7 +262,7 @@ export default function NowPlaying({ song, onClose, autoplay }: Props) {
           </>
         )}
 
-        {tab === 'evidence' && (
+        {tab === 'notes' && (
           <div className="space-y-3">
             {[
               { label: 'Language', value: song.language_claimed, note: song.language_evidence },
