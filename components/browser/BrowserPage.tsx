@@ -83,6 +83,12 @@ export default function BrowserPage({ songs, artists }: Props) {
   const [karaokeMode, setKaraokeMode] = useState(false);
   const { playingTrack, playTrack, setQueue, setAutoAdvance, isFavorite, playlists, registerTogglePanelFn } = usePlayer();
 
+  // History API refs for PWA back-button handling
+  const historyDepth = useRef(0);
+  const skipNextPop = useRef(false);
+  const selectedRef = useRef<Song | null>(null);
+  const karaokeModeRef = useRef(false);
+
   useEffect(() => {
     setMounted(true);
     if (window.innerWidth < 1024) setCompact(true);
@@ -142,8 +148,49 @@ export default function BrowserPage({ songs, artists }: Props) {
   useEffect(() => { setQueue(results); }, [results, setQueue]);
   useEffect(() => { setAutoAdvance(autoplay); }, [autoplay, setAutoAdvance]);
   useEffect(() => { setKaraokeMode(false); }, [selected?.id]);
+
+  // Keep refs in sync for use inside stable callbacks
+  useEffect(() => { selectedRef.current = selected; }, [selected]);
+  useEffect(() => { karaokeModeRef.current = karaokeMode; }, [karaokeMode]);
+
+  // Push a history entry when the mobile sheet opens; replace when switching songs
   useEffect(() => {
-    registerTogglePanelFn(() => setSelected(s => s ? null : (playingTrack ?? null)));
+    if (isLargeScreen || !selected) return;
+    if (historyDepth.current === 0) {
+      history.pushState({ sheet: true }, '');
+    } else {
+      history.replaceState({ sheet: true }, '');
+    }
+    historyDepth.current = 1;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected?.id, isLargeScreen]);
+
+  // Intercept hardware/gesture back button in PWA
+  useEffect(() => {
+    const onPop = () => {
+      if (skipNextPop.current) { skipNextPop.current = false; return; }
+      setSelected(null);
+      setKaraokeMode(false);
+      historyDepth.current = 0;
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  useEffect(() => {
+    registerTogglePanelFn(() => {
+      if (selectedRef.current) {
+        if (historyDepth.current > 0) {
+          skipNextPop.current = true;
+          history.back();
+          historyDepth.current = 0;
+        }
+        setSelected(null);
+        setKaraokeMode(false);
+      } else {
+        setSelected(playingTrack ?? null);
+      }
+    });
     return () => registerTogglePanelFn(null);
   }, [registerTogglePanelFn, playingTrack]);
 
