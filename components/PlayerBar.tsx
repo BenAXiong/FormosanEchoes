@@ -12,7 +12,7 @@ export default function PlayerBar() {
     progress, setProgress, duration, setDuration,
     volume, setVolume, toggleFavorite, isFavorite,
     playlists, addSongToPlaylist, createPlaylist,
-    registerSeekFn, seekTo, seekMirror, autoAdvance,
+    registerSeekFn, seekTo, seekMirror, autoAdvance, togglePanel,
   } = usePlayer();
   const playerRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -83,10 +83,21 @@ export default function PlayerBar() {
       <div className="sm:hidden flex flex-col w-full">
         {/* Row 1: song info + action buttons */}
         <div className="flex items-center gap-3 px-4 pt-3 pb-1">
-          <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-semibold truncate leading-tight">{title}</p>
-            <p className="text-stone-400 text-xs truncate mt-0.5">{artist}</p>
-          </div>
+          <button
+            onClick={togglePanel}
+            className="flex items-center gap-3 flex-1 min-w-0 text-left active:opacity-70 transition-opacity"
+          >
+            <div className="w-10 h-10 rounded bg-stone-900 overflow-hidden shrink-0 border border-white/5">
+              {youtubeId
+                ? <img src={`https://img.youtube.com/vi/${youtubeId}/default.jpg`} alt="" className="w-full h-full object-cover" />
+                : <div className="w-full h-full flex items-center justify-center text-stone-700 text-lg">♪</div>
+              }
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-sm font-semibold truncate leading-tight">{title}</p>
+              <p className="text-stone-400 text-xs truncate mt-0.5">{artist}</p>
+            </div>
+          </button>
           <button
             onClick={() => playingTrack && toggleFavorite(playingTrack.id)}
             className={`p-2 transition-colors shrink-0 ${playingTrack && isFavorite(playingTrack.id) ? 'text-emerald-500' : 'text-stone-500 hover:text-white'}`}

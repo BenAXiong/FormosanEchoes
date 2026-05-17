@@ -81,7 +81,7 @@ export default function BrowserPage({ songs, artists }: Props) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [recentVisibleCount, setRecentVisibleCount] = useState(10);
   const [karaokeMode, setKaraokeMode] = useState(false);
-  const { playingTrack, playTrack, setQueue, setAutoAdvance, isFavorite, playlists } = usePlayer();
+  const { playingTrack, playTrack, setQueue, setAutoAdvance, isFavorite, playlists, registerTogglePanelFn } = usePlayer();
 
   useEffect(() => {
     setMounted(true);
@@ -142,6 +142,10 @@ export default function BrowserPage({ songs, artists }: Props) {
   useEffect(() => { setQueue(results); }, [results, setQueue]);
   useEffect(() => { setAutoAdvance(autoplay); }, [autoplay, setAutoAdvance]);
   useEffect(() => { setKaraokeMode(false); }, [selected?.id]);
+  useEffect(() => {
+    registerTogglePanelFn(() => setSelected(s => s ? null : (playingTrack ?? null)));
+    return () => registerTogglePanelFn(null);
+  }, [registerTogglePanelFn, playingTrack]);
 
   const songById = useMemo(() => {
     const m = new Map<string, Song>();

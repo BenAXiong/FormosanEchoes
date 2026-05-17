@@ -150,12 +150,6 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
       <div className="px-4 pb-3 border-b border-white/5">
         <div className="flex items-start gap-2">
 
-          {/* Mobile: close button on left */}
-          <button
-            onClick={onClose}
-            className="lg:hidden shrink-0 mt-0.5 w-6 h-6 rounded-full bg-white/8 border border-white/10 flex items-center justify-center text-[11px] text-stone-400 hover:bg-white/15 hover:text-white transition-colors"
-          >✕</button>
-
           <div className="flex-1 min-w-0">
             <h2 className="text-white font-bold text-base leading-tight truncate">{title}</h2>
             {song.title_romanized && song.title_romanized !== title && (
@@ -176,19 +170,25 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
             >ℹ</button>
 
             {/* Mobile: karaoke toggle */}
-            <button
-              onClick={onKaraokeToggle}
-              aria-label={karaokeMode ? 'Exit karaoke mode' : 'Enter karaoke mode'}
-              className={`lg:hidden flex flex-col items-center gap-0.5 transition-colors ${karaokeMode ? 'text-amber-400' : 'text-stone-500 hover:text-stone-300'}`}
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                <rect x="9" y="2" width="6" height="11" rx="3" />
-                <path d="M5 10a7 7 0 0 0 14 0" />
-                <line x1="12" y1="17" x2="12" y2="21" />
-                <line x1="9" y1="21" x2="15" y2="21" />
-              </svg>
-              <span className="text-[8px] font-bold tracking-widest leading-none">KARAOKE</span>
-            </button>
+            {karaokeMode ? (
+              <button
+                onClick={onKaraokeToggle}
+                aria-label="Exit karaoke mode"
+                className="lg:hidden flex flex-col items-center gap-0.5 text-stone-500 hover:text-stone-300 transition-colors"
+              >
+                <span className="text-xl leading-none">↓</span>
+                <span className="text-[8px] font-bold tracking-widest leading-none">VIDEO</span>
+              </button>
+            ) : (
+              <button
+                onClick={onKaraokeToggle}
+                aria-label="Enter karaoke mode"
+                className="lg:hidden flex flex-col items-center gap-0.5 text-amber-400 hover:text-amber-300 transition-colors"
+              >
+                <span className="text-xl leading-none">🎤</span>
+                <span className="text-[8px] font-bold tracking-widest leading-none">KARAOKE</span>
+              </button>
+            )}
 
             {showInfo && (
               <>

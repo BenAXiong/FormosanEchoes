@@ -28,6 +28,8 @@ interface PlayerContextType {
   registerSeekFn: (fn: (s: number) => void) => void;
   seekMirror: (seconds: number) => void;
   registerMirrorSeekFn: (fn: ((s: number) => void) | null) => void;
+  togglePanel: () => void;
+  registerTogglePanelFn: (fn: (() => void) | null) => void;
   favorites: string[];
   toggleFavorite: (songId: string) => void;
   isFavorite: (songId: string) => boolean;
@@ -50,10 +52,13 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [volume, setVolume] = useState(0.7);
   const seekFnRef = useRef<((s: number) => void) | null>(null);
   const mirrorSeekFnRef = useRef<((s: number) => void) | null>(null);
+  const togglePanelFnRef = useRef<(() => void) | null>(null);
   const seekTo = useCallback((seconds: number) => seekFnRef.current?.(seconds), []);
   const seekMirror = useCallback((seconds: number) => mirrorSeekFnRef.current?.(seconds), []);
   const registerSeekFn = useCallback((fn: (s: number) => void) => { seekFnRef.current = fn; }, []);
   const registerMirrorSeekFn = useCallback((fn: ((s: number) => void) | null) => { mirrorSeekFnRef.current = fn; }, []);
+  const togglePanel = useCallback(() => togglePanelFnRef.current?.(), []);
+  const registerTogglePanelFn = useCallback((fn: (() => void) | null) => { togglePanelFnRef.current = fn; }, []);
 
   const [autoAdvance, setAutoAdvance] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -178,6 +183,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     registerSeekFn,
     seekMirror,
     registerMirrorSeekFn,
+    togglePanel,
+    registerTogglePanelFn,
     isPanelOpen,
     setIsPanelOpen,
     progress,
@@ -211,6 +218,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     registerSeekFn,
     seekMirror,
     registerMirrorSeekFn,
+    togglePanel,
+    registerTogglePanelFn,
     isPanelOpen,
     progress,
     duration,
