@@ -478,11 +478,7 @@ export default function BrowserPage({ songs, artists }: Props) {
 
       {/* Mobile bottom sheet — only mount when not on a large screen to avoid dual NowPlaying registration */}
       {!isLargeScreen && selected && (
-        <div className={`lg:hidden fixed inset-x-0 z-30 overflow-hidden border-t border-white/10 shadow-2xl transition-all duration-300 ${
-          karaokeMode
-            ? 'top-[52px] bottom-[116px] sm:bottom-0 rounded-none'
-            : `rounded-t-2xl ${playingTrack ? 'bottom-[116px] sm:bottom-0 h-[calc(90vh-116px)] sm:h-[90vh]' : 'bottom-0 h-[90vh]'}`
-        }`}>
+        <div className={`lg:hidden fixed inset-x-0 top-[52px] ${playingTrack ? 'bottom-[116px] sm:bottom-0' : 'bottom-0'} z-30 rounded-none overflow-hidden border-t border-white/10 shadow-2xl`}>
           <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} karaokeMode={karaokeMode} onKaraokeToggle={() => setKaraokeMode(v => !v)} />
         </div>
       )}

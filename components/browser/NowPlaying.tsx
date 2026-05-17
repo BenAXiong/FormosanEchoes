@@ -10,7 +10,7 @@ const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 function RomLyrics({ text, language, large }: { text: string; language?: string | null; large?: boolean }) {
   return (
-    <div className={`leading-loose ${large ? 'text-base' : 'text-sm'}`}>
+    <div className={`leading-loose ${large ? 'text-xl text-center' : 'text-sm'}`}>
       {text.split('\n').map((line, li) => (
         <div key={li} className="min-h-[1.5rem]">
           {line.split(' ').filter(Boolean).map((word, wi) => (
@@ -98,28 +98,15 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
   const zhLines = zhText.split('\n');
 
   const MODE_OPTIONS = [
-    { id: 'original' as const, label: 'Rom',   needsLyrics: true  },
-    { id: 'zh'       as const, label: '中文',  needsLyrics: true  },
-    { id: 'side'     as const, label: '⊞',    needsLyrics: true  },
-    { id: 'seq'      as const, label: '≡',    needsLyrics: true  },
-    { id: 'notes'    as const, label: 'Notes', needsLyrics: false },
+    { id: 'original' as const, label: 'Rom',   needsLyrics: true,  alwaysDisabled: false },
+    { id: 'zh'       as const, label: '中文',  needsLyrics: true,  alwaysDisabled: false },
+    { id: 'side'     as const, label: '⊞',    needsLyrics: true,  alwaysDisabled: false },
+    { id: 'seq'      as const, label: '≡',    needsLyrics: true,  alwaysDisabled: false },
+    { id: 'notes'    as const, label: 'Notes', needsLyrics: false, alwaysDisabled: true  },
   ];
 
   return (
     <div className="flex flex-col h-full bg-[#0f0f16] overflow-hidden">
-
-      {/* Mobile: handle pill (tap to expand/collapse) + close button */}
-      <div className="lg:hidden relative flex items-center justify-center px-4 pt-3 pb-1">
-        <button
-          onClick={onKaraokeToggle}
-          aria-label={karaokeMode ? 'Collapse' : 'Expand to karaoke mode'}
-          className="w-10 h-1 rounded-full bg-white/20 active:bg-white/40 transition-colors"
-        />
-        <button
-          onClick={onClose}
-          className="absolute right-4 text-stone-500 hover:text-white transition-colors text-sm"
-        >✕</button>
-      </div>
 
       {/* Embed — hidden in karaoke mode */}
       <div className={karaokeMode ? 'hidden' : 'px-4 pb-3 pt-3'}>
@@ -159,9 +146,16 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
         )}
       </div>
 
-      {/* Title row with info tooltip */}
+      {/* Title row */}
       <div className="px-4 pb-3 border-b border-white/5">
         <div className="flex items-start gap-2">
+
+          {/* Mobile: close button on left */}
+          <button
+            onClick={onClose}
+            className="lg:hidden shrink-0 mt-0.5 w-6 h-6 rounded-full bg-white/8 border border-white/10 flex items-center justify-center text-[11px] text-stone-400 hover:bg-white/15 hover:text-white transition-colors"
+          >✕</button>
+
           <div className="flex-1 min-w-0">
             <h2 className="text-white font-bold text-base leading-tight truncate">{title}</h2>
             {song.title_romanized && song.title_romanized !== title && (
@@ -173,13 +167,29 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
             )}
           </div>
 
-          {/* Info button + tooltip */}
           <div className="relative shrink-0 mt-0.5">
+            {/* Desktop: info button + tooltip */}
             <button
               onClick={() => setShowInfo(!showInfo)}
               aria-label="Show metadata"
-              className="w-6 h-6 rounded-full bg-white/8 border border-white/10 flex items-center justify-center text-[11px] text-stone-400 hover:bg-white/15 hover:text-white transition-colors"
+              className="hidden lg:flex w-6 h-6 rounded-full bg-white/8 border border-white/10 items-center justify-center text-[11px] text-stone-400 hover:bg-white/15 hover:text-white transition-colors"
             >ℹ</button>
+
+            {/* Mobile: karaoke toggle */}
+            <button
+              onClick={onKaraokeToggle}
+              aria-label={karaokeMode ? 'Exit karaoke mode' : 'Enter karaoke mode'}
+              className={`lg:hidden flex flex-col items-center gap-0.5 transition-colors ${karaokeMode ? 'text-amber-400' : 'text-stone-500 hover:text-stone-300'}`}
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                <rect x="9" y="2" width="6" height="11" rx="3" />
+                <path d="M5 10a7 7 0 0 0 14 0" />
+                <line x1="12" y1="17" x2="12" y2="21" />
+                <line x1="9" y1="21" x2="15" y2="21" />
+              </svg>
+              <span className="text-[8px] font-bold tracking-widest leading-none">KARAOKE</span>
+            </button>
+
             {showInfo && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowInfo(false)} />
@@ -202,7 +212,7 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
       {/* Single-row mode + notes selector */}
       <div className="flex gap-1 px-4 py-2 border-b border-white/5">
         {MODE_OPTIONS.map((m) => {
-          const disabled = m.needsLyrics && !hasLyrics;
+          const disabled = m.alwaysDisabled || (m.needsLyrics && !hasLyrics);
           return (
             <button
               key={m.id}
@@ -267,7 +277,7 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
             : <p className="text-stone-600 italic text-sm">No romanization available.</p>
         ) : activeMode === 'zh' ? (
           zhText
-            ? <pre className={`whitespace-pre-wrap font-sans text-stone-200 leading-relaxed ${karaokeMode ? 'text-base' : 'text-sm'}`}>{zhText}</pre>
+            ? <pre className={`whitespace-pre-wrap font-sans text-stone-200 leading-relaxed ${karaokeMode ? 'text-xl text-center' : 'text-sm'}`}>{zhText}</pre>
             : <p className="text-stone-600 italic text-sm">No Chinese translation available.</p>
         ) : activeMode === 'side' ? (
           <div className="grid grid-cols-2 gap-4">
