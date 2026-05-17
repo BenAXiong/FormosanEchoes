@@ -99,7 +99,7 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
   const zhLines = zhText.split('\n');
 
   const MODE_OPTIONS = [
-    { id: 'original' as const, label: 'Original', needsLyrics: true,  alwaysDisabled: false },
+    { id: 'original' as const, label: song.language_claimed || 'Original', needsLyrics: true,  alwaysDisabled: false },
     { id: 'zh'       as const, label: '中文',     needsLyrics: true,  alwaysDisabled: false },
     { id: 'en'       as const, label: 'EN',       needsLyrics: true,  alwaysDisabled: false },
     { id: 'seq'      as const, label: '≡',        needsLyrics: true,  alwaysDisabled: false },
