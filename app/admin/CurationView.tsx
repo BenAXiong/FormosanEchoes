@@ -9,13 +9,77 @@ import FilterBar from '@/components/FilterBar';
 import SongCard from '@/components/SongCard';
 import SongDetailPanel from '@/components/SongDetailPanel';
 import AddSongPanel from '@/components/admin/AddSongPanel';
+import AddMultipleSongsPanel from '@/components/admin/AddMultipleSongsPanel';
 import ArtistAuditPanel from '@/components/admin/ArtistAuditPanel';
 import MetricsPanel from '@/components/admin/MetricsPanel';
+import SongAuditPanel from '@/components/admin/SongAuditPanel';
 import vocab from '@/data/controlled-vocab.json';
 
 const typedVocab = vocab as ControlledVocab;
 
 type Tab = 'browse' | 'add' | 'artists' | 'metrics';
+type AddMode = 'single' | 'multi' | 'audit';
+type ArtistMode = 'add' | 'edit';
+
+function SubTabBar<T extends string>({ tabs, active, onChange }: Readonly<{
+  tabs: [T, string][];
+  active: T;
+  onChange: (t: T) => void;
+}>) {
+  return (
+    <div className="flex gap-0 border-b border-white/10 px-6 pt-4">
+      {tabs.map(([id, label]) => (
+        <button
+          key={id}
+          onClick={() => onChange(id)}
+          className={`px-4 pb-3 text-xs font-semibold border-b-2 transition-colors
+            ${active === id ? 'border-white text-white' : 'border-transparent text-stone-500 hover:text-stone-300'}`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function AddTab() {
+  const [mode, setMode] = useState<AddMode>('single');
+  return (
+    <div className="bg-[#0f0f16] rounded-xl border border-white/10 min-h-100 overflow-hidden">
+      <SubTabBar
+        tabs={[['single', 'Single Song'], ['multi', 'Multiple Songs'], ['audit', 'Edit Songs']]}
+        active={mode}
+        onChange={setMode}
+      />
+      <div className="p-6">
+        {mode === 'single' && <AddSongPanel />}
+        {mode === 'multi' && <AddMultipleSongsPanel />}
+        {mode === 'audit' && <SongAuditPanel />}
+      </div>
+    </div>
+  );
+}
+
+function ArtistTab() {
+  const [mode, setMode] = useState<ArtistMode>('edit');
+  return (
+    <div className="bg-[#0f0f16] rounded-xl border border-white/10 min-h-100 overflow-hidden">
+      <SubTabBar
+        tabs={[['edit', 'Edit Artists'], ['add', 'Add Artist']]}
+        active={mode}
+        onChange={setMode}
+      />
+      <div className="p-6">
+        {mode === 'edit' && <ArtistAuditPanel />}
+        {mode === 'add' && (
+          <div className="flex items-center justify-center h-48 text-stone-600 text-sm italic">
+            Add Artist — coming soon
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 interface Props {
   songs: Song[];
@@ -56,39 +120,25 @@ export default function CurationView({ songs }: Props) {
                     : 'text-stone-500 hover:text-stone-700'
                 }`}
               >
-                {t === 'browse' ? 'Browse' : t === 'add' ? '+ Add Song' : t === 'artists' ? 'Artists Audit' : 'Metrics'}
+                {{ browse: 'Browse', add: 'Songs', artists: 'Artists', metrics: 'Metrics' }[t]}
               </button>
             ))}
           </div>
           <span className="text-xs text-stone-400 tabular-nums hidden sm:inline">{results.length} / {songs.length}</span>
-          <a
-            href="/"
-            className="text-xs px-3 py-1.5 rounded-full bg-stone-800 text-stone-300 hover:bg-stone-700 hover:text-white border border-stone-700 transition-colors"
-          >
-            Public →
-          </a>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
         {/* ── Add Song tab ── */}
-        {tab === 'add' && (
-          <div className="bg-[#0f0f16] rounded-xl border border-white/10 p-6 min-h-[400px]">
-            <AddSongPanel />
-          </div>
-        )}
+        {tab === 'add' && <AddTab />}
 
-        {/* ── Artist Audit tab ── */}
-        {tab === 'artists' && (
-          <div className="bg-[#0f0f16] rounded-xl border border-white/10 p-6 min-h-[400px]">
-            <ArtistAuditPanel />
-          </div>
-        )}
+        {/* ── Artists tab ── */}
+        {tab === 'artists' && <ArtistTab />}
 
         {/* ── Metrics tab ── */}
         {tab === 'metrics' && (
-          <div className="bg-[#0f0f16] rounded-xl border border-white/10 min-h-[400px]">
+          <div className="bg-[#0f0f16] rounded-xl border border-white/10 min-h-100">
             <MetricsPanel />
           </div>
         )}
@@ -111,7 +161,7 @@ export default function CurationView({ songs }: Props) {
               {/* Song list */}
               <section
                 aria-label="Song list"
-                className={`flex-shrink-0 ${selectedSong ? 'w-full lg:w-80 xl:w-96' : 'w-full'}`}
+                className={`shrink-0 ${selectedSong ? 'w-full lg:w-80 xl:w-96' : 'w-full'}`}
               >
                 {results.length === 0 ? (
                   <div className="rounded-xl border border-stone-200 bg-white px-6 py-12 text-center">
@@ -119,7 +169,7 @@ export default function CurationView({ songs }: Props) {
                     <p className="text-stone-300 text-xs mt-1">Try clearing the search or adjusting filters.</p>
                   </div>
                 ) : (
-                  <ul className="flex flex-col gap-2" role="list">
+                  <ul className="flex flex-col gap-2">
                     {results.map((song) => (
                       <li key={song.id}>
                         <SongCard

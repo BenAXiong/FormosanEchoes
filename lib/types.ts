@@ -66,6 +66,7 @@ export interface Song {
   location_claimed?: string;
   region?: string;
   genre?: string;
+  recording_type?: string;
   tags: string[];
   source_snippets?: string;
   verification_notes?: string;
@@ -99,6 +100,7 @@ export interface Artist {
   wikipedia_url: string | null;
   sources: string[];
   notes: string | null;
+  group_ids?: string[];   // IDs of groups this person is a member of
 }
 
 // ─── Filters ──────────────────────────────────────────────────────────────────
@@ -111,6 +113,7 @@ export interface FilterState {
   confidence: string;
   verification_status: string;
   has_lyrics: boolean | null;
+  recording_type: string;
   only_favorites: boolean;
   playlist_id: string | null;
 }

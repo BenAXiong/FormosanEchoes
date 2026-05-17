@@ -27,15 +27,15 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Demo sidebar slick scrollbar */
-.demo-sidebar {
+/* Thin custom scrollbar for scrollable panels */
+.thin-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
-.demo-sidebar::-webkit-scrollbar { width: 3px; }
-.demo-sidebar::-webkit-scrollbar-track { background: transparent; }
-.demo-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 10px; }
-.demo-sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+.thin-scrollbar::-webkit-scrollbar { width: 3px; }
+.thin-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.thin-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 10px; }
+.thin-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
 
 /* Focus visible ring */
 :focus-visible {

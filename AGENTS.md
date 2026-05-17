@@ -10,7 +10,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## What this project is
 
-A curated browser for Formosan-language (Indigenous Taiwanese) music. Public demo at `/`; admin curation panel at `/admin?key=654321`. The roadmap and current state live in `PLAN.md`.
+A curated browser for Formosan-language (Indigenous Taiwanese) music. Public browser at `/`; admin curation panel at `/admin?key=654321`. The roadmap and current state live in `PLAN.md`.
 
 ## Data architecture
 
@@ -18,8 +18,8 @@ All data is file-based JSON — no database yet:
 
 | File | Role |
 |---|---|
-| `data/songs.json` | Master song catalog (~400+ records) |
-| `data/artists.json` | Artist profiles (~100 entries) |
+| `data/songs.json` | Master song catalog (~80 records as of 2026-05-16) |
+| `data/artists.json` | Artist profiles |
 | `data/artists_unlinked.json` | Artist strings that couldn't be auto-linked |
 | `data/controlled-vocab.json` | Canonical values for languages, tags, confidence, status |
 
@@ -36,7 +36,7 @@ All data is file-based JSON — no database yet:
 | Artist resolution | `lib/artists.ts` |
 | Data validation | `lib/validate.ts` |
 | Global player state | `lib/PlayerContext.tsx` |
-| Public demo page | `app/page.tsx` |
+| Public browser page | `app/page.tsx` |
 | Admin panel | `app/admin/CurationView.tsx` |
 | Gemini enrichment API | `app/api/admin/enrich-song/route.ts` |
 
@@ -48,7 +48,7 @@ All data is file-based JSON — no database yet:
 
 **Controlled vocabulary**: `confidence` and `verification_status` must only use values from `data/controlled-vocab.json`. Do not invent new values.
 
-**Player architecture**: The actual audio lives in the hidden ReactPlayer inside `PlayerBar`. The embed in `DemoNowPlaying` is a **muted mirror** for visual sync only. All playback state goes through `usePlayer()` from `PlayerContext`.
+**Player architecture**: The actual audio lives in the hidden ReactPlayer inside `PlayerBar`. The embed in `NowPlaying` (`components/browser/NowPlaying.tsx`) is a **muted mirror** for visual sync only. All playback state goes through `usePlayer()` from `PlayerContext`.
 
 **Filter key inconsistency**: The `ethnic_group` filter key in `FilterState` is currently repurposed as an artist_id filter. This is a known bug listed in `PLAN.md`. Do not work around it by adding more workarounds — fix the root cause.
 
@@ -82,11 +82,11 @@ These are the decisions most likely to be "fixed" incorrectly by a well-meaning 
 
 **`FilterState` has two distinct filter fields: `ethnic_group` and `artist_id`.**
 - `ethnic_group` filters by `song.ethnic_group_claimed` — used by the admin `FilterBar`.
-- `artist_id` filters by membership in `song.artist_ids` — used by the demo `DemoFilterSidebar`.
+- `artist_id` filters by membership in `song.artist_ids` — used by `FilterSidebar` in the public browser.
 Do not conflate them. The original prototype incorrectly reused `ethnic_group` for artist filtering; that bug has been fixed. See `docs/DECISIONS.md` for the full history.
 
 **The muted mirror embed must stay muted.**
-`DemoNowPlaying` contains a `ReactPlayer` that is always `muted={true}`. This is intentional — actual audio comes from the hidden player in `PlayerBar`. If you add a new player component and forget `muted`, the user will hear double audio. There must be exactly one non-muted `ReactPlayer` in the app, and it lives in `PlayerBar`.
+`NowPlaying` (`components/browser/NowPlaying.tsx`) contains a `ReactPlayer` that is always `muted={true}`. This is intentional — actual audio comes from the hidden player in `PlayerBar`. If you add a new player component and forget `muted`, the user will hear double audio. There must be exactly one non-muted `ReactPlayer` in the app, and it lives in `PlayerBar`.
 
 **Do not default `lyrics.show_publicly` to `true`.**
 When generating or normalizing lyrics data, always leave `show_publicly: false` unless there is an explicit rights decision. The validator warns on public lyrics without a `lyrics_rights_status`. Gemini-enriched lyrics arrive with `show_publicly: false` and must be manually approved.

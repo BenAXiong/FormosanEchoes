@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { Song, Playlist } from './types';
 
 interface PlayerContextType {
@@ -14,6 +14,8 @@ interface PlayerContextType {
   nextTrack: () => void;
   prevTrack: () => void;
   setQueue: (queue: Song[]) => void;
+  autoAdvance: boolean;
+  setAutoAdvance: (v: boolean) => void;
   duration: number;
   setDuration: (d: number) => void;
   volume: number;
@@ -22,6 +24,8 @@ interface PlayerContextType {
   setIsPanelOpen: (open: boolean) => void;
   progress: number;
   setProgress: (p: number) => void;
+  seekTo: (seconds: number) => void;
+  registerSeekFn: (fn: (s: number) => void) => void;
   favorites: string[];
   toggleFavorite: (songId: string) => void;
   isFavorite: (songId: string) => boolean;
@@ -42,6 +46,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.7);
+  const seekFnRef = useRef<((s: number) => void) | null>(null);
+  const seekTo = useCallback((seconds: number) => seekFnRef.current?.(seconds), []);
+  const registerSeekFn = useCallback((fn: (s: number) => void) => { seekFnRef.current = fn; }, []);
+
+  const [autoAdvance, setAutoAdvance] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
 
@@ -125,9 +134,18 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const togglePlay = useCallback(() => setIsPlaying(prev => !prev), []);
 
   const nextTrack = useCallback(() => {
-    if (!playingTrack || queue.length === 0) return;
+    if (!playingTrack || queue.length === 0) {
+      setIsPlaying(false);
+      setProgress(0);
+      return;
+    }
     const currentIndex = queue.findIndex(s => s.id === playingTrack.id);
-    const nextIndex = (currentIndex + 1) % queue.length;
+    const nextIndex = currentIndex + 1;
+    if (nextIndex >= queue.length) {
+      setIsPlaying(false);
+      setProgress(0);
+      return;
+    }
     setPlayingTrackState(queue[nextIndex]);
     setIsPlaying(true);
   }, [playingTrack, queue]);
@@ -151,6 +169,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     nextTrack,
     prevTrack,
     setQueue,
+    seekTo,
+    registerSeekFn,
     isPanelOpen,
     setIsPanelOpen,
     progress,
@@ -159,6 +179,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setDuration,
     volume,
     setVolume,
+    autoAdvance,
+    setAutoAdvance,
     favorites,
     toggleFavorite,
     isFavorite,
@@ -178,10 +200,13 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     nextTrack,
     prevTrack,
     setQueue,
+    seekTo,
+    registerSeekFn,
     isPanelOpen,
     progress,
     duration,
     volume,
+    autoAdvance,
     favorites,
     toggleFavorite,
     isFavorite,

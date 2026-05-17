@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const s=require\\('./data/songs.json'\\); const r=s.find\\(x=>x.artist&&x.artist.includes\\('盧靜子'\\)\\); console.log\\(r?.artist, r?.artist_ids\\)\")",
+      "Bash(node -e \"require\\('dotenv'\\).config\\({path:'.env.local'}\\); console.log\\('SUPABASE_URL:', !!process.env.NEXT_PUBLIC_SUPABASE_URL\\); console.log\\('SERVICE_KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY\\);\")",
+      "Bash(node -e \"require\\('@supabase/supabase-js'\\)\")",
+      "Bash(npm install *)",
+      "Bash(psql --version)",
+      "Bash(where supabase *)",
+      "Bash(node -e ' *)",
+      "Bash(node --env-file=.env.local scripts/migrate-to-supabase.mjs)",
+      "Bash(npx tsc *)",
+      "Bash(npx next *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(node -e \"const p = require\\('./package.json'\\); console.log\\(p.dependencies.next\\)\")",
+      "Bash(node scripts/set-recording-types.mjs)",
+      "Bash(git mv *)",
+      "Bash(New-Item -ItemType Directory -Force app/api/search-lyrics)",
+      "Bash(Out-Null)",
+      "Bash(Remove-Item -Recurse -Force app/api/demo)"
+    ]
+  }
+}

@@ -27,12 +27,13 @@ const CIP_LANGUAGES = [
 const FIRST_N = 6;
 
 function PillList({
-  options, value, onChange, expandLabel,
+  options, value, onChange, expandLabel, allCount,
 }: {
-  options: { value: string; label: string }[];
+  options: { value: string; label: string; count: number }[];
   value: string;
   onChange: (v: string) => void;
   expandLabel: string;
+  allCount: number;
 }) {
   const [expanded, setExpanded] = useState(false);
   const visible = expanded ? options : options.slice(0, FIRST_N);
@@ -42,16 +43,22 @@ function PillList({
     <div className="flex flex-col gap-0.5">
       <button
         onClick={() => onChange('')}
-        className={`text-left px-3 py-1.5 rounded-lg text-xs transition-colors
+        className={`flex items-center px-3 py-1.5 rounded-lg text-xs transition-colors
           ${!value ? 'bg-white/10 text-white font-semibold' : 'text-stone-400 hover:text-white hover:bg-white/5'}`}
-      >All</button>
+      >
+        <span className="flex-1 text-left">All</span>
+        <span className="tabular-nums text-[10px] text-stone-600 shrink-0">{allCount}</span>
+      </button>
       {visible.map((o) => (
         <button
           key={o.value}
           onClick={() => onChange(value === o.value ? '' : o.value)}
-          className={`text-left px-3 py-1.5 rounded-lg text-xs transition-colors truncate
+          className={`flex items-center px-3 py-1.5 rounded-lg text-xs transition-colors
             ${value === o.value ? 'bg-white/10 text-white font-semibold' : 'text-stone-400 hover:text-white hover:bg-white/5'}`}
-        >{o.label}</button>
+        >
+          <span className="flex-1 text-left truncate">{o.label}</span>
+          <span className="tabular-nums text-[10px] text-stone-600 shrink-0 ml-2">{o.count}</span>
+        </button>
       ))}
       {rest > 0 && (
         <button
@@ -74,7 +81,7 @@ interface Props {
   allArtists: Artist[];
 }
 
-export default function DemoFilterSidebar({ filters, onChange, resultCount, totalCount, allSongs, allArtists }: Props) {
+export default function FilterSidebar({ filters, onChange, resultCount, totalCount, allSongs, allArtists }: Props) {
   const { playlists } = usePlayer();
   
   const updateFilters = (updates: Partial<FilterState>) => {
@@ -85,21 +92,57 @@ export default function DemoFilterSidebar({ filters, onChange, resultCount, tota
     updateFilters({ [key]: value });
 
   const active = hasActiveFilters(filters);
-  const isAll = !active;
+
+  // Count songs per language across all songs
+  const langCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const s of allSongs) {
+      if (s.language_claimed) counts[s.language_claimed] = (counts[s.language_claimed] ?? 0) + 1;
+    }
+    return counts;
+  }, [allSongs]);
+
+  const langOptions = useMemo(() =>
+    CIP_LANGUAGES
+      .filter(l => (langCounts[l.value] ?? 0) > 0)
+      .map(l => ({ ...l, count: langCounts[l.value] ?? 0 }))
+      .sort((a, b) => b.count - a.count),
+  [langCounts]);
 
   // Get artists who have at least 1 song in the current language-filtered pool
-  const artistOptions = useMemo(() => {
-    const pool = filters.language
-      ? allSongs.filter((s) => s.language_claimed === filters.language)
-      : allSongs;
-    return getArtistsWithSongs(pool, allArtists).map((a) => ({
-      value: a.id,
-      label: a.name_display,
-    }));
-  }, [allSongs, allArtists, filters.language]);
+  const artistPool = useMemo(() =>
+    filters.language ? allSongs.filter(s => s.language_claimed === filters.language) : allSongs,
+  [allSongs, filters.language]);
+
+  const artistOptions = useMemo(() =>
+    getArtistsWithSongs(artistPool, allArtists)
+      .map(a => ({
+        value: a.id,
+        label: a.name_display,
+        count: artistPool.filter(s => (s.artist_ids ?? []).includes(a.id)).length,
+      }))
+      .sort((a, b) => b.count - a.count),
+  [artistPool, allArtists]);
 
   const artistFilter = filters.artist_id;
   const setArtistFilter = (v: string) => set('artist_id', v);
+
+  const RECORDING_TYPES = ['Studio', 'Live', 'Home Recording', 'Field Recording'];
+
+  const recordingTypeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const s of allSongs) {
+      if (s.recording_type) counts[s.recording_type] = (counts[s.recording_type] ?? 0) + 1;
+    }
+    return counts;
+  }, [allSongs]);
+
+  const recordingTypeOptions = useMemo(() =>
+    RECORDING_TYPES
+      .map(v => ({ value: v, label: v, count: recordingTypeCounts[v] ?? 0 }))
+      .filter(o => o.count > 0)
+      .sort((a, b) => b.count - a.count),
+  [recordingTypeCounts]);
 
   return (
     <aside className="h-full flex flex-col bg-[#0f0f16] overflow-hidden">
@@ -155,15 +198,16 @@ export default function DemoFilterSidebar({ filters, onChange, resultCount, tota
       </div>
 
       {/* Filter lists */}
-      <div className="flex-1 py-4 overflow-y-auto demo-sidebar">
+      <div className="flex-1 py-4 overflow-y-auto thin-scrollbar">
         <div className="mb-6">
           <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-5">Languages</p>
           <div className="px-2">
             <PillList
-              options={CIP_LANGUAGES}
+              options={langOptions}
               value={filters.language}
               onChange={(v) => updateFilters({ language: v, artist_id: '' })}
               expandLabel="other languages"
+              allCount={allSongs.length}
             />
           </div>
         </div>
@@ -183,12 +227,27 @@ export default function DemoFilterSidebar({ filters, onChange, resultCount, tota
                 value={artistFilter}
                 onChange={setArtistFilter}
                 expandLabel="more artists"
+                allCount={artistPool.length}
               />
             ) : (
               <p className="text-stone-700 text-xs px-3 italic">No artists yet</p>
             )}
           </div>
         </div>
+        {recordingTypeOptions.length > 0 && (
+          <div className="mb-6">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-5">Format</p>
+            <div className="px-2">
+              <PillList
+                options={recordingTypeOptions}
+                value={filters.recording_type}
+                onChange={(v) => set('recording_type', v)}
+                expandLabel="more types"
+                allCount={allSongs.filter(s => !!s.recording_type).length}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* User profile pill — bottom */}

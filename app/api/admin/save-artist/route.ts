@@ -64,21 +64,17 @@ export async function POST(request: Request) {
   names.push({ artist_id: saved.id, name: artist.name_display, script: inferScript(artist.name_display) });
   await supabase.from('artist_names').insert(names);
 
-  // Re-link existing songs whose artist_credit matches any of this artist's aliases
-  const allAliases = names.map(n => n.name.toLowerCase().trim());
+  // Re-link existing songs whose artist_credit contains any of this artist's aliases
+  // Use ilike substring matching so "Samingad 紀曉君" links to both "Samingad" and "紀曉君"
+  const allAliases = names.map(n => n.name.trim()).filter(n => n.length >= 2);
+  const ilikeFilter = allAliases.map(a => `artist_credit.ilike.%${a}%`).join(',');
 
   const { data: songRows } = await supabase
     .from('songs')
-    .select('id, artist_credit')
-    .not('artist_credit', 'is', null);
+    .select('id')
+    .or(ilikeFilter);
 
-  const toLink: { song_id: string; artist_id: string }[] = [];
-  for (const song of songRows ?? []) {
-    const parts = splitArtistString(song.artist_credit).map((p: string) => p.toLowerCase().trim());
-    if (parts.some(p => allAliases.includes(p))) {
-      toLink.push({ song_id: song.id, artist_id: saved.id });
-    }
-  }
+  const toLink = (songRows ?? []).map(s => ({ song_id: s.id, artist_id: saved.id }));
 
   let songs_linked = 0;
   if (toLink.length > 0) {
@@ -88,5 +84,56 @@ export async function POST(request: Request) {
     if (!linkError) songs_linked = toLink.length;
   }
 
-  return NextResponse.json({ saved: { id: saved.id, name_display: artist.name_display }, songs_linked });
+  // ── Auto-create member records and link them (groups only) ──────────────────
+  let members_linked = 0;
+  if (artist.is_group && Array.isArray(artist.members) && artist.members.length > 0) {
+    for (const member of artist.members as { name_display?: string }[]) {
+      if (!member.name_display) continue;
+
+      // Check if member already exists in artist_names
+      const { data: existingName } = await supabase
+        .from('artist_names')
+        .select('artist_id')
+        .ilike('name', member.name_display.trim())
+        .limit(1)
+        .maybeSingle();
+
+      let memberId: string | null = existingName?.artist_id ?? null;
+
+      if (!memberId) {
+        // Create a stub artist record for this member
+        const { data: newMember } = await supabase
+          .from('artists')
+          .insert({
+            name_display: member.name_display,
+            ethnic_group: artist.ethnic_group ?? null,
+            language:     artist.language     ?? null,
+            is_group:     false,
+          })
+          .select('id')
+          .single();
+
+        if (newMember) {
+          memberId = newMember.id;
+          await supabase.from('artist_names').insert({
+            artist_id: memberId,
+            name:      member.name_display,
+            script:    inferScript(member.name_display),
+          });
+        }
+      }
+
+      if (memberId) {
+        await supabase
+          .from('artist_members')
+          .upsert(
+            { group_artist_id: saved.id, member_artist_id: memberId },
+            { onConflict: 'group_artist_id,member_artist_id', ignoreDuplicates: true },
+          );
+        members_linked++;
+      }
+    }
+  }
+
+  return NextResponse.json({ saved: { id: saved.id, name_display: artist.name_display }, songs_linked, members_linked });
 }

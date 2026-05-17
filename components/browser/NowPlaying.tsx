@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import type { Song } from '@/lib/types';
 import { getDisplayTitle, isYouTubeUrl, getYouTubeId, getYouTubeStartTime } from '@/lib/normalize';
-import HoverableWord from '@/components/demo/HoverableWord';
+import HoverableWord from '@/components/browser/HoverableWord';
 import { usePlayer } from '@/lib/PlayerContext';
 import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
@@ -38,26 +38,29 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   duplicate: { label: 'Duplicate', className: 'bg-stone-800 text-stone-400 border-stone-700' },
 };
 
-type LyricsMode = 'rom' | 'zh' | 'side' | 'seq';
+type LyricsMode = 'original' | 'zh' | 'side' | 'seq';
 type Tab = 'lyrics' | 'evidence';
 
 interface Props { song: Song; onClose: () => void; autoplay: boolean; }
 
-export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
-  const { 
-    playingTrack, playTrack, isPlaying, progress, setIsPanelOpen 
+export default function NowPlaying({ song, onClose, autoplay }: Props) {
+  const {
+    playingTrack, playTrack, isPlaying, pauseTrack, resumeTrack, progress, setIsPanelOpen, seekTo,
   } = usePlayer();
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<any>(null);   // eslint-disable-line @typescript-eslint/no-explicit-any
+  const lastMirrorTime = useRef(0);
   
   useEffect(() => {
-    // If the song being viewed isn't the one playing, we should start it
+    // Start this song only when the panel opens for a new song.
+    // Do NOT include playingTrack?.id in deps — reacting to external track changes
+    // would fight nextTrack() and force the old song to restart.
     if (playingTrack?.id !== song.id) {
       playTrack(song);
     }
-    
     setIsPanelOpen(true);
     return () => setIsPanelOpen(false);
-  }, [song.id, playTrack, setIsPanelOpen, playingTrack?.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [song.id]);
 
   // Sync the visual mirror with the master audio player on mount
   useEffect(() => {
@@ -67,7 +70,7 @@ export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
   }, []); // only on mount
 
   const [tab, setTab] = useState<Tab>('lyrics');
-  const [mode, setMode] = useState<LyricsMode>('rom');
+  const [mode, setMode] = useState<LyricsMode>('original');
   const [showInfo, setShowInfo] = useState(false);
 
   const title = getDisplayTitle(song);
@@ -76,7 +79,7 @@ export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
   const conf = CONFIDENCE_CONFIG[song.confidence] ?? CONFIDENCE_CONFIG.unknown;
   const status = STATUS_CONFIG[song.verification_status] ?? STATUS_CONFIG.candidate;
   const hasLyrics = !!song.lyrics?.show_publicly;
-  const romText = song.lyrics?.lyrics_romanized ?? '';
+  const romText = song.lyrics?.lyrics_original ?? '';
   const zhText = song.lyrics?.lyrics_translation_zh ?? '';
   const romLines = romText.split('\n');
   const zhLines = zhText.split('\n');
@@ -97,10 +100,21 @@ export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
               ref={playerRef}
               url={song.youtube_url || ''}
               playing={isPlaying}
-              muted={true} // SILENT MIRROR - Audio comes from the PlayerBar
+              muted={true}
               width="100%"
               height="100%"
               controls={true}
+              onSeek={(seconds) => seekTo(seconds)}
+              onProgress={({ playedSeconds }) => {
+                const diff = Math.abs(playedSeconds - lastMirrorTime.current);
+                // Jump of >2s not explained by normal playback → user seeked in embed
+                if (diff > 2 && Math.abs(playedSeconds - progress) > 2) {
+                  seekTo(playedSeconds);
+                }
+                lastMirrorTime.current = playedSeconds;
+              }}
+              onPause={() => pauseTrack()}
+              onPlay={() => resumeTrack()}
               config={{
                 youtube: {
                   playerVars: { autoplay: 1, rel: 0 }
@@ -174,14 +188,14 @@ export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-y-auto demo-sidebar px-4 py-3">
+      <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3">
         {tab === 'lyrics' && (
           <>
             {/* Mode toggles */}
             {hasLyrics && (
               <div className="flex gap-1 mb-3">
                 {([
-                  { id: 'rom', label: 'Rom' },
+                  { id: 'original', label: 'Original' },
                   { id: 'zh', label: '中文' },
                   { id: 'side', label: '⊞ Side' },
                   { id: 'seq', label: '≡ Seq' },
@@ -202,7 +216,7 @@ export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
                   ? 'Lyrics are not available for public display.'
                   : 'No lyrics recorded for this song.'}
               </p>
-            ) : mode === 'rom' ? (
+            ) : mode === 'original' ? (
               romText
                 ? <RomLyrics text={romText} language={song.language_claimed} />
                 : <p className="text-stone-600 italic text-sm">No romanization available.</p>
@@ -213,7 +227,7 @@ export default function DemoNowPlaying({ song, onClose, autoplay }: Props) {
             ) : mode === 'side' ? (
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 mb-1.5">Rom</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 mb-1.5">Original</p>
                   {romText ? <RomLyrics text={romText} language={song.language_claimed} /> : <p className="text-stone-500 text-xs">—</p>}
                 </div>
                 <div>

@@ -1,6 +1,26 @@
-import type { Song } from '@/lib/types';
+'use client';
+import type { Song, Artist } from '@/lib/types';
 import { getYouTubeId, isYouTubeUrl } from '@/lib/normalize';
 import { usePlayer } from '@/lib/PlayerContext';
+
+const CJK = /[一-鿿]/;
+
+function resolveArtistName(song: Song, artistMap: Map<string, Artist> | undefined, showZh: boolean): string {
+  if (artistMap && song.artist_ids?.length) {
+    const names = song.artist_ids
+      .map(id => {
+        const a = artistMap.get(id);
+        if (!a) return null;
+        // Prefer name_display when romanized; fall back to names_rom[0] when display is Chinese
+        const rom = CJK.test(a.name_display) ? (a.names_rom[0] ?? a.name_display) : a.name_display;
+        const zh  = a.names_zh[0];
+        return showZh && zh ? `${rom} (${zh})` : rom;
+      })
+      .filter((n): n is string => !!n);
+    if (names.length) return names.join(' · ');
+  }
+  return song.artist || 'Unknown artist';
+}
 
 const LANG_GRADIENT: Record<string, string> = {
   Amis: 'from-amber-700 via-rose-800 to-red-900',
@@ -17,18 +37,49 @@ function getLangGradient(lang?: string) {
   return LANG_GRADIENT[lang] ?? 'from-stone-600 via-stone-700 to-stone-800';
 }
 
-const GENRE_DOT: Record<string, string> = {
-  'Traditional': 'bg-blue-400',
-  'Traditional Choral': 'bg-blue-300',
-  'Modern Folk': 'bg-amber-400',
-  'Contemporary Folk': 'bg-amber-400',
-  'Contemporary Indigenous Folk-Pop': 'bg-fuchsia-400',
-  'Indigenous Gospel / Folk': 'bg-rose-400',
-};
-
-function getGenreDot(genre?: string | null) {
-  if (!genre) return 'bg-stone-600';
-  return GENRE_DOT[genre] || 'bg-stone-400';
+function GenreIcon({ genre, className }: Readonly<{ genre?: string | null; className?: string }>) {
+  const cls = `inline-block shrink-0 ${className ?? 'w-3 h-3 text-stone-400'}`;
+  switch (genre) {
+    case 'Traditional':
+      // Solid upward triangle — ancient, timeless
+      return <svg className={cls} viewBox="0 0 12 12" fill="currentColor" aria-hidden><polygon points="6,1 11.5,11 0.5,11"/></svg>;
+    case 'Traditional Choral':
+      // Three vertical bars — choir standing together
+      return <svg className={cls} viewBox="0 0 12 12" fill="currentColor" aria-hidden>
+        <rect x="0.5" y="2" width="2.5" height="8" rx="1.25"/>
+        <rect x="4.75" y="2" width="2.5" height="8" rx="1.25"/>
+        <rect x="9" y="2" width="2.5" height="8" rx="1.25"/>
+      </svg>;
+    case 'Modern Folk':
+      // Single quarter note
+      return <svg className={cls} viewBox="0 0 12 12" fill="currentColor" aria-hidden>
+        <circle cx="3.5" cy="9.5" r="2.5"/>
+        <rect x="5.7" y="0.5" width="1.5" height="9.3"/>
+      </svg>;
+    case 'Contemporary Folk':
+      // Two beamed eighth notes
+      return <svg className={cls} viewBox="0 0 12 12" fill="currentColor" aria-hidden>
+        <circle cx="2.5" cy="9.5" r="2"/>
+        <circle cx="8.5" cy="8.5" r="2"/>
+        <rect x="4.2" y="1.5" width="1.2" height="8.2"/>
+        <rect x="10.1" y="1.5" width="1.2" height="7.2"/>
+        <rect x="4.2" y="1.5" width="7.1" height="1.5"/>
+      </svg>;
+    case 'Contemporary Indigenous Folk-Pop':
+      // Four-pointed star / sparkle
+      return <svg className={cls} viewBox="0 0 12 12" fill="currentColor" aria-hidden>
+        <path d="M6 0 L7.1 4.9 L12 6 L7.1 7.1 L6 12 L4.9 7.1 L0 6 L4.9 4.9 Z"/>
+      </svg>;
+    case 'Indigenous Gospel / Folk':
+      // Cross
+      return <svg className={cls} viewBox="0 0 12 12" fill="currentColor" aria-hidden>
+        <rect x="4.5" y="0" width="3" height="12" rx="1.5"/>
+        <rect x="0" y="3.5" width="12" height="3" rx="1.5"/>
+      </svg>;
+    default:
+      // Small filled circle for unknown
+      return <svg className={cls} viewBox="0 0 12 12" fill="currentColor" aria-hidden><circle cx="6" cy="6" r="3"/></svg>;
+  }
 }
 
 interface Props {
@@ -37,14 +88,17 @@ interface Props {
   isPlaying?: boolean;
   onSelect: (song: Song) => void;
   compact?: boolean;
+  artistMap?: Map<string, Artist>;
+  showSongZh?: boolean;
+  showArtistZh?: boolean;
 }
 
-export default function DemoSongCard({ song, isSelected, isPlaying, onSelect, compact = false }: Props) {
+export default function SongCard({ song, isSelected, isPlaying, onSelect, compact = false, artistMap, showSongZh = true, showArtistZh = false }: Props) {
   const { isPlaying: globalIsPlaying, togglePlay, toggleFavorite, isFavorite } = usePlayer();
   const gradient = getLangGradient(song.language_claimed);
   const title = song.title_original ?? song.title_romanized ?? song.title_chinese ?? '(Untitled)';
-  const zhTitle = song.title_chinese ? `(${song.title_chinese})` : '()';
-  const artist = song.artist || 'Unknown artist';
+  const zhTitle = song.title_chinese || ' ';
+  const artist = resolveArtistName(song, artistMap, showArtistZh);
   const ytId = isYouTubeUrl(song.youtube_url) ? getYouTubeId(song.youtube_url!) : null;
   const thumbUrl = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : null;
 
@@ -52,7 +106,7 @@ export default function DemoSongCard({ song, isSelected, isPlaying, onSelect, co
   if (compact) {
     return (
       <div
-        id={`demo-card-${song.id}`}
+        id={`song-card-${song.id}`}
         onClick={(e) => {
           if (isPlaying) {
             togglePlay();
@@ -120,7 +174,7 @@ export default function DemoSongCard({ song, isSelected, isPlaying, onSelect, co
           {song.lyrics?.show_publicly && (
             <span className="text-emerald-500 text-[10px]" title="Has lyrics">♪</span>
           )}
-          <span className={`w-1.5 h-1.5 rounded-full ${getGenreDot(song.genre)}`} title={song.genre || 'Unknown type'} />
+          <GenreIcon genre={song.genre} className="w-3 h-3 text-stone-400 shrink-0" />
         </div>
       </div>
     );
@@ -129,7 +183,7 @@ export default function DemoSongCard({ song, isSelected, isPlaying, onSelect, co
   // ── Default card layout ──────────────────────────────────────────────
   return (
     <div
-      id={`demo-card-${song.id}`}
+      id={`song-card-${song.id}`}
       onClick={(e) => {
         if (isPlaying) {
           togglePlay();
@@ -200,11 +254,11 @@ export default function DemoSongCard({ song, isSelected, isPlaying, onSelect, co
       <div className="bg-[#1a1a24] group-hover:bg-[#1e1e2a] transition-colors px-3 py-2.5">
         <div className="flex items-center gap-2">
           <p className={`text-sm font-semibold truncate leading-tight ${isPlaying ? 'text-emerald-500' : 'text-white'}`}>{title}</p>
-          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${getGenreDot(song.genre)}`} title={`Type: ${song.genre || 'Unknown'}`} />
+          <GenreIcon genre={song.genre} className="w-3 h-3 text-stone-400 shrink-0" />
         </div>
         <div className="pl-0">
-          <p className="text-stone-400 text-xs truncate mt-0.5">{zhTitle}</p>
-          <p className="text-stone-300 text-xs font-medium truncate mt-1.5">{artist}</p>
+          {showSongZh && <p className="text-stone-400 text-xs truncate mt-0.5">{zhTitle}</p>}
+          <p className={`text-stone-300 text-xs font-medium truncate ${showSongZh ? 'mt-1.5' : 'mt-0.5'}`}>{artist}</p>
         </div>
       </div>
     </div>

@@ -1,34 +1,74 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 
-type UnlinkedItem = { song_artist_string: string; suggested_action: string };
+function ElapsedTimer({ className = '' }: { className?: string }) {
+  const [secs, setSecs] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setSecs(s => s + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+  return <span className={className}>{secs}s</span>;
+}
+
+type UnlinkedItem = { song_artist_string: string; song_title: string; yt_url: string; suggested_action: string };
+
+type ExistingMatch = { id: string; name_display: string; matched_on: string };
 
 type BatchResult = {
   string: string;
+  yt_url?: string;
+  song_title?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Record<string, any> | null;
-  status: 'pending' | 'researching' | 'done' | 'error' | 'saved' | 'skipped';
+  status: 'pending' | 'researching' | 'done' | 'error' | 'saved' | 'skipped' | 'existing';
   error?: string;
+  sources?: string[];
+  existingMatches?: ExistingMatch[];
 };
 
 // ── Compact batch result card ─────────────────────────────────────────────────
+
+function SourceChips({ sources }: { sources?: string[] }) {
+  if (!sources?.length) return null;
+  return (
+    <div className="flex flex-wrap gap-1 mt-1">
+      {sources.slice(0, 4).map((url, i) => {
+        let host = url;
+        try { host = new URL(url).hostname.replace(/^www\./, ''); } catch { /* keep raw */ }
+        return (
+          <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+            className="px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-stone-500 hover:text-stone-300 text-[9px] transition-colors truncate max-w-30">
+            {host}
+          </a>
+        );
+      })}
+    </div>
+  );
+}
 
 function BatchCard({
   result,
   onSave,
   onSkip,
   onEdit,
+  onResearchAnyway,
 }: {
   result: BatchResult;
   onSave: () => void;
   onSkip: () => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onEdit: (data: Record<string, any>) => void;
+  onResearchAnyway: () => void;
 }) {
-  const { data, status, string: str } = result;
+  const { data, status, string: str, sources, existingMatches } = result;
 
   if (status === 'pending')     return <div className="text-stone-700 text-[10px] px-3 py-2 italic">Queued: {str}</div>;
-  if (status === 'researching') return <div className="text-violet-400 text-[10px] px-3 py-2 italic animate-pulse">Researching "{str}"…</div>;
+  if (status === 'researching') return (
+    <div className="flex items-center gap-2 px-3 py-2">
+      <span className="text-violet-400 text-[10px] italic animate-pulse">Researching "{str}"…</span>
+      <ElapsedTimer className="text-stone-600 text-[10px] tabular-nums" />
+    </div>
+  );
   if (status === 'saved')       return <div className="text-emerald-500 text-[10px] px-3 py-2">✓ Saved: {data?.name_display ?? str}</div>;
   if (status === 'skipped')     return null;
   if (status === 'error')       return (
@@ -37,14 +77,35 @@ function BatchCard({
       <button onClick={onSkip} className="text-stone-600 text-[10px] hover:text-stone-400 transition-colors">Dismiss</button>
     </div>
   );
+
+  if (status === 'existing' && existingMatches?.length) {
+    return (
+      <div className="px-3 py-2.5 hover:bg-white/2 transition-colors">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-amber-400 text-[10px] font-semibold truncate">Already in DB: {existingMatches[0].name_display}</p>
+            <p className="text-stone-600 text-[10px] truncate">matched on "{existingMatches[0].matched_on}"
+              {existingMatches.length > 1 && ` +${existingMatches.length - 1} more`}
+            </p>
+          </div>
+          <div className="flex gap-1 shrink-0">
+            <button onClick={onResearchAnyway} className="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-stone-400 text-[10px] transition-colors">Research anyway</button>
+            <button onClick={onSkip}           className="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-stone-500 text-[10px] transition-colors">Skip</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!data) return null;
 
   return (
-    <div className="flex items-start justify-between gap-3 px-3 py-2.5 hover:bg-white/[0.02] transition-colors">
-      <div className="min-w-0">
+    <div className="flex items-start justify-between gap-3 px-3 py-2.5 hover:bg-white/2 transition-colors">
+      <div className="min-w-0 flex-1">
         <p className="text-white text-xs font-semibold truncate">{data.name_display}</p>
         <p className="text-stone-500 text-[10px]">{[data.ethnic_group, data.language].filter(Boolean).join(' · ') || 'Unknown group/language'}</p>
         {data.bio_en && <p className="text-stone-600 text-[10px] line-clamp-1 mt-0.5">{data.bio_en}</p>}
+        <SourceChips sources={sources} />
       </div>
       <div className="flex gap-1 shrink-0">
         <button onClick={() => onEdit(data)} className="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-stone-400 text-[10px] transition-colors">Edit</button>
@@ -96,19 +157,26 @@ export default function ArtistAuditPanel() {
 
   // ── Single research ─────────────────────────────────────────────────────────
 
-  async function handleResearch(name: string) {
+  async function handleResearch(item: UnlinkedItem, forceGemini = false) {
+    const name = item.song_artist_string;
     setResearching(name);
     setStatus(`Researching "${name}"…`);
     try {
       const res  = await fetch('/api/admin/research-artist', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ artist_name: name }),
+        body: JSON.stringify({ artist_name: name, force: forceGemini, yt_url: item.yt_url, song_title: item.song_title }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Research failed');
-      setEditArtist(data.research);
-      setBatchResults([]);
-      setStatus('');
+
+      if (data.existing_matches?.length) {
+        const names = data.existing_matches.map((m: ExistingMatch) => m.name_display).join(', ');
+        setStatus(`Already in DB: ${names} — run Auto-link or Research anyway via batch mode`);
+      } else {
+        setEditArtist(data.research);
+        setBatchResults([]);
+        setStatus('');
+      }
     } catch (err: unknown) {
       setStatus(`Error: ${err instanceof Error ? err.message : 'Research failed'}`);
     } finally { setResearching(null); }
@@ -126,7 +194,7 @@ export default function ArtistAuditPanel() {
     setStatus('');
 
     const initial: BatchResult[] = candidates.map(i => ({
-      string: i.song_artist_string, data: null, status: 'pending',
+      string: i.song_artist_string, yt_url: i.yt_url, song_title: i.song_title, data: null, status: 'pending',
     }));
     setBatchResults(initial);
 
@@ -138,11 +206,20 @@ export default function ArtistAuditPanel() {
       try {
         const res  = await fetch('/api/admin/research-artist', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ artist_name: initial[i].string }),
+          body: JSON.stringify({ artist_name: initial[i].string, yt_url: initial[i].yt_url, song_title: initial[i].song_title }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error ?? 'Research failed');
-        setBatchResults(prev => prev.map((r, idx) => idx === i ? { ...r, data: data.research, status: 'done' } : r));
+
+        if (data.existing_matches?.length) {
+          setBatchResults(prev => prev.map((r, idx) => idx === i
+            ? { ...r, status: 'existing', existingMatches: data.existing_matches }
+            : r));
+        } else {
+          setBatchResults(prev => prev.map((r, idx) => idx === i
+            ? { ...r, data: data.research, sources: data.sources ?? [], status: 'done' }
+            : r));
+        }
       } catch (err: unknown) {
         setBatchResults(prev => prev.map((r, idx) => idx === i ? { ...r, status: 'error', error: err instanceof Error ? err.message : 'Failed' } : r));
       }
@@ -171,13 +248,14 @@ export default function ArtistAuditPanel() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Save failed');
 
-      const linked = data.songs_linked > 0 ? ` · ${data.songs_linked} song(s) linked` : '';
+      const linked   = data.songs_linked   > 0 ? ` · ${data.songs_linked} song(s) linked`     : '';
+      const members  = data.members_linked  > 0 ? ` · ${data.members_linked} member(s) created` : '';
 
       if (batchIdx !== undefined) {
         setBatchResults(prev => prev.map((r, i) => i === batchIdx ? { ...r, status: 'saved' } : r));
-        setStatus(`✓ "${artistData.name_display}" saved${linked}`);
+        setStatus(`✓ "${artistData.name_display}" saved${linked}${members}`);
       } else {
-        setStatus(`✓ "${artistData.name_display}" saved${linked}`);
+        setStatus(`✓ "${artistData.name_display}" saved${linked}${members}`);
         setEditArtist(null);
       }
       fetchUnlinked();
@@ -200,9 +278,10 @@ export default function ArtistAuditPanel() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
-  const doneCount    = batchResults.filter(r => r.status === 'done').length;
-  const savedCount   = batchResults.filter(r => r.status === 'saved').length;
-  const hasBatch     = batchResults.length > 0;
+  const doneCount     = batchResults.filter(r => r.status === 'done').length;
+  const savedCount    = batchResults.filter(r => r.status === 'saved').length;
+  const existingCount = batchResults.filter(r => r.status === 'existing').length;
+  const hasBatch      = batchResults.length > 0;
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl">
@@ -241,14 +320,17 @@ export default function ArtistAuditPanel() {
 
       {/* Status */}
       {status && (
-        <div className={`text-xs px-3 py-2 rounded-lg border ${
+        <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg border ${
           status.startsWith('✓')
             ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+            : status.startsWith('Already in DB')
+            ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
             : status.startsWith('Error')
             ? 'bg-red-500/10 border-red-500/30 text-red-400'
             : 'bg-blue-500/10 border-blue-500/30 text-blue-300'
         }`}>
-          {status}
+          <span>{status}</span>
+          {researching && <ElapsedTimer className="text-current opacity-50 tabular-nums shrink-0" />}
         </div>
       )}
 
@@ -264,13 +346,13 @@ export default function ArtistAuditPanel() {
           ) : (
             <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden divide-y divide-white/5">
               {items.map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-3 hover:bg-white/[0.02] transition-colors">
+                <div key={i} className="flex items-center justify-between p-3 hover:bg-white/2 transition-colors">
                   <div className="min-w-0 pr-3">
                     <p className="text-white text-xs font-medium truncate">{item.song_artist_string}</p>
                     <p className="text-stone-600 text-[10px] truncate mt-0.5">{item.suggested_action}</p>
                   </div>
                   <button
-                    onClick={() => { setBatchResults([]); handleResearch(item.song_artist_string); }}
+                    onClick={() => { setBatchResults([]); handleResearch(item); }}
                     disabled={researching !== null || batchRunning}
                     className="px-3 py-1 rounded bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 text-[10px] font-bold transition-colors disabled:opacity-40 shrink-0"
                   >
@@ -290,7 +372,7 @@ export default function ArtistAuditPanel() {
                 <h3 className="text-stone-400 text-[10px] font-bold uppercase tracking-widest">
                   Batch Results
                   <span className="ml-2 normal-case font-normal text-stone-600">
-                    {savedCount} saved · {doneCount} ready
+                    {savedCount} saved · {doneCount} ready{existingCount > 0 ? ` · ${existingCount} in DB` : ''}
                     {batchRunning && ` · researching…`}
                   </span>
                 </h3>
@@ -311,6 +393,24 @@ export default function ArtistAuditPanel() {
                     onSave={() => result.data && saveArtist(result.data, i)}
                     onSkip={() => setBatchResults(prev => prev.map((r, idx) => idx === i ? { ...r, status: 'skipped' } : r))}
                     onEdit={data => { setEditArtist(data); setBatchResults([]); }}
+                    onResearchAnyway={async () => {
+                      setBatchResults(prev => prev.map((r, idx) => idx === i ? { ...r, status: 'researching', existingMatches: undefined } : r));
+                      try {
+                        const res = await fetch('/api/admin/research-artist', {
+                          method: 'POST', headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ artist_name: result.string, force: true, yt_url: result.yt_url, song_title: result.song_title }),
+                        });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error ?? 'Research failed');
+                        setBatchResults(prev => prev.map((r, idx) => idx === i
+                          ? { ...r, data: data.research, sources: data.sources ?? [], status: 'done' }
+                          : r));
+                      } catch (err: unknown) {
+                        setBatchResults(prev => prev.map((r, idx) => idx === i
+                          ? { ...r, status: 'error', error: err instanceof Error ? err.message : 'Failed' }
+                          : r));
+                      }
+                    }}
                   />
                 ))}
               </div>

@@ -36,11 +36,15 @@ export async function POST(request: Request) {
 
   const supabase = createServerClient();
 
-  // Duplicate check
+  // Duplicate check — match by video ID so &t=2s variants are caught
+  const videoId = getYouTubeId(String(song.youtube_url));
+  if (!videoId) {
+    return NextResponse.json({ error: 'Could not extract YouTube video ID from URL' }, { status: 400 });
+  }
   const { data: existing } = await supabase
     .from('songs')
     .select('id')
-    .eq('yt_url', song.youtube_url)
+    .eq('yt_video_id', videoId)
     .maybeSingle();
   if (existing) {
     return NextResponse.json({ error: 'Duplicate YouTube URL' }, { status: 409 });
@@ -83,6 +87,8 @@ export async function POST(request: Request) {
       region:              song.region               ?? null,
       location:            song.location_claimed     ?? null,
       genre:               song.genre                ?? null,
+      recording_type:      song.recording_type       ?? null,
+      description:         song.description          ?? null,
       notes,
       verification_status: song.verification_status  ?? 'candidate',
     })

@@ -42,3 +42,5 @@ next-env.d.ts
 
 # internal notes & research docs
 /notes/
+tdl.txt
+notes.txt

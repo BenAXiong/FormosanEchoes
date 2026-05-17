@@ -44,11 +44,21 @@ export async function POST() {
   for (const song of songs ?? [] as any[]) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const existingIds = new Set<string>((song.song_artists as any[]).map((sa: any) => sa.artist_id));
+    const creditLower = song.artist_credit.toLowerCase().trim();
     const parts = splitArtistString(song.artist_credit);
 
+    // Pass 1: exact match on split parts (fast)
     for (const part of parts) {
       const artistId = nameMap.get(part.toLowerCase().trim());
       if (artistId && !existingIds.has(artistId)) {
+        toLink.push({ song_id: song.id, artist_id: artistId });
+        existingIds.add(artistId);
+      }
+    }
+
+    // Pass 2: substring match on full credit string (handles "Samingad 紀曉君" style combined credits)
+    for (const [alias, artistId] of nameMap) {
+      if (alias.length >= 2 && !existingIds.has(artistId) && creditLower.includes(alias)) {
         toLink.push({ song_id: song.id, artist_id: artistId });
         existingIds.add(artistId);
       }

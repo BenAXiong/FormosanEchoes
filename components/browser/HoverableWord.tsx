@@ -135,7 +135,7 @@ export default function HoverableWord({ word, language }: { word: string; langua
           ) : !entries || entries.length === 0 ? (
             <span className="block px-3 py-2.5 text-stone-600 italic">Not found</span>
           ) : (
-            <span className="block max-h-44 overflow-y-auto demo-sidebar divide-y divide-white/5">
+            <span className="block max-h-44 overflow-y-auto thin-scrollbar divide-y divide-white/5">
               {entries.slice(0, 6).map((e, i) => (
                 <span key={i} className="flex items-baseline justify-between gap-4 px-3 py-1.5 block">
                   <span className="text-emerald-300 font-medium shrink-0">{e.zh}</span>

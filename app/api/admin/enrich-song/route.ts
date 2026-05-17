@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+export const maxDuration = 120; // Gemini + search grounding can take 30–60 s
+
 const GEMINI_API_KEY   = process.env.GEMINI_API_KEY ?? '';
 const YOUTUBE_API_KEY  = process.env.YOUTUBE_API_KEY ?? ''; // optional — enables description + comments
 
@@ -60,26 +62,29 @@ Check the provided YouTube context (description/comments) carefully as they ofte
 Rules for your JSON output:
 - Use null (not empty string) when a field is unknown.
 - "title_original": The song title in the original indigenous language (if it has one), else the most official title.
+- "title_chinese": Chinese title if known.
 - "artist": The primary artist(s). Use indigenous names where possible (e.g., "Samingad", "Sangpuy").
 - "language_claimed": MUST be one of the 16 groups above. If it is a mix, pick the primary one.
-- "lyrics_original": Provide the FULL lyrics in the indigenous language. 
-- "lyrics_romanized": Provide the Romanized/Latin-script version of the lyrics. This is CRITICAL for our language learning app.
+- "ethnic_group_claimed": Same 16-group list — the ethnic group associated with the song.
+- "genre": One of: Traditional, Traditional Choral, Modern Folk, Contemporary Folk, Contemporary Indigenous Folk-Pop, Indigenous Gospel / Folk.
+- "recording_type": One of: Studio, Live, Home Recording, Field Recording.
+- "lyrics_original": Provide the FULL lyrics in the indigenous language (romanized script if applicable).
 - "lyrics_translation_zh": Provide a Traditional Chinese translation.
+- "lyrics_translation_en": Provide an English translation.
 - "notes": Mention where you found the lyrics or any ambiguities about the dialect.
 
 Example Output:
 {
   "title_original": "Senasenai",
-  "title_romanized": "Senasenai",
   "title_chinese": "大家來唱歌",
   "artist": "Samingad",
   "language_claimed": "Puyuma",
   "ethnic_group_claimed": "Puyuma",
   "genre": "Contemporary Indigenous Folk-Pop",
+  "recording_type": "Studio",
   "year": "1999",
   "album_or_source": "Voice of Puyuma",
   "lyrics_original": "senasenai kema lra... (full lyrics)",
-  "lyrics_romanized": "senasenai kema lra... (full romanization)",
   "lyrics_translation_zh": "大家一起來唱歌... (full translation)",
   "lyrics_translation_en": "Everyone come and sing... (full translation)",
   "lyrics_source": "Voice of Puyuma Album Booklet",
@@ -120,10 +125,10 @@ export async function POST(request: Request) {
 
   try {
     const genai = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genai.getGenerativeModel({
-      model: 'gemini-3.1-pro',
-      tools: [{ googleSearch: {} } as any],
-    });
+    const model = genai.getGenerativeModel(
+      { model: 'gemini-3.1-pro-preview', tools: [{ googleSearch: {} } as any] },  // eslint-disable-line @typescript-eslint/no-explicit-any
+      { timeout: 110_000 },
+    );
 
     const result = await model.generateContent([
       { text: SYSTEM_PROMPT },
@@ -172,6 +177,7 @@ export async function POST(request: Request) {
       }
       return NextResponse.json({ error: `Gemini API error: ${e.status} ${e.statusText}` }, { status: 502 });
     }
-    return NextResponse.json({ error: 'Gemini API error' }, { status: 500 });
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Gemini API error: ${msg}` }, { status: 500 });
   }
 }

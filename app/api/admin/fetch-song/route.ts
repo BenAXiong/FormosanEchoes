@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
+import { createServerClient } from '@/lib/supabase';
 
 /**
  * GET /api/admin/fetch-song?url=<youtube_url>
  * Fetches YouTube oEmbed metadata and returns a draft Song object.
+ * Also checks for duplicates by yt_video_id and returns duplicate:true if found.
  * No API key required — uses the public YouTube oEmbed endpoint.
  */
 export async function GET(request: Request) {
@@ -21,6 +23,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Not a recognised YouTube URL' }, { status: 400 });
   }
   const videoId = ytMatch[1];
+
+  // Duplicate check before fetching metadata
+  const supabase = createServerClient();
+  const { data: existing } = await supabase
+    .from('songs')
+    .select('id, title_original, artist_credit')
+    .eq('yt_video_id', videoId)
+    .maybeSingle();
 
   try {
     // YouTube oEmbed — free, no API key
@@ -59,7 +69,7 @@ export async function GET(request: Request) {
       _oembed: { title, channel, videoId },
     };
 
-    return NextResponse.json({ draft });
+    return NextResponse.json({ draft, duplicate: existing ?? null });
   } catch (err) {
     console.error('[fetch-song]', err);
     return NextResponse.json({ error: 'Failed to fetch YouTube metadata' }, { status: 500 });

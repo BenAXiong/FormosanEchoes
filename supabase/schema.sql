@@ -83,6 +83,18 @@ CREATE INDEX idx_songs_fts ON songs USING GIN (
   )
 );
 
+-- ── Artist ↔ Member ──────────────────────────────────────────
+-- Links group artists to their individual member artists.
+-- Enables "filter by member → also shows group songs" in the public demo.
+
+CREATE TABLE artist_members (
+  group_artist_id  UUID NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+  member_artist_id UUID NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+  PRIMARY KEY (group_artist_id, member_artist_id)
+);
+
+CREATE INDEX idx_artist_members_member ON artist_members (member_artist_id);
+
 -- ── Song ↔ Artist ─────────────────────────────────────────────
 
 CREATE TABLE song_artists (

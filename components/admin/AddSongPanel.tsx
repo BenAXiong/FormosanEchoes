@@ -7,17 +7,17 @@ type DraftSong = Record<string, unknown> & {
   id: string;
   youtube_url: string;
   title_original?: string;
-  title_romanized?: string | null;
   title_chinese?: string | null;
   artist?: string;
   language_claimed?: string | null;
   ethnic_group_claimed?: string | null;
   genre?: string | null;
+  recording_type?: string | null;
   year?: string | null;
   album_or_source?: string | null;
+  description?: string | null;
   tags?: string[];
   lyrics_original?: string | null;
-  lyrics_romanized?: string | null;
   lyrics_translation_zh?: string | null;
   lyrics_translation_en?: string | null;
   lyrics_source?: string | null;
@@ -35,6 +35,8 @@ const GENRES = [
   'Traditional', 'Traditional Choral', 'Modern Folk', 'Contemporary Folk',
   'Contemporary Indigenous Folk-Pop', 'Indigenous Gospel / Folk',
 ];
+
+const RECORDING_TYPES = ['Studio', 'Live', 'Home Recording', 'Field Recording'];
 
 // ─── Field component ──────────────────────────────────────────────────────────
 
@@ -103,6 +105,7 @@ export default function AddSongPanel() {
   const [status, setStatus] = useState<'idle' | 'fetching' | 'enriching' | 'saving' | 'saved' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [sources, setSources] = useState<string[]>([]);
+  const [duplicate, setDuplicate] = useState<{ id: string; title_original: string; artist_credit: string } | null>(null);
 
   // Generic draft field updater
   const setField = (key: keyof DraftSong, value: unknown) =>
@@ -127,11 +130,13 @@ export default function AddSongPanel() {
     if (!url.trim()) return;
     setStatus('fetching');
     setMessage('');
+    setDuplicate(null);
     try {
       const res = await fetch(`/api/admin/fetch-song?url=${encodeURIComponent(url.trim())}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Fetch failed');
       setDraft(data.draft);
+      setDuplicate(data.duplicate ?? null);
       setStatus('idle');
     } catch (err: unknown) {
       setStatus('error');
@@ -164,21 +169,19 @@ export default function AddSongPanel() {
         if (!d) return d;
         return {
           ...d,
-          title_original:           e.title_original         ?? d.title_original,
-          title_romanized:          e.title_romanized        ?? d.title_romanized,
-          title_chinese:            e.title_chinese          ?? d.title_chinese,
-          artist:                   e.artist                 ?? d.artist,
-          language_claimed:         e.language_claimed       ?? d.language_claimed,
-          ethnic_group_claimed:     e.ethnic_group_claimed   ?? d.ethnic_group_claimed,
-          genre:                    e.genre                  ?? d.genre,
-          year:                     e.year                   ?? d.year,
-          album_or_source:          e.album_or_source        ?? d.album_or_source,
-          lyrics_original:          e.lyrics_original        ?? d.lyrics_original,
-          lyrics_romanized:         e.lyrics_romanized       ?? d.lyrics_romanized,
-          lyrics_translation_zh:    e.lyrics_translation_zh  ?? d.lyrics_translation_zh,
-          lyrics_translation_en:    e.lyrics_translation_en  ?? d.lyrics_translation_en,
-          lyrics_source:            e.lyrics_source          ?? d.lyrics_source,
-          notes:                    e.notes                  ?? d.notes,
+          title_original:        e.title_original        ?? d.title_original,
+          title_chinese:         e.title_chinese         ?? d.title_chinese,
+          artist:                e.artist                ?? d.artist,
+          language_claimed:      e.language_claimed      ?? d.language_claimed,
+          ethnic_group_claimed:  e.ethnic_group_claimed  ?? d.ethnic_group_claimed,
+          genre:                 e.genre                 ?? d.genre,
+          year:                  e.year                  ?? d.year,
+          album_or_source:       e.album_or_source ?? e.album ?? d.album_or_source,
+          lyrics_original:       e.lyrics_original       ?? d.lyrics_original,
+          lyrics_translation_zh: e.lyrics_translation_zh ?? d.lyrics_translation_zh,
+          lyrics_translation_en: e.lyrics_translation_en ?? d.lyrics_translation_en,
+          lyrics_source:         e.lyrics_source         ?? d.lyrics_source,
+          notes:                 e.notes                 ?? d.notes,
         };
       });
       setStatus('idle');
@@ -200,21 +203,19 @@ export default function AddSongPanel() {
       const payload = {
         ...draft,
         lyrics: hasLyrics ? {
-          song_id: draft.id,
-          lyrics_original:          draft.lyrics_original        ?? null,
-          lyrics_romanized:         draft.lyrics_romanized       ?? null,
-          lyrics_translation_zh:    draft.lyrics_translation_zh  ?? null,
-          lyrics_translation_en:    draft.lyrics_translation_en  ?? null,
-          lyrics_source:            draft.lyrics_source          ?? null,
-          has_permission:           false,
-          show_publicly:            false,
+          song_id:               draft.id,
+          lyrics_original:       draft.lyrics_original       ?? null,
+          lyrics_translation_zh: draft.lyrics_translation_zh ?? null,
+          lyrics_translation_en: draft.lyrics_translation_en ?? null,
+          lyrics_source:         draft.lyrics_source         ?? null,
+          has_permission:        false,
+          show_publicly:         false,
         } : null,
         // Clean up flat lyrics fields before saving
-        lyrics_original: undefined,
-        lyrics_romanized: undefined,
+        lyrics_original:       undefined,
         lyrics_translation_zh: undefined,
         lyrics_translation_en: undefined,
-        lyrics_source: undefined,
+        lyrics_source:         undefined,
       };
 
       const res = await fetch('/api/admin/save-song', {
@@ -266,6 +267,14 @@ export default function AddSongPanel() {
         </button>
       </div>
 
+      {/* Duplicate warning */}
+      {duplicate && (
+        <div className="text-xs px-3 py-2 rounded-lg border bg-amber-500/10 border-amber-500/30 text-amber-300">
+          Already in DB — <span className="font-semibold">{duplicate.title_original}</span>
+          {duplicate.artist_credit ? ` · ${duplicate.artist_credit}` : ''}. Use the Songs Audit tab to edit metadata and lyrics.
+        </div>
+      )}
+
       {/* Status message */}
       {message && (
         <div className={`text-xs px-3 py-2 rounded-lg border ${
@@ -306,7 +315,7 @@ export default function AddSongPanel() {
           {/* Enrich button + sources */}
           <button
             onClick={handleEnrich}
-            disabled={status === 'enriching'}
+            disabled={status === 'enriching' || !!duplicate}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/30 text-violet-300 text-sm font-semibold transition-colors disabled:opacity-40 self-start"
           >
             <span>✦</span>
@@ -331,25 +340,25 @@ export default function AddSongPanel() {
           {/* Core metadata */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Title (original)" value={draft.title_original ?? ''} onChange={v => setField('title_original', v)} />
-            <Field label="Title (romanized)" value={draft.title_romanized ?? ''} onChange={v => setField('title_romanized', v || null)} />
             <Field label="Title (Chinese)" value={draft.title_chinese ?? ''} onChange={v => setField('title_chinese', v || null)} />
-            <Field label="Artist" value={draft.artist ?? ''} onChange={v => setField('artist', v)} />
-            <Select label="Language" value={draft.language_claimed ?? ''} onChange={v => setField('language_claimed', v || null)} options={LANGUAGES} />
-            <Select label="Ethnic Group" value={draft.ethnic_group_claimed ?? ''} onChange={v => setField('ethnic_group_claimed', v || null)} options={LANGUAGES} />
-            <Select label="Genre" value={draft.genre ?? ''} onChange={v => setField('genre', v || null)} options={GENRES} />
+            <Field label="Artist credit" value={draft.artist ?? ''} onChange={v => setField('artist', v)} />
             <Field label="Year" value={draft.year ?? ''} onChange={v => setField('year', v || null)} placeholder="e.g. 2019" />
+            <Select label="Language" value={draft.language_claimed ?? ''} onChange={v => setField('language_claimed', v || null)} options={LANGUAGES} />
+            <Select label="Ethnic group" value={draft.ethnic_group_claimed ?? ''} onChange={v => setField('ethnic_group_claimed', v || null)} options={LANGUAGES} />
+            <Select label="Genre" value={draft.genre ?? ''} onChange={v => setField('genre', v || null)} options={GENRES} />
+            <Select label="Performance" value={draft.recording_type ?? ''} onChange={v => setField('recording_type', v || null)} options={RECORDING_TYPES} />
             <Field label="Album / Source" value={draft.album_or_source ?? ''} onChange={v => setField('album_or_source', v || null)} />
-            <Field label="Tags (comma-separated)" value={(draft.tags ?? []).join(', ')} onChange={v => setField('tags', v.split(',').map(t => t.trim()).filter(Boolean))} />
+            <Field label="Tags (comma-separated)" value={(draft.tags ?? []).join(', ')} onChange={v => setField('tags', v.split(',').map((t: string) => t.trim()).filter(Boolean))} />
           </div>
+          <Field label="Description (public)" value={draft.description ?? ''} onChange={v => setField('description', v || null)} multiline placeholder="Public-facing context shown to visitors" />
 
           {/* Lyrics section */}
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-3">Lyrics</p>
             <div className="flex flex-col gap-4">
-              <Field label="Original (indigenous language)" value={draft.lyrics_original ?? ''} onChange={v => setField('lyrics_original', v || null)} multiline />
-              <Field label="Romanized" value={draft.lyrics_romanized ?? ''} onChange={v => setField('lyrics_romanized', v || null)} multiline />
-              <Field label="Translation (Traditional Chinese)" value={draft.lyrics_translation_zh ?? ''} onChange={v => setField('lyrics_translation_zh', v || null)} multiline />
-              <Field label="Translation (English)" value={draft.lyrics_translation_en ?? ''} onChange={v => setField('lyrics_translation_en', v || null)} multiline />
+              <Field label="Original" value={draft.lyrics_original ?? ''} onChange={v => setField('lyrics_original', v || null)} multiline />
+              <Field label="Chinese translation" value={draft.lyrics_translation_zh ?? ''} onChange={v => setField('lyrics_translation_zh', v || null)} multiline />
+              <Field label="English translation" value={draft.lyrics_translation_en ?? ''} onChange={v => setField('lyrics_translation_en', v || null)} multiline />
               <Field label="Lyrics source" value={draft.lyrics_source ?? ''} onChange={v => setField('lyrics_source', v || null)} placeholder="URL or description" />
             </div>
           </div>
@@ -359,7 +368,7 @@ export default function AddSongPanel() {
           {/* Save */}
           <button
             onClick={handleSave}
-            disabled={status === 'saving' || !draft.title_original}
+            disabled={status === 'saving' || !draft.title_original || !!duplicate}
             className="px-6 py-2.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-300 text-sm font-bold transition-colors disabled:opacity-40 self-start"
           >
             {status === 'saving' ? 'Saving…' : '✓ Save to DB'}

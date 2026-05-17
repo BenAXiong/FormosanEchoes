@@ -56,6 +56,7 @@ function mapSong(row: Row): Song {
     location_claimed:         row.location             ?? undefined,
     region:                   row.region               ?? undefined,
     genre:                    row.genre                ?? undefined,
+    recording_type:           row.recording_type       ?? undefined,
     tags,
     source_snippets:          undefined,
     verification_notes:       row.notes                ?? undefined,
@@ -112,11 +113,24 @@ export async function getSongs(): Promise<Song[]> {
 
 export async function getArtists(): Promise<Artist[]> {
   const supabase = createServerClient();
-  const { data, error } = await supabase
-    .from('artists')
-    .select(`*, artist_names (*)`)
-    .order('name_display');
+  const [{ data, error }, { data: memberships }] = await Promise.all([
+    supabase.from('artists').select(`*, artist_names (*)`).order('name_display'),
+    supabase.from('artist_members').select('group_artist_id, member_artist_id'),
+  ]);
 
   if (error) throw new Error(`getArtists: ${error.message}`);
-  return (data ?? []).map(mapArtist);
+
+  // Build member→groups map
+  const memberGroupMap = new Map<string, string[]>();
+  for (const row of memberships ?? []) {
+    const existing = memberGroupMap.get(row.member_artist_id) ?? [];
+    memberGroupMap.set(row.member_artist_id, [...existing, row.group_artist_id]);
+  }
+
+  return (data ?? []).map(row => {
+    const artist = mapArtist(row);
+    const groupIds = memberGroupMap.get(artist.id);
+    if (groupIds?.length) artist.group_ids = groupIds;
+    return artist;
+  });
 }
