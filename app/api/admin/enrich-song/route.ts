@@ -73,6 +73,8 @@ Rules for your JSON output:
 - "lyrics_translation_en": Provide an English translation.
 - "notes": Mention where you found the lyrics or any ambiguities about the dialect.
 
+- "youtube_url": The most official YouTube video URL for this song (if you can find one), else null.
+
 Example Output:
 {
   "title_original": "Senasenai",
@@ -100,14 +102,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'GEMINI_API_KEY not configured' }, { status: 500 });
   }
 
-  let body: { title?: string; channel?: string; youtube_url?: string; videoId?: string };
+  let body: { title?: string; channel?: string; youtube_url?: string; videoId?: string; titleMode?: boolean };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const { title = '', channel = '', youtube_url = '', videoId = '' } = body;
+  const { title = '', channel = '', youtube_url = '', videoId = '', titleMode = false } = body;
   if (!title && !youtube_url) {
     return NextResponse.json({ error: 'Provide at least title or youtube_url' }, { status: 400 });
   }
@@ -115,18 +117,24 @@ export async function POST(request: Request) {
   // Optionally fetch YouTube description + comments
   const ytContext = videoId ? await fetchYouTubeContext(videoId) : '';
 
-  const userMessage = [
-    `Video title: "${title}"`,
-    `Channel: "${channel}"`,
-    `YouTube URL: ${youtube_url}`,
-    ytContext ? `\n${ytContext}` : '',
-    `\nSearch for this song and return the JSON metadata object.`,
-  ].filter(Boolean).join('\n');
+  const userMessage = titleMode
+    ? [
+        `Song title to look up: "${title}"`,
+        `\nSearch for this song online. Find the most official YouTube video for it if one exists.`,
+        `Return the JSON metadata object, and include "youtube_url" with the best YouTube URL you find (or null if none exists).`,
+      ].join('\n')
+    : [
+        `Video title: "${title}"`,
+        `Channel: "${channel}"`,
+        `YouTube URL: ${youtube_url}`,
+        ytContext ? `\n${ytContext}` : '',
+        `\nSearch for this song and return the JSON metadata object.`,
+      ].filter(Boolean).join('\n');
 
   try {
     const genai = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genai.getGenerativeModel(
-      { model: 'gemini-3.1-pro-preview', tools: [{ googleSearch: {} } as any] },  // eslint-disable-line @typescript-eslint/no-explicit-any
+      { model: 'gemini-2.5-pro', tools: [{ googleSearch: {} } as any] },  // eslint-disable-line @typescript-eslint/no-explicit-any
       { timeout: 110_000 },
     );
 
@@ -141,6 +149,7 @@ export async function POST(request: Request) {
     const jsonStr = raw.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim();
 
     let enriched: Record<string, unknown>;
+    const aiLabel = `[AI research — ${new Date().toISOString().slice(0, 10)}]`;
     try {
       enriched = JSON.parse(jsonStr);
     } catch {
@@ -155,6 +164,16 @@ export async function POST(request: Request) {
       } else {
         return NextResponse.json({ error: 'Gemini returned non-JSON response', raw }, { status: 502 });
       }
+    }
+
+    // Label AI-generated fields
+    if (enriched.notes) {
+      enriched.notes = `${enriched.notes}\n\n${aiLabel}`;
+    } else {
+      enriched.notes = aiLabel;
+    }
+    if (!enriched.lyrics_source) {
+      enriched.lyrics_source = `AI research — ${new Date().toISOString().slice(0, 10)}`;
     }
 
     // Include grounding sources if available (for UI provenance display)

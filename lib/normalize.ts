@@ -43,7 +43,12 @@ export function normalizeSong(raw: Partial<Song>): Song {
 
 /** Get a display title for a song — falls back gracefully. */
 export function getDisplayTitle(song: Song): string {
-  return song.title_original ?? song.title_romanized ?? song.title_chinese ?? '(Untitled)';
+  return song.title_original ?? song.title_romanized ?? song.title_chinese ?? song.yt_title ?? '(Untitled)';
+}
+
+/** True when the display title is the raw YouTube title (no curated title set yet). */
+export function isTitleFallback(song: Song): boolean {
+  return !song.title_original && !song.title_romanized && !song.title_chinese && !!song.yt_title;
 }
 
 /** Get a secondary title line (romanized or Chinese), different from the primary. */

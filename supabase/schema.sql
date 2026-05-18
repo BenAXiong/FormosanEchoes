@@ -41,7 +41,8 @@ CREATE INDEX idx_artist_names_artist ON artist_names (artist_id);
 CREATE TABLE songs (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   legacy_id           TEXT UNIQUE,      -- sof-00001 etc, migration bridge
-  title_original      TEXT,             -- primary title (indigenous script or common name)
+  yt_title            TEXT,             -- raw YouTube video title — provenance only, never edited
+  title_original      TEXT,             -- curated accurate title (indigenous script or common name)
   title_zh            TEXT,
   title_en            TEXT,
   artist_credit       TEXT,             -- raw credit string ("ABAO feat. X") — display + fallback

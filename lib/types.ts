@@ -49,6 +49,7 @@ export interface Song {
   title_original?: string;
   title_romanized?: string;
   title_chinese?: string;
+  yt_title?: string;            // raw YouTube video title — provenance only, never curated
   artist?: string;
   language_claimed?: string;
   language_evidence?: string;

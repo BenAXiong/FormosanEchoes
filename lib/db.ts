@@ -41,6 +41,7 @@ function mapSong(row: Row): Song {
     title_original:           row.title_original       ?? undefined,
     title_romanized:          undefined,
     title_chinese:            row.title_zh             ?? undefined,
+    yt_title:                 row.yt_title             ?? undefined,
     artist:                   row.artist_credit        ?? undefined,
     language_claimed:         row.language             ?? undefined,
     language_evidence:        undefined,

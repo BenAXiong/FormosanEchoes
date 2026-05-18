@@ -14,105 +14,92 @@ A curated browser for Formosan-language (Indigenous Taiwanese) music. Public bro
 
 ## Data architecture
 
-All data is file-based JSON — no database yet:
+**Supabase (PostgreSQL)** is the source of truth. `data/controlled-vocab.json` is the only remaining file in `data/` — it is a reference document for valid `confidence` and `verification_status` values, not imported at runtime.
 
-| File | Role |
+| Table | Role |
 |---|---|
-| `data/songs.json` | Master song catalog (~80 records as of 2026-05-16) |
-| `data/artists.json` | Artist profiles |
-| `data/artists_unlinked.json` | Artist strings that couldn't be auto-linked |
-| `data/controlled-vocab.json` | Canonical values for languages, tags, confidence, status |
+| `songs` | Master song catalog |
+| `song_artists` | Many-to-many: song ↔ artist |
+| `lyrics` | One-to-one with songs; gated by `show_publicly` |
+| `tags` + `song_tags` | Tag vocabulary + song assignments |
+| `artists` | Artist profiles |
+| `artist_names` | Name aliases per artist (script-tagged) |
+| `artist_members` | Group membership (artist ↔ member artist) |
 
-**Artist linking** is a build-time step (`scripts/link-artists.js`, also `npm run link`). It resolves `song.artist` strings to `artist_ids` arrays. It is idempotent — safe to re-run at any time. Always re-run it after editing `songs.json` or `artists.json`.
+Server-side data access is in `lib/db.ts` — `getSongs()` and `getArtists()`. Never import `lib/db.ts` in client components. The Supabase client factory is in `lib/supabase.ts`.
+
+The public page uses ISR (`export const revalidate = 60` in `app/page.tsx`) — new data appears within 60 seconds.
 
 ## Key code locations
 
 | Concern | File |
 |---|---|
 | All TypeScript types | `lib/types.ts` |
-| Song loading + normalization | `lib/data.ts`, `lib/normalize.ts` |
+| Supabase data access | `lib/db.ts` |
+| URL normalization / title display | `lib/normalize.ts` |
 | Search | `lib/search.ts` |
 | Filtering | `lib/filters.ts` |
-| Artist resolution | `lib/artists.ts` |
-| Data validation | `lib/validate.ts` |
+| Artist helpers | `lib/artists.ts` |
 | Global player state | `lib/PlayerContext.tsx` |
 | Public browser page | `app/page.tsx` |
+| Browser UI (songs, filters, NowPlaying) | `components/browser/` |
+| Player bar (audio master) | `components/PlayerBar.tsx` |
 | Admin panel | `app/admin/CurationView.tsx` |
+| Admin songs view (list + edit form) | `components/admin/SongsAdminView.tsx` |
+| Admin multi-song add | `components/admin/AddMultipleSongsPanel.tsx` |
+| Admin metrics | `components/admin/MetricsPanel.tsx` |
+| Admin artist audit | `components/admin/ArtistAuditPanel.tsx` |
 | Gemini enrichment API | `app/api/admin/enrich-song/route.ts` |
+| Song save/update APIs | `app/api/admin/save-song/`, `app/api/admin/update-song/` |
 
 ## Critical rules
 
 **Types**: Always use types from `lib/types.ts`. Do not define ad-hoc inline types.
 
-**Lyrics rights**: `lyrics.show_publicly` is the display gate — never render lyrics content unless this is `true`. Do not default it to true. Also respect `lyrics.has_permission` and `lyrics.lyrics_rights_status`.
+**Lyrics rights**: `lyrics.show_publicly` is the display gate — never render lyrics content unless this is `true`. Do not default it to `true`. Gemini-enriched lyrics arrive with `show_publicly: false` and must be manually approved in the Song Audit panel.
 
 **Controlled vocabulary**: `confidence` and `verification_status` must only use values from `data/controlled-vocab.json`. Do not invent new values.
 
-**Player architecture**: The actual audio lives in the hidden ReactPlayer inside `PlayerBar`. The embed in `NowPlaying` (`components/browser/NowPlaying.tsx`) is a **muted mirror** for visual sync only. All playback state goes through `usePlayer()` from `PlayerContext`.
+**Player architecture**: The actual audio lives in the hidden ReactPlayer inside `PlayerBar` (1×1px, always mounted). The embed in `NowPlaying` (`components/browser/NowPlaying.tsx`) is a **muted mirror** — visual sync only. All playback state goes through `usePlayer()` from `PlayerContext`. There must be exactly one non-muted `ReactPlayer` in the app, and it lives in `PlayerBar`.
 
-**Filter key inconsistency**: The `ethnic_group` filter key in `FilterState` is currently repurposed as an artist_id filter. This is a known bug listed in `PLAN.md`. Do not work around it by adding more workarounds — fix the root cause.
+**Seek sync pattern**: `PlayerContext` exposes `seekTo` (seeks the master audio) and `seekMirror` (seeks the visual embed). They are kept separate to avoid feedback loops. `NowPlaying` registers its `playerRef.seekTo` via `registerMirrorSeekFn`. `PlayerBar` calls `seekMirror` only on `onPointerUp` (not on every `onChange` tick) to avoid flooding YouTube with seek requests.
 
-## Before modifying data files
+**Panel open/close**: `PlayerContext` exposes `togglePanel` / `registerTogglePanelFn` — the same ref-callback pattern as seekMirror. `BrowserPage` registers `() => setSelected(...)` so the `PlayerBar` thumbnail tap can toggle the NowPlaying panel without prop drilling. Do not bypass this by adding new props or refs.
 
-- After any edit to `songs.json` or `artists.json`, run `npm run link` to refresh `artist_ids`
-- Check the dev console for validation warnings from `lib/validate.ts`
-- The admin panel writes new songs via `/api/admin/save-song` — prefer that path for adding songs programmatically
+**NowPlaying dual-mount guard**: On desktop, `BrowserPage` renders NowPlaying inside the right panel. On mobile, a full-screen bottom sheet. To prevent both from mounting simultaneously (which would overwrite `mirrorSeekFnRef`), the mobile sheet is gated by `!isLargeScreen`. Do not remove this guard.
 
-## Dev server
-
-Runs on **port 3002** (`npm run dev`).
-
-## Environment variables
-
-```env
-GEMINI_API_KEY=...        # Required for admin enrichment
-YOUTUBE_API_KEY=...       # Optional — YouTube description/comments during enrichment
-PORTAL_URL=...            # Dictionary API endpoint
-```
-
-## Admin panel security
-
-The admin panel is gated by `?key=654321` — a placeholder until OAuth is implemented. Do not remove or circumvent this check. Do not expose the key in client-side bundle code.
+**Admin panel security**: Gated by `?key=654321` — placeholder until OAuth. Do not remove or expose the key in client-side bundle code.
 
 ---
 
 ## Traps — things an AI will naturally get wrong here
 
-These are the decisions most likely to be "fixed" incorrectly by a well-meaning agent. Read before touching any of these areas.
-
-**`FilterState` has two distinct filter fields: `ethnic_group` and `artist_id`.**
-- `ethnic_group` filters by `song.ethnic_group_claimed` — used by the admin `FilterBar`.
-- `artist_id` filters by membership in `song.artist_ids` — used by `FilterSidebar` in the public browser.
-Do not conflate them. The original prototype incorrectly reused `ethnic_group` for artist filtering; that bug has been fixed. See `docs/DECISIONS.md` for the full history.
-
 **The muted mirror embed must stay muted.**
-`NowPlaying` (`components/browser/NowPlaying.tsx`) contains a `ReactPlayer` that is always `muted={true}`. This is intentional — actual audio comes from the hidden player in `PlayerBar`. If you add a new player component and forget `muted`, the user will hear double audio. There must be exactly one non-muted `ReactPlayer` in the app, and it lives in `PlayerBar`.
+`NowPlaying` (`components/browser/NowPlaying.tsx`) contains a `ReactPlayer` that is always `muted={true}`. If you add a new player component and forget `muted`, the user will hear double audio.
 
 **Do not default `lyrics.show_publicly` to `true`.**
-When generating or normalizing lyrics data, always leave `show_publicly: false` unless there is an explicit rights decision. The validator warns on public lyrics without a `lyrics_rights_status`. Gemini-enriched lyrics arrive with `show_publicly: false` and must be manually approved.
+When generating or normalizing lyrics data, always leave `show_publicly: false`. The admin Song Audit panel is the only place this should be set to `true`.
 
 **`artist` and `artist_ids` both exist on purpose.**
-Do not delete `song.artist` after linking. Do not display `artist_ids` directly to users — resolve them to `Artist` records via `getArtistById` in `lib/artists.ts`. Do not manually edit `artist_ids` in JSON — they are regenerated by the linker script.
+Do not delete `song.artist` (raw display string). `artist_ids` resolves to full `Artist` records. Do not display `artist_ids` directly to users.
 
-**Run `npm run link` after any data edit.**
-The dev server does not re-run the linker. If you add a song or edit an artist's name variants and skip this step, `artist_ids` will be stale and artist filters will silently break.
-
-**JSON encoding: no escaped Unicode.**
-When writing to `songs.json` or `artists.json` from a script, use `JSON.stringify(data, null, 2)` with no additional options. Do not pass any flag that converts CJK characters to `\uXXXX` escapes. The files must remain human-readable.
+**`FilterState` has two distinct filter fields: `ethnic_group` and `artist_id`.**
+- `ethnic_group` — filters by `song.ethnic_group_claimed` (admin FilterBar).
+- `artist_id` — filters by `song.artist_ids` membership (public FilterSidebar).
+Do not conflate them. See `docs/DECISIONS.md` for history.
 
 **`confidence` and `verification_status` are different axes.**
-`confidence` is epistemic (how certain is the data). `verification_status` is workflow (what has been done). Do not conflate them. A checked entry can still be low-confidence. An unreviewed entry can have high confidence. See `docs/DECISIONS.md` for the full reasoning.
+`confidence` is epistemic (how certain is the data). `verification_status` is workflow state. A checked entry can still be low-confidence.
 
 **`title_original` is not always the indigenous-script title.**
-Some songs only have a Chinese or romanized title. `title_original` is populated with whatever the "most original" available title is — which may be Chinese if no indigenous-script form is known. The upcoming schema change (PLAN.md) will formally split this into `title_original` (script) and `title_name` (common name). Do not assume `title_original` is always indigenous script.
+Some songs only have a Chinese or romanized title. `title_original` is whatever the "most original" available title is. Do not assume it is always indigenous script.
 
-**`language_claimed` values must match `controlled-vocab.json`.**
+**`language` values must match `data/controlled-vocab.json`.**
 Do not invent values like `"Pangcah"` or `"Formosan"`. The vocab has `"Amis"` for Amis/Pangcah. Inconsistent values silently break language filters.
 
-**Keep PLAN.md current.** Update it whenever a significant task is completed or a decision changes scope. Mark items done, add new items as they emerge. Do this at the end of any session that changes the architecture or completes a feature.
+**Keep PLAN.md current.** Update it whenever a significant task is completed or a decision changes scope.
 
 **Docs to read before non-trivial changes:**
 - `docs/DECISIONS.md` — why things are the way they are
-- `docs/DATA_SCHEMA.md` — field-by-field reference and encoding rules
+- `docs/DATA_SCHEMA.md` — field-by-field reference
 - `PLAN.md` — current state and upcoming work
-- `notes/artist_research_coverage.md` — artist linking status and gaps

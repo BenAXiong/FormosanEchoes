@@ -294,6 +294,12 @@ export default function ArtistAuditPanel() {
         </div>
         <div className="flex gap-2 flex-wrap">
           <button
+            onClick={() => { setEditArtist({ name_display: '', ethnic_group: '', language: '', names_rom: [], names_zh: [], bio_zh: '', bio_en: '' }); setBatchResults([]); setStatus(''); }}
+            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-stone-300 text-xs font-semibold transition-colors"
+          >
+            + Add Artist
+          </button>
+          <button
             onClick={handleAutoLink}
             className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-stone-300 text-xs font-semibold transition-colors"
           >

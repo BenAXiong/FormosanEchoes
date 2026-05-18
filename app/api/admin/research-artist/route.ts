@@ -150,7 +150,7 @@ export async function POST(request: Request) {
   try {
     const genai = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genai.getGenerativeModel(
-      { model: 'gemini-3.1-pro-preview', tools: [{ googleSearch: {} } as any] },  // eslint-disable-line @typescript-eslint/no-explicit-any
+      { model: 'gemini-2.5-pro', tools: [{ googleSearch: {} } as any] },  // eslint-disable-line @typescript-eslint/no-explicit-any
       { timeout: 110_000 },
     );
 

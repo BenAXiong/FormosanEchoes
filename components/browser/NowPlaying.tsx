@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import type { Song } from '@/lib/types';
-import { getDisplayTitle, isYouTubeUrl, getYouTubeId, getYouTubeStartTime } from '@/lib/normalize';
+import { getDisplayTitle, isTitleFallback, isYouTubeUrl, getYouTubeId, getYouTubeStartTime } from '@/lib/normalize';
 import HoverableWord from '@/components/browser/HoverableWord';
 import { usePlayer } from '@/lib/PlayerContext';
 import { useEffect, useRef } from 'react';
@@ -87,6 +87,7 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
   const [showInfo, setShowInfo] = useState(false);
 
   const title = getDisplayTitle(song);
+  const titleFallback = isTitleFallback(song);
   const youtubeId = isYouTubeUrl(song.youtube_url) ? getYouTubeId(song.youtube_url!) : null;
   const startTime = song.youtube_url ? getYouTubeStartTime(song.youtube_url) : null;
   const conf = CONFIDENCE_CONFIG[song.confidence] ?? CONFIDENCE_CONFIG.unknown;
@@ -158,7 +159,7 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
         <div className="flex items-start gap-2">
 
           <div className="flex-1 min-w-0">
-            <h2 className="text-white font-bold text-base leading-tight truncate">{title}</h2>
+            <h2 className={`font-bold text-base leading-tight truncate ${titleFallback ? 'text-white/70 italic' : 'text-white'}`}>{title}</h2>
             {song.title_romanized && song.title_romanized !== title && (
               <p className="text-stone-400 text-xs mt-0.5 truncate">{song.title_romanized}</p>
             )}

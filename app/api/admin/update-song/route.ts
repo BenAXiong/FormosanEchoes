@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 
 export async function POST(request: Request) {
-  let body: { song_id: string; enriched?: Record<string, unknown>; fields?: Record<string, string | boolean> };
+  let body: { song_id: string; enriched?: Record<string, unknown>; fields?: Record<string, string | boolean | string[]> };
   try {
     body = await request.json();
   } catch {
@@ -16,24 +16,45 @@ export async function POST(request: Request) {
 
   // ── Direct form save (from editor) ──────────────────────────────────────────
   if (fields) {
-    const { lyrics_show_publicly, ...strFields } = fields as Record<string, string | boolean>;
+    const { lyrics_show_publicly, tags: rawTags, ...strFields } = fields as Record<string, string | boolean | string[]>;
     const f = strFields as Record<string, string>;
     const songUpdate: Record<string, string | null> = {
-      title_original: f.title_original  || null,
-      title_zh:       f.title_zh        || null,
-      artist_credit:  f.artist_credit   || null,
-      language:       f.language        || null,
-      ethnic_group:   f.ethnic_group    || null,
-      genre:          f.genre           || null,
-      recording_type: f.recording_type  || null,
-      year:           f.year            || null,
-      album:          f.album           || null,
-      description:    f.description     || null,
-      notes:          f.notes           || null,
+      yt_title:            f.yt_title            || null,
+      title_original:      f.title_original      || null,
+      title_zh:            f.title_zh            || null,
+      title_en:            f.title_en            || null,
+      artist_credit:       f.artist_credit       || null,
+      url:                 f.url                 || null,
+      language:            f.language            || null,
+      ethnic_group:        f.ethnic_group        || null,
+      region:              f.region              || null,
+      location:            f.location            || null,
+      genre:               f.genre               || null,
+      recording_type:      f.recording_type      || null,
+      year:                f.year                || null,
+      album:               f.album               || null,
+      description:         f.description         || null,
+      notes:               f.notes               || null,
+      verification_status: f.verification_status || null,
     };
 
     const { error: songErr } = await supabase.from('songs').update(songUpdate).eq('id', song_id);
     if (songErr) return NextResponse.json({ error: songErr.message }, { status: 500 });
+
+    // Tags: replace all existing tags for this song
+    const tagValues = typeof rawTags === 'string'
+      ? rawTags.split(',').map((t: string) => t.trim()).filter(Boolean)
+      : [];
+    if (tagValues.length > 0) {
+      await supabase.from('song_tags').delete().eq('song_id', song_id);
+      for (const value of tagValues) {
+        await supabase.from('tags').upsert({ value, label: value.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) }, { onConflict: 'value' });
+      }
+      const { data: tagRows } = await supabase.from('tags').select('id').in('value', tagValues);
+      if (tagRows?.length) {
+        await supabase.from('song_tags').insert(tagRows.map((t: { id: string }) => ({ song_id, tag_id: t.id })));
+      }
+    }
 
     const hasLyrics = !!(f.lyrics_original || f.lyrics_zh || f.lyrics_en);
     if (hasLyrics) {

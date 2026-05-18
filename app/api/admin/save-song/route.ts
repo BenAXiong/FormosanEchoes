@@ -30,24 +30,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  if (!song.youtube_url) {
-    return NextResponse.json({ error: 'Song must have youtube_url' }, { status: 400 });
+  if (!song.youtube_url && !song.url && !song.title_original) {
+    return NextResponse.json({ error: 'Song must have youtube_url, url, or title_original' }, { status: 400 });
   }
 
   const supabase = createServerClient();
 
-  // Duplicate check — match by video ID so &t=2s variants are caught
-  const videoId = getYouTubeId(String(song.youtube_url));
-  if (!videoId) {
-    return NextResponse.json({ error: 'Could not extract YouTube video ID from URL' }, { status: 400 });
-  }
-  const { data: existing } = await supabase
-    .from('songs')
-    .select('id')
-    .eq('yt_video_id', videoId)
-    .maybeSingle();
-  if (existing) {
-    return NextResponse.json({ error: 'Duplicate YouTube URL' }, { status: 409 });
+  // Duplicate check by video ID when YouTube URL is present
+  const videoId = song.youtube_url ? getYouTubeId(String(song.youtube_url)) : null;
+  if (videoId) {
+    const { data: existing } = await supabase
+      .from('songs')
+      .select('id')
+      .eq('yt_video_id', videoId)
+      .maybeSingle();
+    if (existing) {
+      return NextResponse.json({ error: 'Duplicate YouTube URL' }, { status: 409 });
+    }
   }
 
   // Resolve artist IDs by querying artist_names
@@ -74,11 +73,13 @@ export async function POST(request: Request) {
   const { data: savedSong, error: songError } = await supabase
     .from('songs')
     .insert({
+      yt_title:            song.yt_title             ?? null,
       title_original:      song.title_original      ?? null,
       title_zh:            song.title_chinese        ?? null,
+      title_en:            song.title_en             ?? null,
       artist_credit:       song.artist               ?? null,
-      yt_url:              song.youtube_url,
-      yt_video_id:         getYouTubeId(String(song.youtube_url)),
+      yt_url:              song.youtube_url  ?? null,
+      yt_video_id:         videoId           ?? null,
       url:                 song.url                  ?? null,
       album:               song.album_or_source      ?? null,
       year:                song.year != null ? String(song.year) : null,

@@ -1,6 +1,6 @@
 'use client';
 import type { Song, Artist } from '@/lib/types';
-import { getYouTubeId, isYouTubeUrl } from '@/lib/normalize';
+import { getYouTubeId, isYouTubeUrl, getDisplayTitle, isTitleFallback } from '@/lib/normalize';
 import { usePlayer } from '@/lib/PlayerContext';
 
 const CJK = /[一-鿿]/;
@@ -96,7 +96,8 @@ interface Props {
 export default function SongCard({ song, isSelected, isPlaying, onSelect, compact = false, artistMap, showSongZh = true, showArtistZh = false }: Props) {
   const { isPlaying: globalIsPlaying, togglePlay, toggleFavorite, isFavorite } = usePlayer();
   const gradient = getLangGradient(song.language_claimed);
-  const title = song.title_original ?? song.title_romanized ?? song.title_chinese ?? '(Untitled)';
+  const title = getDisplayTitle(song);
+  const titleFallback = isTitleFallback(song);
   const zhTitle = song.title_chinese || ' ';
   const artist = resolveArtistName(song, artistMap, showArtistZh);
   const ytId = isYouTubeUrl(song.youtube_url) ? getYouTubeId(song.youtube_url!) : null;
@@ -165,7 +166,7 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
 
         {/* Text */}
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-semibold truncate leading-tight ${isPlaying ? 'text-emerald-500' : 'text-white'}`}>{title}</p>
+          <p className={`text-sm font-semibold truncate leading-tight ${isPlaying ? 'text-emerald-500' : 'text-white'} ${titleFallback ? 'italic' : ''}`}>{title}</p>
           <p className="text-stone-400 text-xs truncate mt-0.5">{artist}</p>
         </div>
 
@@ -253,7 +254,7 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
       {/* Meta */}
       <div className="bg-[#1a1a24] group-hover:bg-[#1e1e2a] transition-colors px-3 py-2.5">
         <div className="flex items-center gap-2">
-          <p className={`text-sm font-semibold truncate leading-tight ${isPlaying ? 'text-emerald-500' : 'text-white'}`}>{title}</p>
+          <p className={`text-sm font-semibold truncate leading-tight ${isPlaying ? 'text-emerald-500' : 'text-white'} ${titleFallback ? 'italic' : ''}`}>{title}</p>
           <GenreIcon genre={song.genre} className="w-3 h-3 text-stone-400 shrink-0" />
         </div>
         <div className="pl-0">

@@ -16,15 +16,29 @@ Format:
 
 ## [DATA] JSON files over a database (for now)
 
+> **Superseded by [DATA] Supabase as primary data store (2026-05-18).** Kept for historical context.
+
 **Chosen:** `data/songs.json` and `data/artists.json` as the source of truth.
 
 **Why:** The prototype needed to move fast. JSON is directly editable, readable in git diff, and trivially deployable on Vercel without any external service. The dataset is small enough (~400 songs, ~100 artists) that flat-file reads are instant.
 
-**Rejected:** Supabase at this stage. It adds auth, connection pooling, and migration overhead before we know the schema is stable. The schema *will* change (title fields, awards, performance style, dialect tags are all pending).
-
-**When to revisit:** When the batch import pipeline runs and the song count grows into the thousands, or when multi-user admin becomes necessary. See PLAN.md.
+**Rejected:** Supabase at this stage. It adds auth, connection pooling, and migration overhead before we know the schema is stable.
 
 **Date:** 2026-05-15
+
+---
+
+## [DATA] Supabase as primary data store
+
+**Chosen:** PostgreSQL via Supabase. `lib/db.ts` (`getSongs()`, `getArtists()`) is the single server-side data access layer. Admin routes write through Supabase REST/JS client. Files in `data/` are legacy and ignored at runtime.
+
+**Why:** The schema stabilized enough to migrate. Supabase enables real-time capabilities, proper relational integrity (many-to-many `song_artists`, one-to-one `lyrics`), and a path to multi-user admin. The `scripts/link-artists.js` build-time linker was replaced by server-side artist resolution at write time.
+
+**Rejected:** Continuing to manage flat JSON files once data reached ~80 songs and the admin panel needed concurrent writes. Also rejected PlanetScale and Turso — Supabase was already chosen at project start and the JS client is well-supported in Next.js App Router.
+
+**Implication:** Never import `lib/db.ts` in client components (it uses the service-role key). The public page uses ISR (`revalidate = 60` in `app/page.tsx`) so new data appears within 60 seconds without a redeploy.
+
+**Date:** 2026-05-18
 
 ---
 
@@ -182,13 +196,13 @@ Format:
 
 ## [PLAYER] Hidden master audio + muted visual mirror
 
-**Chosen:** One `ReactPlayer` instance lives inside `PlayerBar` (always mounted, 1×1px, handles actual audio). `DemoNowPlaying` contains a second `ReactPlayer` that is always muted — it mirrors the current song for visual display only.
+**Chosen:** One `ReactPlayer` instance lives inside `PlayerBar` (always mounted, 1×1px, handles actual audio). `NowPlaying` (`components/browser/NowPlaying.tsx`) contains a second `ReactPlayer` that is always muted — it mirrors the current song for visual display only.
 
 **Why:** A single audio source prevents double-playback. The visual embed in the detail panel shows the YouTube video frame while `PlayerBar` controls the actual audio. This gives the feel of a unified player without complex cross-component audio routing.
 
-**Rejected:** Moving the ReactPlayer into `DemoNowPlaying` and having `PlayerBar` reference it via a ref. Component lifetime issues: the detail panel can unmount, which would kill audio. The fixed bottom bar never unmounts, making it the correct home for persistent audio.
+**Rejected:** Moving the ReactPlayer into `NowPlaying` and having `PlayerBar` reference it via a ref. Component lifetime issues: the detail panel can unmount, which would kill audio. The fixed bottom bar never unmounts, making it the correct home for persistent audio.
 
-**Implication:** `DemoNowPlaying`'s player must always have `muted={true}`. `PlayerBar`'s player must never be muted. If you see audio doubling, a component is wrongly creating a non-muted player outside of `PlayerBar`.
+**Implication:** `NowPlaying`'s player must always have `muted={true}`. `PlayerBar`'s player must never be muted. If you see audio doubling, a component is wrongly creating a non-muted player outside of `PlayerBar`.
 
 **Date:** 2026-05-15
 
@@ -217,6 +231,8 @@ Format:
 ---
 
 ## [BUILD] Artist linker runs at `prebuild` (not at request time)
+
+> **Superseded (2026-05-18).** Artist resolution now happens server-side at write time in the admin API routes. `scripts/link-artists.js` and `npm run link` are no longer needed. Kept for historical context.
 
 **Chosen:** `scripts/link-artists.js` runs automatically before every `next build`. Also exposed as `npm run link` for manual use.
 
@@ -255,6 +271,45 @@ Format:
 **When to upgrade:** When the batch import pipeline needs to process hundreds of songs autonomously and accuracy on ambiguous cases becomes the bottleneck. Upgrade to `gemini-2.5-pro` at that point.
 
 **Date:** 2026-05-15
+
+---
+
+## [PLAYER] Seek and mirror sync via ref-callback pattern
+
+**Chosen:** `PlayerContext` exposes two seek functions — `seekTo` (seeks the master audio in `PlayerBar`) and `seekMirror` (seeks the muted mirror in `NowPlaying`) — each backed by a `useRef` that holds the actual function, registered via `registerSeekFn` / `registerMirrorSeekFn`.
+
+**Why:** The two seeks must be kept strictly separate. If `seekTo` also fired `seekMirror`, and `seekMirror` triggered any callback that called `seekTo` again, you'd get an infinite loop. Keeping them as distinct refs with separate call sites makes the data flow unambiguous. `PlayerBar` calls `seekMirror` only on `onPointerUp` (not on every `onChange` tick) to avoid flooding YouTube with seek requests.
+
+**Rejected:** Sharing a single seek ref and routing based on which component calls it. That merges two orthogonal concerns and makes the feedback-loop risk less visible.
+
+**Pattern:**
+```ts
+// PlayerContext
+const seekFnRef = useRef<((s: number) => void) | null>(null);
+const mirrorSeekFnRef = useRef<((s: number) => void) | null>(null);
+const seekTo = useCallback((s) => seekFnRef.current?.(s), []);
+const seekMirror = useCallback((s) => mirrorSeekFnRef.current?.(s), []);
+const registerSeekFn = useCallback((fn) => { seekFnRef.current = fn; }, []);
+const registerMirrorSeekFn = useCallback((fn) => { mirrorSeekFnRef.current = fn; }, []);
+```
+
+**Implication:** The same ref-callback pattern is used for `togglePanel` / `registerTogglePanelFn`. `BrowserPage` registers `() => setSelected(...)` so `PlayerBar`'s thumbnail tap can close/open the sheet without prop drilling.
+
+**Date:** 2026-05-18
+
+---
+
+## [PLAYER] History API for PWA back-button handling
+
+**Chosen:** When the NowPlaying mobile sheet opens, push one `history.pushState({ sheet: true }, '')` entry. A `popstate` listener on `window` closes the sheet (and resets karaoke state). Programmatic close (thumbnail tap, `togglePanel`) calls `history.back()` first to keep the history stack clean; a `skipNextPop` ref prevents the `popstate` handler from firing twice in that case.
+
+**Why:** On iOS/Android PWA installs the system back gesture/button fires `popstate` (or closes the app if the stack is empty). Without this, the first back tap always closes the app. With one pushed entry, the first back tap closes the sheet; only a second back tap reaches the empty stack and exits. The fix is invisible on desktop (browser back button is rarely used in this context) and adds no UI chrome.
+
+**Rejected:** Intercepting `keydown` (doesn't fire for system gestures), a custom back-button overlay (adds visual noise), or disabling back navigation entirely (bad UX on Android).
+
+**Key detail:** `historyDepth` ref tracks whether an entry has been pushed. On desktop (`isLargeScreen`) we skip pushing entirely to avoid polluting browser history for non-sheet interactions. On sheet close, the depth is reset to 0.
+
+**Date:** 2026-05-18
 
 ---
 

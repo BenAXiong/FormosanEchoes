@@ -50,7 +50,8 @@ export async function GET(request: Request) {
     const draft = {
       id: `song-${Date.now()}`,
       youtube_url: `https://www.youtube.com/watch?v=${videoId}`,
-      title_original: guessedTitle,
+      yt_title: title,
+      title_original: null,
       title_romanized: null,
       title_chinese: null,
       artist: guessedArtist,

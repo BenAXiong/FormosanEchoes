@@ -1,0 +1,1026 @@
+[
+  {
+    "id": "6a9c7caf-c553-4b96-a3ad-a5bba38315b2",
+    "yt_title": "盧靜子 馬蘭之戀",
+    "original_title_for_context": "馬蘭姑娘",
+    "changes": {
+      "title_original": {
+        "from": "馬蘭姑娘",
+        "to": "Inaaw, hay ya amaaw!"
+      },
+      "title_zh": {
+        "from": "馬蘭姑娘",
+        "to": "馬蘭之戀"
+      },
+      "artist_credit": {
+        "from": "盧靜子 (Lu Jingzi)",
+        "to": "盧靜子 (Ceko)"
+      }
+    },
+    "notes": "Corrected title_original to the song's first line in Amis, as a proper title in the language is not consistently available. The Chinese title was changed from '馬蘭姑娘' to '馬蘭之戀' to match the YouTube video's title, though both are commonly used. Added the artist's Amis name, Ceko."
+  },
+  {
+    "id": "92dbf63f-c4d8-412f-ad23-da4a3b97fff4",
+    "yt_title": "Kulumaha 回家吧-2017玉山星空音樂會原聲+波茲南  Kulumaha in 7 voices by Vox Nativa & Poznan Boys' Choir",
+    "original_title_for_context": "Kulumaha",
+    "changes": {
+      "artist_credit": {
+        "from": "金國寶 (Jin Guobao)",
+        "to": "台灣原聲童聲合唱團 (Vox Nativa) & Poznan Boys' Choir"
+      }
+    },
+    "notes": "Artist credit was changed from the composer (金國寶) to the performing artists, who are listed in the video title and description as Vox Nativa & Poznan Boys' Choir."
+  },
+  {
+    "id": "b4b8b1a2-2a67-4423-aeda-c28e3af9d3b4",
+    "yt_title": "《太陽的孩子》電影主題曲－不要放棄Aka pisawad (阿美族語版)",
+    "original_title_for_context": "Aka Pisawad",
+    "changes": {
+      "artist_credit": {
+        "from": "舒米恩 (Suming Rupi)",
+        "to": "Suming 舒米恩"
+      }
+    },
+    "notes": "Corrected artist name to the more commonly used format 'Suming 舒米恩' based on music platform and official credits."
+  },
+  {
+    "id": "5c1434b0-fbcd-452c-a2ee-44f156ff9ef2",
+    "yt_title": null,
+    "original_title_for_context": "Mivanwa",
+    "changes": {
+      "title_zh": {
+        "from": null,
+        "to": "飛魚祭"
+      }
+    },
+    "notes": "Mivanwa is the name of the Tao people's Flying Fish Ceremony (飛魚祭), not a song title. Syaman Rapongan is an author and anthropologist, not the performing artist of a song."
+  },
+  {
+    "id": "883a27f7-dbd8-4968-821e-4f984f0a0bfe",
+    "yt_title": "好聽的阿美歌曲",
+    "original_title_for_context": ") O wawa no Pangcah kami",
+    "changes": {
+      "title_original": {
+        "from": ") O wawa no Pangcah kami",
+        "to": "O wawa no Pangcah kako"
+      }
+    },
+    "notes": "Corrected `title_original` to a more grammatically accurate phrase that reflects the first-person Chinese title; the original was '`) O wawa no Pangcah kami`'. The artist credit is the name of the YouTube channel that uploaded the video, as no other artist information could be found."
+  },
+  {
+    "id": "93110af0-0666-44c9-915e-cc4e952083a9",
+    "yt_title": "結實纍纍的稻穗 Clusters of Rice Plants",
+    "original_title_for_context": "結實纍纍的稻穗",
+    "changes": {
+      "artist_credit": {
+        "from": "以莉·高露",
+        "to": "以莉·高露 (Ilid Kaolo)"
+      }
+    },
+    "notes": "The artist's romanized name, Ilid Kaolo, was added for completeness, as she is known by both names. An original Amis title could not be definitively verified from available sources."
+  },
+  {
+    "id": "a7aff03b-c4ca-4f37-954c-206dd0b4ef42",
+    "yt_title": null,
+    "original_title_for_context": "Pasiwali",
+    "changes": {
+      "title_zh": {
+        "from": "東",
+        "to": "日出東方"
+      },
+      "artist_credit": {
+        "from": null,
+        "to": "佚名 (Amis Traditional)"
+      }
+    },
+    "notes": "Corrected Chinese title from '東' to '日出東方' and added '佚名 (Amis Traditional)' as the artist, as it is a well-known Amis traditional song."
+  },
+  {
+    "id": "bb0e4b29-3db7-4ede-9136-f4c6a19cb6e8",
+    "yt_title": "Suming 舒米恩〈I cowa ko lalan 路在哪裡〉漢文空耳歌詞",
+    "original_title_for_context": "Icowa ko lalan",
+    "changes": {
+      "title_original": {
+        "from": "Icowa ko lalan",
+        "to": "I cowa ko lalan"
+      }
+    },
+    "notes": "Corrected spacing and capitalization in the original title to match official album tracklists."
+  },
+  {
+    "id": "085bc093-dcc6-4cd9-bccf-8bb1ed6ab028",
+    "yt_title": "Suming 舒米恩 〈Kasasetek no mita 我們的約定〉 漢文空耳歌詞",
+    "original_title_for_context": "Kasasetek no mita",
+    "changes": {
+      "title_original": {
+        "from": "Kasasetek no mita",
+        "to": "Kasasetek nomita"
+      }
+    },
+    "notes": "Corrected spacing in `title_original` from \"Kasasetek no mita\" to \"Kasasetek nomita\" based on multiple music platform listings."
+  },
+  {
+    "id": "91863fa2-bba9-4c8c-ad9e-120a3de83f86",
+    "yt_title": "阿米斯",
+    "original_title_for_context": "阿米斯",
+    "changes": {
+      "title_original": {
+        "from": "阿米斯",
+        "to": "Amis"
+      }
+    },
+    "notes": "Corrected `title_original` to the romanized Amis language title based on album and track listings."
+  },
+  {
+    "id": "99313e68-9b28-43f4-96b2-f6586a33183b",
+    "yt_title": "Suming舒米恩「約翰淑敏 John Suming」HD官方版MV",
+    "original_title_for_context": "約翰淑敏",
+    "changes": {
+      "title_original": {
+        "from": "約翰淑敏",
+        "to": "John Suming"
+      }
+    },
+    "notes": "Corrected title_original from the Chinese script version to the romanized Amis name \"John Suming\" as indicated in the official MV title."
+  },
+  {
+    "id": "8fe335b0-d2bd-4c88-81f6-8641dacbc0c9",
+    "yt_title": "賽德克女孩",
+    "original_title_for_context": "賽德克女孩",
+    "changes": {
+      "title_original": {
+        "from": "賽德克女孩",
+        "to": "Kaying no seediq"
+      }
+    },
+    "notes": "Updated title_original to its romanized Amis name based on search results."
+  },
+  {
+    "id": "b49d00c5-a150-403c-ac7a-0d78ce149ae6",
+    "yt_title": "Suming舒米恩    第二張創作專輯歌曲【遠洋】",
+    "original_title_for_context": "遠洋",
+    "changes": {
+      "title_original": {
+        "from": "遠洋",
+        "to": "Tayla maraayay mifoting"
+      }
+    },
+    "notes": "Added the original Amis language title, which was missing."
+  },
+  {
+    "id": "f18afb4e-ae55-4542-b331-07c075b99b10",
+    "yt_title": "我愛你",
+    "original_title_for_context": "https://www.youtube.com/watch?v=DkU4W9MKRVw",
+    "changes": {
+      "title_original": {
+        "from": "https://www.youtube.com/watch?v=DkU4W9MKRVw",
+        "to": "Maolahay kako tisowanang"
+      },
+      "artist_credit": {
+        "from": "Suming - Topic",
+        "to": "Suming 舒米恩"
+      }
+    },
+    "notes": "Corrected artist name to their recognized name and added the original Amis language title based on search results."
+  },
+  {
+    "id": "a091070e-38a5-447e-a123-c5f967fadea3",
+    "yt_title": "舒米恩suming【Tonfor 鈴鐺】",
+    "original_title_for_context": "Tonfor",
+    "changes": {
+      "title_original": {
+        "from": "Tonfor",
+        "to": "Tangfur"
+      }
+    },
+    "notes": "Corrected original title from \"Tonfor\" to \"Tangfur\" based on official album track listings on Apple Music and Deezer."
+  },
+  {
+    "id": "6fde39cd-5404-4e72-95c1-ca1604672c0f",
+    "yt_title": "好聽的原住民歌曲 1 ~ 阿美族情歌 ~ 思念",
+    "original_title_for_context": "senai",
+    "changes": {
+      "title_original": {
+        "from": "senai",
+        "to": "Senay senay sa ko losa'"
+      }
+    },
+    "notes": "Corrected original title to a more complete version based on search results. Removed artist credit as '曹瓦特' is the YouTube uploader, not the performer, and the actual artist for this traditional song's recording is not specified."
+  },
+  {
+    "id": "4e305f84-4cef-4a2f-a049-05f2e089a993",
+    "yt_title": "Dremedreman|曾妮-saceqaljan-NANGUAQ那屋瓦[N.2]",
+    "original_title_for_context": "saceqaljan",
+    "changes": {
+      "title_zh": {
+        "from": "(男對女 婚禮前唱)",
+        "to": "輩愛 (男對女婚禮前唱)"
+      },
+      "artist_credit": {
+        "from": "Dremedreman 曾妮",
+        "to": "Dremedreman Tjuleng Kisausau 曾妮"
+      }
+    },
+    "notes": "Corrected artist's full name based on video description and added a more formal Chinese title found in search results, retaining the original descriptive title as a subtitle."
+  },
+  {
+    "id": "d5ab073a-d03e-4972-a78a-02cdfa305439",
+    "yt_title": "鬼湖之戀",
+    "original_title_for_context": "鬼湖之戀",
+    "changes": {
+      "title_original": {
+        "from": "鬼湖之戀",
+        "to": "Dalubaling"
+      }
+    },
+    "notes": "Set original title to its Rukai name, based on multiple sources. Cleared artist credit as \"ng Ti\" is the YouTube channel, not the performer; the actual artist is unidentifiable from the video."
+  },
+  {
+    "id": "f1639ee2-9bd2-4f62-8600-f2e9109bc3c3",
+    "yt_title": "阿美族語歌曲 十七歲的女孩",
+    "original_title_for_context": "Pito ko safaw a mihcaan no kayoing",
+    "changes": {
+      "artist_credit": {
+        "from": "桂春米雅",
+        "to": "桂春．米雅"
+      }
+    },
+    "notes": "Corrected artist's name to include the interpunct based on biographical information. The original Amis title could not be verified from search results and has been set to null."
+  },
+  {
+    "id": "39692abb-b32d-40aa-98ed-d740517f3123",
+    "yt_title": "【#Radiw不打烊 EP10】音樂純享版｜《Senai kalevalevai 我們當歡喜歌唱》｜音樂流量密碼！部落Cover歌手",
+    "original_title_for_context": "Senai kalevalevai",
+    "changes": {
+      "artist_credit": {
+        "from": "原視 TITV+",
+        "to": "排灣女聲"
+      }
+    },
+    "notes": "Corrected artist_credit from the TV channel '原視 TITV+' to '排灣女聲' as credited in the video's description."
+  },
+  {
+    "id": "1956da64-1006-46ba-bcd6-cea48807283d",
+    "yt_title": "排灣女聲-排灣情歌(春日版)",
+    "original_title_for_context": "排灣情歌",
+    "changes": {
+      "title_original": {
+        "from": "排灣情歌",
+        "to": "Sipilipiliq"
+      }
+    },
+    "notes": "Added 'Sipilipiliq' as the original language title based on its pairing with '排灣情歌' in several search results. The artist credit remains '排灣女聲' as it appears to be a collective or descriptive name for this recording, rather than a specific, identifiable artist."
+  },
+  {
+    "id": "0b6e97f6-3aa1-4d26-83d1-ba5979fcbf7d",
+    "yt_title": "【嵐色旋律】2021EP24 排灣女聲｜senai tua CEMES 排 灣 聖 詩 組 曲｜LANTIANBOX LIVE SHOW",
+    "original_title_for_context": "(senai tua CEMES)",
+    "changes": {
+      "title_original": {
+        "from": "(senai tua CEMES)",
+        "to": "senai tua CEMES"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "排灣聖詩組曲"
+      }
+    },
+    "notes": "Added Chinese title and corrected original title based on video description and context from search results."
+  },
+  {
+    "id": "41de3a48-982d-4700-8556-061c1455d0d6",
+    "yt_title": "美麗的稻穗",
+    "original_title_for_context": "美麗的稻穗",
+    "changes": {
+      "title_original": {
+        "from": "美麗的稻穗",
+        "to": "bulai naniyam kalalumayan"
+      },
+      "artist_credit": {
+        "from": "陸森寶",
+        "to": "陸森寶 (Baliwakes)"
+      }
+    },
+    "notes": "Updated title_original to the Puyuma name and added the artist's indigenous name for completeness."
+  },
+  {
+    "id": "6d7cb1f0-653d-472e-ab8a-056eacc6b9da",
+    "yt_title": "【嵐色旋律】2020EP15｜na lu wan｜Ljaucu Talimaraw",
+    "original_title_for_context": "na lu wan",
+    "changes": {
+      "title_zh": {
+        "from": null,
+        "to": "娜魯灣 (排灣族情歌)"
+      },
+      "artist_credit": {
+        "from": "Ljaucu Talimaraw",
+        "to": "Ljaucu Talimaraw (蔡清安)"
+      }
+    },
+    "notes": "Added artist's Chinese name to artist_credit and added a descriptive Chinese title, as 'na lu wan' is a common name for a traditional Paiwan love song."
+  },
+  {
+    "id": "1220404f-1d35-4ad9-b991-6cb92e2dfca7",
+    "yt_title": "陳建年 Paudull feat. 南王姊妹花《媽媽的花環》Official Lyric Video",
+    "original_title_for_context": "媽媽的花環",
+    "changes": {
+      "title_original": {
+        "from": "媽媽的花環",
+        "to": "Tu Aput Kan Nanali"
+      },
+      "artist_credit": {
+        "from": "南王姊妹花, 陳建年 Paudull",
+        "to": "陳建年 (Paudull) feat. 南王姊妹花"
+      }
+    },
+    "notes": "Corrected `title_original` to its Puyuma name based on lyric search results and reversed artist order to reflect the main artist."
+  },
+  {
+    "id": "a3c0599e-79f9-4676-8404-3e2255bfb777",
+    "yt_title": "太巴塱民謠",
+    "original_title_for_context": "太巴塱民謠",
+    "changes": {
+      "artist_credit": {
+        "from": "陳建年 Paudull",
+        "to": "陳建年 Paudull & 巴奈 Panai"
+      }
+    },
+    "notes": "Updated artist_credit to include 巴奈 Panai, who is consistently credited alongside 陳建年 Paudull on this song."
+  },
+  {
+    "id": "b28d7f53-53d3-4f6f-aea2-1b65532a4cca",
+    "yt_title": "sisarusaru 結婚歌曲",
+    "original_title_for_context": "sisarusaru",
+    "changes": {
+      "artist_credit": {
+        "from": "tjuku taligu 謝光蘭",
+        "to": "TBM 土坂部落青年歌謠傳唱"
+      }
+    },
+    "notes": "Updated artist_credit from an individual to the performing group \"TBM 土坂部落青年歌謠傳唱\" based on the video's detailed description."
+  },
+  {
+    "id": "95de0f25-ec80-4b66-880c-279b1af0efec",
+    "yt_title": "思念 by 原來是美族 #三姊妹 #阿美族 #古調",
+    "original_title_for_context": "思念",
+    "changes": {
+      "title_original": {
+        "from": "思念",
+        "to": "Senay"
+      }
+    },
+    "notes": "Added original Amis title based on romanized lyrics found in search results."
+  },
+  {
+    "id": "9291dd0e-6a06-4fb6-8196-5c49078def17",
+    "yt_title": "紀曉君 Samingad【野火】Official Music Video",
+    "original_title_for_context": "野火（遊訪家戶)",
+    "changes": {
+      "title_original": {
+        "from": "野火（遊訪家戶)",
+        "to": "遊訪家戶"
+      },
+      "title_zh": {
+        "from": "野火（遊訪家戶)",
+        "to": "野火"
+      }
+    },
+    "notes": "Separated the song's popular promotional title from its original name. The music video description states the song's original name is '遊訪家戶' (which has been set as title_original) and it is widely known by '野火' (which is now title_zh)."
+  },
+  {
+    "id": "df72a3f3-3b78-4230-a8e5-76ade5203345",
+    "yt_title": "ABUS 阿布絲 feat. 大亨《Aza-Aza》Official Music Video",
+    "original_title_for_context": "Aza-Aza",
+    "changes": {
+      "title_zh": {
+        "from": null,
+        "to": "給我你所有"
+      },
+      "artist_credit": {
+        "from": "ABUS 阿布絲",
+        "to": "ABUS 阿布絲 feat. 大亨 Heng Jones"
+      }
+    },
+    "notes": "Added Chinese title and full artist credit for the featured artist based on search results."
+  },
+  {
+    "id": "d129e294-4d72-49c6-8fb4-9610c375c4bf",
+    "yt_title": null,
+    "original_title_for_context": "Sapuy",
+    "changes": {
+      "title_original": {
+        "from": "Sapuy",
+        "to": "sapuy"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "火把"
+      }
+    },
+    "notes": "Added Chinese title based on official music video and streaming platform listings."
+  },
+  {
+    "id": "69be2c6c-f693-4a39-b871-7d5540760138",
+    "yt_title": "Dipin Kari Tang 麵包 咖哩 刺蝟 (feat. 泰武古謠傳唱)",
+    "original_title_for_context": "Dipin Kari Tang",
+    "changes": {
+      "artist_credit": {
+        "from": "Sauljaljui 戴曉君",
+        "to": "Sauljaljui 戴曉君 feat. 泰武古謠傳唱"
+      }
+    },
+    "notes": "Added featured artist to artist_credit based on search results."
+  },
+  {
+    "id": "d3895e25-50b6-4fb5-a67d-0a633a96173a",
+    "yt_title": "戴曉君 - 順著河流走 (歌詞MV) / Sauljaljui - Tracing the River of Life(Lyrics)",
+    "original_title_for_context": "Semusu ta pana",
+    "changes": {
+      "title_original": {
+        "from": "Semusu ta pana",
+        "to": "semusu ta pana"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "順著河流走"
+      }
+    },
+    "notes": "Corrected original title based on lyrics and added official Chinese title from multiple sources."
+  },
+  {
+    "id": "5c8e2967-dd45-4d8f-b0cc-024474f214f7",
+    "yt_title": "溫暖的光 Sadeku na semenam",
+    "original_title_for_context": "Sadeku na semenam",
+    "changes": {
+      "title_original": {
+        "from": "Sadeku na semenam",
+        "to": "Sadeku na senan"
+      }
+    },
+    "notes": "Corrected original title from 'Semenam' to 'Senan' to match official album track listings."
+  },
+  {
+    "id": "c66ccabb-1ece-4f05-9a64-cf843d6d9796",
+    "yt_title": null,
+    "original_title_for_context": "no malalamuday",
+    "changes": {
+      "artist_credit": {
+        "from": null,
+        "to": "台東原音文化團"
+      }
+    },
+    "notes": "Added artist_credit based on search result."
+  },
+  {
+    "id": "e2d5e1ef-420d-4cf2-bee3-db8a5e1e3690",
+    "yt_title": null,
+    "original_title_for_context": "怠惰鬼",
+    "changes": {
+      "title_original": {
+        "from": "怠惰鬼",
+        "to": "Matokaay a tamdaw"
+      },
+      "artist_credit": {
+        "from": null,
+        "to": "郭茂盛"
+      }
+    },
+    "notes": "The original Amis title was identified as 'Matokaay a tamdaw,' which translates to 'lazy person.' The artist has been corrected to 郭茂盛 (Guo Mao-sheng), who was a famous Amis singer from the 1960s and is credited with this song."
+  },
+  {
+    "id": "af363d1a-e037-4aec-9aad-beb157ae0557",
+    "yt_title": "f4-2 演出者介紹+Eric Scheihagen／採木瓜歌 介紹+發哥和馬蘭吟唱班／採木瓜歌+發哥／採木瓜歌 歌詞介紹（被正史忽略的黑膠年代歪歌@樂廣場 經典金曲講唱會 2026.05.02.）",
+    "original_title_for_context": "木瓜歌",
+    "changes": {
+      "title_original": {
+        "from": "木瓜歌",
+        "to": "Tiwas kuwa'"
+      },
+      "title_zh": {
+        "from": "木瓜歌",
+        "to": "採木瓜歌"
+      },
+      "artist_credit": {
+        "from": "馬蘭吟唱班 feat. 發哥",
+        "to": "豐政發 (發哥) & 馬蘭吟唱班"
+      }
+    },
+    "notes": "Corrected original title to Amis language based on lyrics and theme. Updated artist credit with the performer's full name and clarified the relationship with the singing group."
+  },
+  {
+    "id": "d2ace3c0-2836-423c-a204-f8fff1b9c6b4",
+    "yt_title": "kero no kayoing 優美舞姿 (又名：阿美恰恰)",
+    "original_title_for_context": "Kero no kaying",
+    "changes": {
+      "title_zh": {
+        "from": "優美舞姿 / 阿美恰恰",
+        "to": "優美的舞姿 (阿美恰恰)"
+      },
+      "artist_credit": {
+        "from": "撒耘奇桹",
+        "to": "潘金松 (Pan Jin-song)"
+      }
+    },
+    "notes": "Artist credit was changed from '撒耘奇桹' to the correct and widely recognized singer, 潘金松 (Pan Jin-song), as verified by multiple sources."
+  },
+  {
+    "id": "bdc2a8fa-4168-4669-9a3c-9fe9f67bc91a",
+    "yt_title": null,
+    "original_title_for_context": "我的爸爸是蔣總統",
+    "changes": {
+      "artist_credit": {
+        "from": null,
+        "to": "阿美族複音青春歌隊"
+      }
+    },
+    "notes": "Artist credit was added based on a documented performance. The original title could not be determined, so it has been set to null."
+  },
+  {
+    "id": "2aa66c14-ca17-436e-8a47-170d288776ca",
+    "yt_title": "排灣歌謠/感謝之歌 masalu",
+    "original_title_for_context": "排灣歌謠/感謝之歌 masalu - YouTube - 《謝正男》Paljaljim varengelan",
+    "changes": {
+      "title_original": {
+        "from": "排灣歌謠/感謝之歌 masalu - YouTube - 《謝正男》Paljaljim varengelan",
+        "to": "Masalu"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "感謝之歌"
+      }
+    },
+    "notes": "Separated the romanized and Chinese titles from the original single string into their respective fields based on YouTube video details and other sources."
+  },
+  {
+    "id": "35b0edf0-8735-4fa7-b7f2-bf8c26c3523b",
+    "yt_title": "原歌/排灣族古調/思念",
+    "original_title_for_context": "原歌/排灣族古調/思念 - YouTube - 蔡金茂",
+    "changes": {
+      "title_original": {
+        "from": "原歌/排灣族古調/思念 - YouTube - 蔡金茂",
+        "to": "Lju li ma"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "思念"
+      },
+      "artist_credit": {
+        "from": "Kivi Pasulivai 吳美婷",
+        "to": "桑梅絹"
+      }
+    },
+    "notes": "Corrected artist to 桑梅絹, the original singer of this popular adaptation of a Paiwan lullaby. Changed original title to its commonly used romanized name and added the widely recognized Chinese title."
+  },
+  {
+    "id": "2d2b749d-5721-4036-b718-4e2d4c482b1c",
+    "yt_title": null,
+    "original_title_for_context": "Lju li ma",
+    "changes": {
+      "artist_credit": {
+        "from": null,
+        "to": "桑梅絹"
+      }
+    },
+    "notes": "Artist credit was missing and has been added based on multiple search results consistently identifying 桑梅絹 as the singer of this Paiwan song."
+  },
+  {
+    "id": "9f873800-a2c5-49d5-87b9-cc345b39131e",
+    "yt_title": "卑南族—美麗的稻穗",
+    "original_title_for_context": "卑南族—美麗的稻穗 - YouTube - Celalaq Tuljaljuy",
+    "changes": {
+      "title_original": {
+        "from": "卑南族—美麗的稻穗 - YouTube - Celalaq Tuljaljuy",
+        "to": "bulai naniyam kalalumayan"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "美麗的稻穗"
+      }
+    },
+    "notes": "Corrected original title and added Chinese title based on search results. Set artist_credit to null as the original artist is Paiwan, but the song is Puyuma, and the video does not credit a specific performer."
+  },
+  {
+    "id": "5db99298-8427-4a2f-aa8f-7258c2b02b3a",
+    "yt_title": "《排灣族古謠》",
+    "original_title_for_context": "《排灣族古謠》 - YouTube - HoHoBa 🍀Love🍀",
+    "changes": {
+      "title_zh": {
+        "from": null,
+        "to": "排灣族古謠"
+      }
+    },
+    "notes": "Artist credit changed from a YouTube channel to null as the actual performer could not be identified. The Chinese title is a generic description for 'Paiwan ancient melody' and not a specific song title."
+  },
+  {
+    "id": "0b77804f-7273-4aa6-b1fa-4be05c0812f9",
+    "yt_title": "Arase 阿拉斯【 spi adringi na ico 夢人 】Official Music Video",
+    "original_title_for_context": "Arase 阿拉斯【 spi adringi na ico 夢人 】Official Music Video - YouTube - 那屋瓦Nanguaq",
+    "changes": {
+      "title_original": {
+        "from": "Arase 阿拉斯【 spi adringi na ico 夢人 】Official Music Video - YouTube - 那屋瓦Nanguaq",
+        "to": "spi adringi na ico"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "夢人"
+      }
+    },
+    "notes": "Cleaned original title to remove YouTube video metadata and added Chinese title, both of which were present in the video title."
+  },
+  {
+    "id": "ff88f391-3717-4a8f-ae47-9a7670d4704e",
+    "yt_title": "Makav 真愛【embiyax su hug 你好嗎】Official Music Video",
+    "original_title_for_context": "Makav 真愛【embiyax su hug 你好嗎】Official Music Video - YouTube - 那屋瓦Nanguaq",
+    "changes": {
+      "title_original": {
+        "from": "Makav 真愛【embiyax su hug 你好嗎】Official Music Video - YouTube - 那屋瓦Nanguaq",
+        "to": "embiyax su hug"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "你好嗎"
+      },
+      "artist_credit": {
+        "from": "那屋瓦Nanguaq",
+        "to": "Makav 真愛"
+      }
+    },
+    "notes": "Corrected artist from the label (那屋瓦Nanguaq) to the performing artist (Makav 真愛); separated the original and Chinese titles from the longer YouTube video title."
+  },
+  {
+    "id": "1aa7000d-e5e2-46b9-8e57-54b5ed6dff58",
+    "yt_title": "Kivi【 macidilj 自己 】Official Music Video",
+    "original_title_for_context": "Kivi【 macidilj 自己 】Official Music Video - YouTube - 那屋瓦Nanguaq",
+    "changes": {
+      "title_original": {
+        "from": "Kivi【 macidilj 自己 】Official Music Video - YouTube - 那屋瓦Nanguaq",
+        "to": "macidilj"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "自己"
+      }
+    },
+    "notes": "Separated original and Chinese titles based on official sources and corrected artist's full name."
+  },
+  {
+    "id": "7717c877-45fe-4d1b-ace6-dd06dea21446",
+    "yt_title": "elrg兒路創作藝術工寮 | 相見歌-nanguaq那屋瓦[N.21]",
+    "original_title_for_context": "elrg兒路創作藝術工寮 | 相見歌-nanguaq那屋瓦[N.21] - YouTube - 那屋瓦Nanguaq",
+    "changes": {
+      "title_zh": {
+        "from": null,
+        "to": "相見歌"
+      },
+      "artist_credit": {
+        "from": "那屋瓦Nanguaq",
+        "to": "兒路創作藝術工寮"
+      }
+    },
+    "notes": "Artist credit was changed from the production company '那屋瓦Nanguaq' to the performing artist '兒路創作藝術工寮', which is a Truku arts collective. The Chinese title was also added."
+  },
+  {
+    "id": "521cda62-8a26-4e25-aba5-9d2cbf26d75b",
+    "yt_title": "張威龍-大地(排灣語創作)-NANGUAQ那屋瓦[N.16]",
+    "original_title_for_context": "張威龍-大地(排灣語創作)-NANGUAQ那屋瓦[N.16] - YouTube - 那屋瓦Nanguaq",
+    "changes": {
+      "title_original": {
+        "from": "張威龍-大地(排灣語創作)-NANGUAQ那屋瓦[N.16] - YouTube - 那屋瓦Nanguaq",
+        "to": "kadjunangan"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "大地"
+      }
+    },
+    "notes": "Corrected original title from YouTube video title to Paiwan language translation of '大地' (kadjunangan) and added the Chinese title."
+  },
+  {
+    "id": "f93c0490-8c26-4cef-920f-f869cf5786be",
+    "yt_title": "pangtre’|馬靖-murkezanga(堅強)-NANGUAQ那屋瓦[N.7]",
+    "original_title_for_context": "pangtre’|馬靖-murkezanga(堅強)-NANGUAQ那屋瓦[N.7] - YouTube - 那屋瓦Nanguaq",
+    "changes": {
+      "title_original": {
+        "from": "pangtre’|馬靖-murkezanga(堅強)-NANGUAQ那屋瓦[N.7] - YouTube - 那屋瓦Nanguaq",
+        "to": "murkezanga"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "堅強"
+      }
+    },
+    "notes": "Separated original title, Chinese title, and artist from the cluttered YouTube title. 'NANGUAQ那屋瓦' is a music project/label, not part of the song title."
+  },
+  {
+    "id": "40768d07-17ab-4f8f-8910-ace391a139f7",
+    "yt_title": "《太魯閣族▲祭祀祖靈古調♫》Taiwanese aborigines 彼得洛．烏嘎",
+    "original_title_for_context": "《太魯閣族▲祭祀祖靈古調♫》Taiwanese aborigines 彼得洛．烏嘎 - YouTube - HoHoBa 🍀Love🍀",
+    "changes": {
+      "title_zh": {
+        "from": null,
+        "to": "出草 (祭神歌)"
+      },
+      "artist_credit": {
+        "from": "HoHoBa 🍀Love🍀",
+        "to": "彼得洛．烏嘎 (Piteyo Ukah)"
+      }
+    },
+    "notes": "Artist credit was corrected to the performer, 彼得洛．烏嘎 (Piteyo Ukah), instead of the uploader channel. The Chinese title was updated to a more specific name, '出草 (祭神歌)', based on information from the Taiwan Digital Archives and other sources referencing his work with Truku ancient melodies."
+  },
+  {
+    "id": "f17e3732-fbce-4467-bee7-629e3241f539",
+    "yt_title": "Utjung舞炯恩 【Nasi生命／Su Vuvu Aken我是你的孩子】 (Short Film)",
+    "original_title_for_context": "Utjung舞炯恩 【Nasi生命／Su Vuvu Aken我是你的孩子】 (Short Film) - YouTube - 59N舞炯恩",
+    "changes": {
+      "title_original": {
+        "from": "Utjung舞炯恩 【Nasi生命／Su Vuvu Aken我是你的孩子】 (Short Film) - YouTube - 59N舞炯恩",
+        "to": "Nasi / Su Vuvu Aken"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "生命 / 我是你的孩子"
+      }
+    },
+    "notes": "Separated the two song titles (original and Chinese) and formatted them based on common metadata standards from the video's full title."
+  },
+  {
+    "id": "1f748153-001c-4b5a-b54c-25349c6deca7",
+    "yt_title": "alja' a'en na gadu i 'avulungan (feat. 黃麗貞)",
+    "original_title_for_context": "alja' a'en na gadu i 'avulungan (feat. 黃麗貞) - YouTube - 59N舞炯恩",
+    "changes": {
+      "title_original": {
+        "from": "alja' a'en na gadu i 'avulungan (feat. 黃麗貞) - YouTube - 59N舞炯恩",
+        "to": "alja' a'en na gadu i 'avulungan"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "大武山下的孩子"
+      },
+      "artist_credit": {
+        "from": "Utjung 舞炯恩",
+        "to": "舞炯恩 Utjung feat. 黃麗貞"
+      }
+    },
+    "notes": "Corrected original title by removing extraneous text. Added Chinese title based on album review. Refined artist credit to include both primary and featured artists."
+  },
+  {
+    "id": "a10f2328-8d75-4f9a-b12f-3e5be4fee879",
+    "yt_title": "風的能力者 - Lju li ma 思念 - 桑梅絹",
+    "original_title_for_context": "風的能力者 - Lju li ma 思念 - 桑梅絹 - YouTube - 風的能力者",
+    "changes": {
+      "title_original": {
+        "from": "風的能力者 - Lju li ma 思念 - 桑梅絹 - YouTube - 風的能力者",
+        "to": "Lju li ma"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "思念"
+      }
+    },
+    "notes": "Corrected original title to the Paiwan name and added its Chinese translation, based on album tracklists and music video descriptions. The song is from the album '風的能力者' (The one with the ability of wind)."
+  },
+  {
+    "id": "d1398a0b-97a6-4b4e-9f94-f6c09a76110c",
+    "yt_title": "第一代排灣女聲: {吳美婷} 魯凱古調＆我想要回家.創作者:杜花兒 ~原住民族國際音樂節~",
+    "original_title_for_context": "第一代排灣女聲: {吳美婷} 魯凱古調＆我想要回家.創作者:杜花兒 ~原住民族國際音樂節~ - YouTube - 曹瓦特",
+    "changes": {
+      "title_original": {
+        "from": "第一代排灣女聲: {吳美婷} 魯凱古調＆我想要回家.創作者:杜花兒 ~原住民族國際音樂節~ - YouTube - 曹瓦特",
+        "to": "Paiwan k古調 & 我想要回家"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "排灣古調 & 我想要回家"
+      },
+      "artist_credit": {
+        "from": "Kivi Pasulivai 吳美婷",
+        "to": "Kivi Pasulivai 吳美婷 & 杜花兒 Du Hua-er"
+      }
+    },
+    "notes": "Corrected artist's ethnic group from Rukai to Paiwan and adjusted the song title to reflect this. The performance is a medley of a Paiwan ancient melody and the song '我想要回家'. Added the composer of '我想要回家' as a credited artist."
+  },
+  {
+    "id": "40f68cfb-91e3-4bd1-889c-1aecfd880ea2",
+    "yt_title": "『We do SoR』布農族  kulumaha 回家",
+    "original_title_for_context": "『We do SoR』布農族 kulumaha 回家 - YouTube - Martin Chang",
+    "changes": {
+      "title_original": {
+        "from": "『We do SoR』布農族 kulumaha 回家 - YouTube - Martin Chang",
+        "to": "Kulumaha"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "回家"
+      }
+    },
+    "notes": "Corrected original title from YouTube video title to the actual song name 'Kulumaha' and added the common Chinese title '回家'. Artist credit is set to null as 'Martin Chang' is the uploader, and the actual performers from the 'We do SoR' group could not be definitively identified."
+  },
+  {
+    "id": "1f0b17d7-7a08-4a67-9671-a251171ad66f",
+    "yt_title": "Kulumaha回家吧｜布農聖詩",
+    "original_title_for_context": "Kulumaha回家吧｜布農聖詩 - YouTube - JF 耶式",
+    "changes": {
+      "title_original": {
+        "from": "Kulumaha回家吧｜布農聖詩 - YouTube - JF 耶式",
+        "to": "Kulumaha"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "回家吧"
+      },
+      "artist_credit": {
+        "from": "JF 耶式",
+        "to": "Jenny吳貞妮, Tarulribak 許凱蕾, Rowi•Osay 林紹恩, Osay•Amoy鄧偉婷, Yagu•Tanga 王祥如, Kacaw•Osay歐牧仁, Nakaw•Tomi 黃佳云, Ibi•Ispalakan呂錦宏, Niua•Istanda 胡恩惠, Bukun•Palalavi余士杰, Puni•Istanda 胡以斯帖, Makili•Isbabanal 杜峻原, Malas•Isbabanal 陳瑪菈絲"
+      }
+    },
+    "notes": "Corrected titles and credited the actual performers listed in the video description; 'JF 耶式' is the uploader, not the artist."
+  },
+  {
+    "id": "89845cad-a742-44e0-bad2-669ee444015c",
+    "yt_title": "DANUVAK|高詩捷-ZEMAWA(分享)-NANGUAQ那屋瓦[N.3]",
+    "original_title_for_context": "DANUVAK|高詩捷-ZEMAWA(分享)-NANGUAQ那屋瓦[N.3] - YouTube - 那屋瓦Nanguaq",
+    "changes": {
+      "title_original": {
+        "from": "DANUVAK|高詩捷-ZEMAWA(分享)-NANGUAQ那屋瓦[N.3] - YouTube - 那屋瓦Nanguaq",
+        "to": "Zemawa"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "分享"
+      },
+      "artist_credit": {
+        "from": "DANUVAK 高詩捷",
+        "to": "Danuvak 高詩捷"
+      }
+    },
+    "notes": "Corrected original title to 'Zemawa' and added Chinese title '分享' based on search results that identified it as a Puyuma song from the Nanguaq project. Standardized artist's romanized name capitalization."
+  },
+  {
+    "id": "578bf5f8-5a6d-4c24-b884-9c391d49beb5",
+    "yt_title": "senay za temuaali’an ngangidayan 友誼之歌",
+    "original_title_for_context": "senay za temuaali’an ngangidayan 友誼之歌 - YouTube - Katratripulr・卡大地布部落",
+    "changes": {
+      "title_original": {
+        "from": "senay za temuaali’an ngangidayan 友誼之歌 - YouTube - Katratripulr・卡大地布部落",
+        "to": "senay za temuaali’an ngangidayan"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "友誼之歌"
+      },
+      "artist_credit": {
+        "from": "DANUVAK 高詩捷",
+        "to": "高詩捷、馬靖、楊展、盧冠宇、陳侃伶、陳思瑾、陳昱蓁"
+      }
+    },
+    "notes": "Corrected title_original to remove extraneous text. Added title_zh based on YouTube title. Expanded artist_credit to include all vocalists listed in the video description."
+  },
+  {
+    "id": "112b772f-4683-4dd0-8169-eb68896b580c",
+    "yt_title": "Balu&grandmother|巴魯＆VUVU–Paiwan ancient ballad(排灣古謠)-NANGUAQ那屋瓦[N.5]",
+    "original_title_for_context": "Balu&grandmother|巴魯＆VUVU–Paiwan ancient ballad(排灣古謠)-NANGUAQ那屋瓦[N.5] - YouTube - 那屋瓦Nanguaq",
+    "changes": {
+      "title_original": {
+        "from": "Balu&grandmother|巴魯＆VUVU–Paiwan ancient ballad(排灣古謠)-NANGUAQ那屋瓦[N.5] - YouTube - 那屋瓦Nanguaq",
+        "to": "VUVU & BALU"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "排灣古謠"
+      },
+      "artist_credit": {
+        "from": "那屋瓦Nanguaq",
+        "to": "Balu & Vuvu (巴魯 & VUVU)"
+      }
+    },
+    "notes": "The original title, Chinese title, and artist credit have been corrected based on the video's description. The artist is identified as Balu and his grandmother (Vuvu), not the YouTube channel '那屋瓦Nanguaq'."
+  },
+  {
+    "id": "f40378b2-1844-4e70-9ddd-aae60585fba1",
+    "yt_title": "【嵐色旋律】2023EP44｜魯凱古謠—Ralhumedane ｜小魯凱｜TOLANSPACE LIVE SHOW｜",
+    "original_title_for_context": "【嵐色旋律】2023EP44｜魯凱古謠—Ralhumedane ｜小魯凱｜TOLANSPACE LIVE SHOW｜ - YouTube - LantianMusic Studio嵐天音樂",
+    "changes": {
+      "title_original": {
+        "from": "【嵐色旋律】2023EP44｜魯凱古謠—Ralhumedane ｜小魯凱｜TOLANSPACE LIVE SHOW｜ - YouTube - LantianMusic Studio嵐天音樂",
+        "to": "Ralhumedane"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "魯凱古謠—Ralhumedane"
+      },
+      "artist_credit": {
+        "from": "小魯凱",
+        "to": "小魯凱音樂傳創隊"
+      }
+    },
+    "notes": "Corrected artist_credit from '小魯凱' to the full group name '小魯凱音樂傳創隊' based on search results. Refined title_original to the song name and added a title_zh based on the video description."
+  },
+  {
+    "id": "64fa9220-9464-4c02-bf81-c4d28dd8e3a5",
+    "yt_title": "Kuljelje Tuquljingid|卓亞麥-老米酒Blues-NANGUAQ那屋瓦[N.6]",
+    "original_title_for_context": "Kuljelje Tuquljingid|卓亞麥-老米酒Blues-NANGUAQ那屋瓦[N.6] - YouTube - 那屋瓦Nanguaq",
+    "changes": {
+      "title_zh": {
+        "from": null,
+        "to": "老米酒Blues"
+      }
+    },
+    "notes": "Extracted Chinese title from the video title. The original title was incorrect and has been set to null as a distinct Paiwan-language title could not be found in search results."
+  },
+  {
+    "id": "0d376b9c-3645-4470-b290-1f5fe0426440",
+    "yt_title": "排灣族大武(富山部落)父子歌手 排灣組曲",
+    "original_title_for_context": "排灣族大武(富山部落)父子歌手 排灣組曲 - YouTube - Ku ljelje忠雄",
+    "changes": {
+      "title_original": {
+        "from": "排灣族大武(富山部落)父子歌手 排灣組曲 - YouTube - Ku ljelje忠雄",
+        "to": "Paiwan Medley"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "排灣組曲"
+      },
+      "artist_credit": {
+        "from": "Ku ljelje忠雄",
+        "to": "排灣族大武富山部落父子 (Paiwan father and son from Dawu Fushan)"
+      }
+    },
+    "notes": "The artist credit was changed from the YouTube channel name to a more accurate description of the performers. The original title was a descriptive phrase which has been distilled to 'Paiwan Medley' in English and Chinese, as a formal title could not be found."
+  },
+  {
+    "id": "532512ba-e8a1-48e2-acc8-2830b60b7fa3",
+    "yt_title": "阿美族歌曲 (那天晚上風的聲音) 檳榔兄弟",
+    "original_title_for_context": "阿美族歌曲 (那天晚上風的聲音) 檳榔兄弟 - YouTube - 曹瓦特",
+    "changes": {
+      "title_original": {
+        "from": "阿美族歌曲 (那天晚上風的聲音) 檳榔兄弟 - YouTube - 曹瓦特",
+        "to": "Uya suni nu bali tuya labii"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "那天晚上風的聲音"
+      }
+    },
+    "notes": "Added original Amis title and Chinese title based on search results."
+  },
+  {
+    "id": "40646402-7e71-4a60-ad47-6fd7980615a2",
+    "yt_title": "泰雅族民謠 Atayal Folk Song 【Swa I Yan ( Missing You ) 思念】（歐開合唱團 O-Kai Singers Cover)",
+    "original_title_for_context": "泰雅族民謠 Atayal Folk Song 【Swa I Yan ( Missing You ) 思念】（歐開合唱團 O-Kai Singers Cover) - YouTube - 歐開合唱團O-Kai Singers Official",
+    "changes": {
+      "title_original": {
+        "from": "泰雅族民謠 Atayal Folk Song 【Swa I Yan ( Missing You ) 思念】（歐開合唱團 O-Kai Singers Cover) - YouTube - 歐開合唱團O-Kai Singers Official",
+        "to": "Swa I Yan"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "思念"
+      }
+    },
+    "notes": "Extracted original Atayal title and Chinese (zh) title from the full YouTube video title."
+  },
+  {
+    "id": "8b71df0d-8ed9-4b92-9411-8849bb19a715",
+    "yt_title": "尤勞尤幹-泰雅情歌swa i yan（思念）",
+    "original_title_for_context": "尤勞尤幹-泰雅情歌swa i yan（思念） - YouTube - 尤幹尤勞",
+    "changes": {
+      "title_original": {
+        "from": "尤勞尤幹-泰雅情歌swa i yan（思念） - YouTube - 尤幹尤勞",
+        "to": "Swa I Yan"
+      },
+      "title_zh": {
+        "from": null,
+        "to": "思念"
+      },
+      "artist_credit": {
+        "from": "尤勞尤幹",
+        "to": "尤勞·尤幹 (Yuraw Yukan)"
+      }
+    },
+    "notes": "Corrected the original title from the descriptive YouTube title to the actual song name 'Swa I Yan'. Added the commonly used Chinese title '思念'. Verified and standardized the artist's name, including their romanized name."
+  },
+  {
+    "id": "442c828e-1982-43ce-9563-d4c019c74778",
+    "yt_title": "排灣族 古調 奈何+追憶+婚禮之歌",
+    "original_title_for_context": "Tjakudain / Qinalaina / Uwanaiyui",
+    "changes": {
+      "artist_credit": {
+        "from": "Kivi Basulivai",
+        "to": "蔡美雲 (Ljeljeng)"
+      }
+    },
+    "notes": "Corrected artist_credit from \"Kivi Basulivai\" to the actual singer, renowned Paiwan vocalist 蔡美雲 (Tsai Mei-Yun), also known by her Paiwan name Ljeljeng."
+  },
+  {
+    "id": "b9344281-7410-48b7-9da3-166765bb5397",
+    "yt_title": "馬蘭姑娘 by 原來是美族 #三姐妹",
+    "original_title_for_context": "Inaaw",
+    "changes": {
+      "title_original": {
+        "from": "Inaaw",
+        "to": "Inaaw hay ya amaaw"
+      }
+    },
+    "notes": "Corrected `title_original` to full first line of lyrics, as this is a common way to refer to the song in Amis."
+  }
+]

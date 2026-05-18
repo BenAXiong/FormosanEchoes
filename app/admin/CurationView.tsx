@@ -1,238 +1,176 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import type { Song, FilterState, ControlledVocab } from '@/lib/types';
-import { searchSongs } from '@/lib/search';
-import { filterSongs, DEFAULT_FILTERS } from '@/lib/filters';
-import SearchBar from '@/components/SearchBar';
-import FilterBar from '@/components/FilterBar';
-import SongCard from '@/components/SongCard';
-import SongDetailPanel from '@/components/SongDetailPanel';
-import AddSongPanel from '@/components/admin/AddSongPanel';
-import AddMultipleSongsPanel from '@/components/admin/AddMultipleSongsPanel';
+import { useState, useEffect } from 'react';
+import type { Song } from '@/lib/types';
+import SongsAdminView from '@/components/admin/SongsAdminView';
 import ArtistAuditPanel from '@/components/admin/ArtistAuditPanel';
 import MetricsPanel from '@/components/admin/MetricsPanel';
-import SongAuditPanel from '@/components/admin/SongAuditPanel';
-import vocab from '@/data/controlled-vocab.json';
 
-const typedVocab = vocab as ControlledVocab;
+type Tab = 'metrics' | 'songs' | 'artists';
 
-type Tab = 'browse' | 'add' | 'artists' | 'metrics';
-type AddMode = 'single' | 'multi' | 'audit';
-type ArtistMode = 'add' | 'edit';
+export type AdminFilters = {
+  language: string;
+  verification_status: string;
+  artist: string;
+  missing_field: string;
+};
 
-function SubTabBar<T extends string>({ tabs, active, onChange }: Readonly<{
-  tabs: [T, string][];
-  active: T;
-  onChange: (t: T) => void;
+const EMPTY_FILTERS: AdminFilters = { language: '', verification_status: '', artist: '', missing_field: '' };
+
+const MISSING_FIELDS = ['language', 'ethnic_group', 'no_artist', 'no_url', 'lyrics', 'lyrics_unapproved'];
+const MISSING_LABELS: Record<string, string> = {
+  language:         'No language',
+  ethnic_group:     'No ethnic group',
+  no_artist:        'No artist',
+  no_url:           'No URL',
+  lyrics:           'No lyrics',
+  lyrics_unapproved:'Lyrics unapproved',
+};
+
+const LANGUAGES = [
+  'Amis', 'Atayal', 'Paiwan', 'Bunun', 'Puyuma', 'Rukai', 'Tsou',
+  'Saisiyat', 'Tao (Yami)', 'Thao', 'Kavalan', 'Truku', 'Sakizaya',
+  'Seediq', "Hla'alua", 'Kanakanavu',
+];
+
+const VERIFICATION_STATUSES = [
+  'candidate', 'needs_review', 'checked', 'approved_public', 'approved_private', 'rejected', 'duplicate',
+];
+
+function FilterSelect({ label, value, onChange, options, optionLabels }: Readonly<{
+  label: string; value: string; onChange: (v: string) => void; options: string[];
+  optionLabels?: Record<string, string>;
 }>) {
   return (
-    <div className="flex gap-0 border-b border-white/10 px-6 pt-4">
-      {tabs.map(([id, label]) => (
-        <button
-          key={id}
-          onClick={() => onChange(id)}
-          className={`px-4 pb-3 text-xs font-semibold border-b-2 transition-colors
-            ${active === id ? 'border-white text-white' : 'border-transparent text-stone-500 hover:text-stone-300'}`}
-        >
-          {label}
-        </button>
-      ))}
+    <div className="flex items-center gap-1.5">
+      <span className="text-[10px] font-semibold text-stone-400 whitespace-nowrap">{label}</span>
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className={`w-32 text-xs rounded-md border px-2 py-1 focus:outline-none focus:ring-1 focus:ring-stone-400 transition-colors ${
+          value
+            ? 'bg-stone-800 border-stone-600 text-white'
+            : 'bg-stone-100 border-stone-200 text-stone-600'
+        }`}
+      >
+        <option value="">All</option>
+        {options.map(o => <option key={o} value={o}>{optionLabels?.[o] ?? o}</option>)}
+      </select>
     </div>
   );
 }
 
-function AddTab() {
-  const [mode, setMode] = useState<AddMode>('single');
+function FilterIcon({ className }: Readonly<{ className?: string }>) {
   return (
-    <div className="bg-[#0f0f16] rounded-xl border border-white/10 min-h-100 overflow-hidden">
-      <SubTabBar
-        tabs={[['single', 'Single Song'], ['multi', 'Multiple Songs'], ['audit', 'Edit Songs']]}
-        active={mode}
-        onChange={setMode}
-      />
-      <div className="p-6">
-        {mode === 'single' && <AddSongPanel />}
-        {mode === 'multi' && <AddMultipleSongsPanel />}
-        {mode === 'audit' && <SongAuditPanel />}
-      </div>
-    </div>
+    <svg className={className} viewBox="0 0 16 16" fill="currentColor">
+      <path d="M1.5 3h13a.5.5 0 0 1 .35.85L10 9.71V14a.5.5 0 0 1-.78.41l-3-2A.5.5 0 0 1 6 12V9.71L1.15 3.85A.5.5 0 0 1 1.5 3z"/>
+    </svg>
   );
 }
 
-function ArtistTab() {
-  const [mode, setMode] = useState<ArtistMode>('edit');
-  return (
-    <div className="bg-[#0f0f16] rounded-xl border border-white/10 min-h-100 overflow-hidden">
-      <SubTabBar
-        tabs={[['edit', 'Edit Artists'], ['add', 'Add Artist']]}
-        active={mode}
-        onChange={setMode}
-      />
-      <div className="p-6">
-        {mode === 'edit' && <ArtistAuditPanel />}
-        {mode === 'add' && (
-          <div className="flex items-center justify-center h-48 text-stone-600 text-sm italic">
-            Add Artist — coming soon
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+// songs prop kept for ISR compatibility with the admin page — not used internally
+export default function CurationView(_: { songs: Song[] }) {
+  const [tab, setTab]                 = useState<Tab>('metrics');
+  const [filtersOpen, setFiltersOpen] = useState(true);
+  const [filters, setFilters]         = useState<AdminFilters>(EMPTY_FILTERS);
+  const [artistOptions, setArtistOptions] = useState<string[]>([]);
 
-interface Props {
-  songs: Song[];
-}
+  const setFilter = <K extends keyof AdminFilters>(key: K, value: string) =>
+    setFilters(f => ({ ...f, [key]: value }));
 
-export default function CurationView({ songs }: Props) {
-  const [tab, setTab] = useState<Tab>('browse');
-  const [query, setQuery] = useState('');
-  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
-  const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+  // Load artist options whenever language or status filter changes
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (filters.language)            params.set('language',            filters.language);
+    if (filters.verification_status) params.set('verification_status', filters.verification_status);
+    const qs = params.toString();
+    fetch(`/api/admin/artist-options${qs ? `?${qs}` : ''}`)
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setArtistOptions(data); })
+      .catch(() => {});
+  }, [filters.language, filters.verification_status]);
 
-  const results = useMemo(() => {
-    const searched = searchSongs(songs, query);
-    return filterSongs(searched, filters);
-  }, [songs, query, filters]);
+  const hasActiveFilter = Object.values(filters).some(Boolean);
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="h-screen overflow-hidden bg-stone-50 flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
+      <header className="shrink-0 bg-white border-b border-stone-200 z-20 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-4">
           <div className="flex-1">
             <h1 className="text-lg font-bold text-stone-800 tracking-tight">
-              Formosan Echoes
-              <span className="ml-2 text-xs font-normal text-stone-400">台灣原住民音樂索引</span>
+              Formosan Echoes{' '}<span className="text-xs font-normal text-stone-400 ml-2">台灣原住民音樂索引</span>
             </h1>
             <p className="text-xs text-stone-400 hidden sm:block">Formosan-language song metadata browser · all entries are candidates unless verified</p>
           </div>
-          {/* Tab switcher */}
-          <div className="flex gap-1 bg-stone-100 rounded-lg p-1">
-            {(['browse', 'add', 'artists', 'metrics'] as Tab[]).map(t => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors ${
-                  tab === t
-                    ? 'bg-white text-stone-800 shadow-sm'
-                    : 'text-stone-500 hover:text-stone-700'
-                }`}
-              >
-                {{ browse: 'Browse', add: 'Songs', artists: 'Artists', metrics: 'Metrics' }[t]}
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setFiltersOpen(o => !o)}
+              title="Toggle filters"
+              className={`relative p-2 rounded-lg transition-colors ${
+                filtersOpen
+                  ? 'bg-stone-800 text-white'
+                  : 'bg-stone-100 text-stone-500 hover:bg-stone-200 hover:text-stone-700'
+              }`}
+            >
+              <FilterIcon className="w-4 h-4" />
+            </button>
+            <div className="flex gap-1 bg-stone-100 rounded-lg p-1">
+              {(['metrics', 'songs', 'artists'] as Tab[]).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setTab(t)}
+                  className={`px-5 py-2 rounded-md text-sm font-semibold transition-colors ${
+                    tab === t ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700'
+                  }`}
+                >
+                  {{ metrics: 'Metrics', songs: 'Songs', artists: 'Artists' }[t]}
+                </button>
+              ))}
+            </div>
           </div>
-          <span className="text-xs text-stone-400 tabular-nums hidden sm:inline">{results.length} / {songs.length}</span>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Filter bar */}
+      {filtersOpen && (
+        <div className="shrink-0 bg-white border-b border-stone-200 z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-4 flex-wrap">
+            <FilterSelect label="Language" value={filters.language}            onChange={v => setFilter('language', v)}            options={LANGUAGES} />
+            <FilterSelect label="Artist"   value={filters.artist}              onChange={v => setFilter('artist', v)}              options={artistOptions} />
+            <FilterSelect label="Status"   value={filters.verification_status} onChange={v => setFilter('verification_status', v)} options={VERIFICATION_STATUSES} />
+            <FilterSelect label="Missing"  value={filters.missing_field}       onChange={v => setFilter('missing_field', v)}       options={MISSING_FIELDS} optionLabels={MISSING_LABELS} />
+            {hasActiveFilter && (
+              <button
+                onClick={() => setFilters(EMPTY_FILTERS)}
+                className="text-[10px] text-stone-400 hover:text-stone-700 transition-colors ml-auto"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
-        {/* ── Add Song tab ── */}
-        {tab === 'add' && <AddTab />}
+      <main className={`flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 ${
+        tab === 'songs' ? 'overflow-hidden' : 'overflow-y-auto'
+      }`}>
 
-        {/* ── Artists tab ── */}
-        {tab === 'artists' && <ArtistTab />}
-
-        {/* ── Metrics tab ── */}
         {tab === 'metrics' && (
-          <div className="bg-[#0f0f16] rounded-xl border border-white/10 min-h-100">
-            <MetricsPanel />
+          <div className="bg-[#0f0f16] rounded-xl border border-white/10">
+            <MetricsPanel filters={filters} />
           </div>
         )}
 
-        {/* ── Browse tab ── */}
-        {tab === 'browse' && (
-          <>
-            {/* Search */}
-            <div className="mb-4">
-              <SearchBar value={query} onChange={setQuery} />
-            </div>
+        {tab === 'songs' && <SongsAdminView filters={filters} />}
 
-            {/* Filters */}
-            <div className="mb-6 p-4 bg-white rounded-xl border border-stone-200 shadow-sm">
-              <FilterBar filters={filters} onChange={setFilters} vocab={typedVocab} />
-            </div>
-
-        {/* Two-column layout on desktop */}
-            <div className="flex gap-6 items-start">
-              {/* Song list */}
-              <section
-                aria-label="Song list"
-                className={`shrink-0 ${selectedSong ? 'w-full lg:w-80 xl:w-96' : 'w-full'}`}
-              >
-                {results.length === 0 ? (
-                  <div className="rounded-xl border border-stone-200 bg-white px-6 py-12 text-center">
-                    <p className="text-stone-400 text-sm">No songs match your search or filters.</p>
-                    <p className="text-stone-300 text-xs mt-1">Try clearing the search or adjusting filters.</p>
-                  </div>
-                ) : (
-                  <ul className="flex flex-col gap-2">
-                    {results.map((song) => (
-                      <li key={song.id}>
-                        <SongCard
-                          song={song}
-                          isSelected={selectedSong?.id === song.id}
-                          onSelect={setSelectedSong}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </section>
-
-              {/* Detail panel */}
-              {selectedSong && (
-                <section
-                  aria-label="Song detail"
-                  className="hidden lg:block flex-1 min-w-0 bg-white rounded-xl border border-stone-200 p-6 shadow-sm"
-                >
-                  <div className="flex items-center justify-between mb-5">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">Selected Song</span>
-                    <button
-                      onClick={() => setSelectedSong(null)}
-                      className="text-stone-400 hover:text-stone-600 transition-colors text-xs"
-                      aria-label="Close detail panel"
-                    >
-                      ✕ Close
-                    </button>
-                  </div>
-                  <SongDetailPanel song={selectedSong} />
-                </section>
-              )}
-            </div>
-
-            {/* Mobile: selected song appears below list */}
-            {selectedSong && (
-              <section
-                aria-label="Song detail"
-                className="lg:hidden mt-4 bg-white rounded-xl border border-stone-200 p-5 shadow-sm"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">Selected Song</span>
-                  <button
-                    onClick={() => setSelectedSong(null)}
-                    className="text-stone-400 hover:text-stone-600 transition-colors text-xs"
-                    aria-label="Close detail panel"
-                  >
-                    ✕ Close
-                  </button>
-                </div>
-                <SongDetailPanel song={selectedSong} />
-              </section>
-            )}
-          </>
+        {tab === 'artists' && (
+          <div className="bg-[#0f0f16] rounded-xl border border-white/10 overflow-hidden p-6">
+            <ArtistAuditPanel />
+          </div>
         )}
-      </main>
 
-      <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-4 border-t border-stone-200">
-        <p className="text-xs text-stone-400 text-center">
-          Formosan Echoes · Cultural metadata browser · All entries are candidates unless marked verified ·{' '}
-          <span className="italic">Candidate data should not be cited as authoritative.</span>
-        </p>
-      </footer>
+      </main>
     </div>
   );
 }

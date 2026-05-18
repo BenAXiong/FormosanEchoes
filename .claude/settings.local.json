@@ -19,7 +19,15 @@
       "Bash(git mv *)",
       "Bash(New-Item -ItemType Directory -Force app/api/search-lyrics)",
       "Bash(Out-Null)",
-      "Bash(Remove-Item -Recurse -Force app/api/demo)"
+      "Bash(Remove-Item -Recurse -Force app/api/demo)",
+      "Bash(git rm *)",
+      "Bash(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\Ben\\\\Documents\\\\LL\\\\6_ycm\\\\Echoes\\\\app\\\\api\\\\admin\\\\similar-songs\")",
+      "Bash(Write-Output \"ok\")",
+      "Bash(Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue)",
+      "Bash(node --input-type=module)",
+      "Bash(node scripts/fix-yt-metadata.mjs)",
+      "Bash(node scripts/patch-sapuy-url.mjs)",
+      "Bash(node scripts/ai-metadata-pass2.mjs)"
     ]
   }
 }
