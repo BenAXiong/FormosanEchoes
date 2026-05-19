@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { Song } from '@/lib/types';
 import SongsAdminView from '@/components/admin/SongsAdminView';
-import ArtistAuditPanel from '@/components/admin/ArtistAuditPanel';
+import ArtistsAdminView from '@/components/admin/ArtistsAdminView';
 import MetricsPanel from '@/components/admin/MetricsPanel';
 
 type Tab = 'metrics' | 'songs' | 'artists';
@@ -13,12 +13,16 @@ export type AdminFilters = {
   verification_status: string;
   artist: string;
   missing_field: string;
+  ethnic_group: string;
+  artist_missing_field: string;
 };
 
-const EMPTY_FILTERS: AdminFilters = { language: '', verification_status: '', artist: '', missing_field: '' };
+const EMPTY_FILTERS: AdminFilters = { language: '', verification_status: '', artist: '', missing_field: 'any_core', ethnic_group: '', artist_missing_field: '' };
 
-const MISSING_FIELDS = ['language', 'ethnic_group', 'no_artist', 'no_url', 'lyrics', 'lyrics_unapproved'];
+const MISSING_FIELDS = ['any', 'any_core', 'language', 'ethnic_group', 'no_artist', 'no_url', 'lyrics', 'lyrics_unapproved'];
 const MISSING_LABELS: Record<string, string> = {
+  any:              'Any missing',
+  any_core:         'Any missing*',
   language:         'No language',
   ethnic_group:     'No ethnic group',
   no_artist:        'No artist',
@@ -27,11 +31,24 @@ const MISSING_LABELS: Record<string, string> = {
   lyrics_unapproved:'Lyrics unapproved',
 };
 
+const ARTIST_MISSING_FIELDS = ['any', 'no_bio', 'no_ethnic_group', 'no_language', 'no_active_years', 'no_links', 'no_linked_songs'];
+const ARTIST_MISSING_LABELS: Record<string, string> = {
+  any:             'Any missing',
+  no_bio:          'No bio',
+  no_ethnic_group: 'No ethnic group',
+  no_language:     'No language',
+  no_active_years: 'No active years',
+  no_links:        'No links',
+  no_linked_songs: 'No songs',
+};
+
 const LANGUAGES = [
   'Amis', 'Atayal', 'Paiwan', 'Bunun', 'Puyuma', 'Rukai', 'Tsou',
   'Saisiyat', 'Tao (Yami)', 'Thao', 'Kavalan', 'Truku', 'Sakizaya',
   'Seediq', "Hla'alua", 'Kanakanavu',
 ];
+
+const ETHNIC_GROUPS = LANGUAGES; // same 16 groups
 
 const VERIFICATION_STATUSES = [
   'candidate', 'needs_review', 'checked', 'approved_public', 'approved_private', 'rejected', 'duplicate',
@@ -74,9 +91,17 @@ export default function CurationView(_: { songs: Song[] }) {
   const [filtersOpen, setFiltersOpen] = useState(true);
   const [filters, setFilters]         = useState<AdminFilters>(EMPTY_FILTERS);
   const [artistOptions, setArtistOptions] = useState<string[]>([]);
+  const [unlinkedCount, setUnlinkedCount] = useState(0);
 
   const setFilter = <K extends keyof AdminFilters>(key: K, value: string) =>
     setFilters(f => ({ ...f, [key]: value }));
+
+  useEffect(() => {
+    fetch('/api/admin/unlinked-artists')
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setUnlinkedCount(data.length); })
+      .catch(() => {});
+  }, []);
 
   // Load artist options whenever language or status filter changes
   useEffect(() => {
@@ -125,6 +150,11 @@ export default function CurationView(_: { songs: Song[] }) {
                   }`}
                 >
                   {{ metrics: 'Metrics', songs: 'Songs', artists: 'Artists' }[t]}
+                  {t === 'artists' && unlinkedCount > 0 && (
+                    <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold leading-none">
+                      {unlinkedCount > 9 ? '9+' : unlinkedCount}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -136,10 +166,18 @@ export default function CurationView(_: { songs: Song[] }) {
       {filtersOpen && (
         <div className="shrink-0 bg-white border-b border-stone-200 z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-4 flex-wrap">
-            <FilterSelect label="Language" value={filters.language}            onChange={v => setFilter('language', v)}            options={LANGUAGES} />
-            <FilterSelect label="Artist"   value={filters.artist}              onChange={v => setFilter('artist', v)}              options={artistOptions} />
-            <FilterSelect label="Status"   value={filters.verification_status} onChange={v => setFilter('verification_status', v)} options={VERIFICATION_STATUSES} />
-            <FilterSelect label="Missing"  value={filters.missing_field}       onChange={v => setFilter('missing_field', v)}       options={MISSING_FIELDS} optionLabels={MISSING_LABELS} />
+            {(tab === 'metrics' || tab === 'songs') && <>
+              <FilterSelect label="Language" value={filters.language}            onChange={v => setFilter('language', v)}            options={LANGUAGES} />
+              <FilterSelect label="Artist"   value={filters.artist}              onChange={v => setFilter('artist', v)}              options={artistOptions} />
+              <FilterSelect label="Status"   value={filters.verification_status} onChange={v => setFilter('verification_status', v)} options={VERIFICATION_STATUSES} />
+            </>}
+            {tab === 'songs' && (
+              <FilterSelect label="Missing" value={filters.missing_field} onChange={v => setFilter('missing_field', v)} options={MISSING_FIELDS} optionLabels={MISSING_LABELS} />
+            )}
+            {tab === 'artists' && <>
+              <FilterSelect label="Ethnic group" value={filters.ethnic_group}         onChange={v => setFilter('ethnic_group', v)}         options={ETHNIC_GROUPS} />
+              <FilterSelect label="Missing"      value={filters.artist_missing_field} onChange={v => setFilter('artist_missing_field', v)} options={ARTIST_MISSING_FIELDS} optionLabels={ARTIST_MISSING_LABELS} />
+            </>}
             {hasActiveFilter && (
               <button
                 onClick={() => setFilters(EMPTY_FILTERS)}
@@ -165,8 +203,8 @@ export default function CurationView(_: { songs: Song[] }) {
         {tab === 'songs' && <SongsAdminView filters={filters} />}
 
         {tab === 'artists' && (
-          <div className="bg-[#0f0f16] rounded-xl border border-white/10 overflow-hidden p-6">
-            <ArtistAuditPanel />
+          <div className="h-full overflow-hidden">
+            <ArtistsAdminView filters={filters} />
           </div>
         )}
 

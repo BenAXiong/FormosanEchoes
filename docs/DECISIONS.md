@@ -264,11 +264,11 @@ Format:
 
 ## [ADMIN] Gemini 2.5 Flash for enrichment (not Pro)
 
+> **Superseded by [ADMIN] Gemini 2.5 Pro (2026-05-18).** Kept for historical context.
+
 **Chosen:** `gemini-2.5-flash` in `/api/admin/enrich-song`.
 
 **Why:** Flash is fast enough for interactive use (admin waits for the result) and cheap enough for frequent calls during bulk data entry. Pro-level reasoning is not needed for structured metadata extraction from song titles + YouTube context.
-
-**When to upgrade:** When the batch import pipeline needs to process hundreds of songs autonomously and accuracy on ambiguous cases becomes the bottleneck. Upgrade to `gemini-2.5-pro` at that point.
 
 **Date:** 2026-05-15
 
@@ -320,3 +320,129 @@ const registerMirrorSeekFn = useCallback((fn) => { mirrorSeekFnRef.current = fn;
 **Why:** Avoids collisions with other local projects running on the default 3000 or 3001.
 
 **Date:** 2026-05-15
+
+---
+
+## [ADMIN] Gemini 2.5 Pro (not Flash) for production enrichment
+
+**Chosen:** `gemini-2.5-pro` in `/api/admin/enrich-song/route.ts`.
+
+**Why:** Flash was fast but produced noticeably lower accuracy on ambiguous song attribution and language identification — exactly the cases where errors matter most. The dataset is small enough that cost is not a concern. Pro is the right default; Flash is only appropriate for high-volume batch pipelines where speed and cost dominate.
+
+**Rejected:** Keeping Flash. Also rejected routing ambiguous cases to Pro and clear cases to Flash — premature complexity.
+
+**Date:** 2026-05-18
+
+---
+
+## [ADMIN] Three save paths with different semantics
+
+**Chosen:** Three distinct code paths to write enriched song data to Supabase:
+
+1. **Single-song manual save** (`saveSelected`, `fields` branch of `update-song`) — triggered by "Save Changes". Writes the full `DraftForm` as-is, including whatever the user has typed. `show_publicly` is written from the checkbox.
+2. **Batch review save** (`saveBatchSong`, same `fields` branch) — triggered per-song in the left-rail checklist. Semantically identical to Path 1 but draws from `BatchEntry.draft` instead of the right-panel state.
+3. **Research All auto-save** (`saveAllResearched`, `enriched` branch of `update-song`) — skips the form entirely and writes the raw Gemini result. Only populates fields the AI returned. Always sets `show_publicly: false`. Writes the `[not found]` sentinel when the AI found no lyrics.
+
+**Why:** The three paths serve fundamentally different intents: (1) is human-authored, (2) is human-reviewed AI, (3) is autonomous AI. Collapsing them into one path would either require the human to always review before saving (too slow) or risk auto-publishing AI lyrics (unacceptable).
+
+**Implication:** Any bug fix to lyrics writing must be checked against all three paths. They have historically diverged (e.g. the `[not found]` sentinel was missing from Path 3 for a period).
+
+**Date:** 2026-05-18
+
+---
+
+## [ADMIN] Research merge: draft-as-base, not DB-as-base
+
+**Chosen:** `mergeEnriched(currentDraft, aiResult)` — the current form state is the merge base. The AI result wins for any field it returns non-null; draft values are the fallback.
+
+**Why:** Before this change, merge base was `draftFromSong(song)` (fresh from DB), so any field the user had manually corrected before clicking Research was silently discarded. The new behaviour lets intentional corrections (e.g. fixing a wrong artist name) survive re-research and also get sent to the AI as context.
+
+**Tradeoff:** If the user has accidentally typed a wrong value in a field and the AI returns null for that field, the wrong value persists (previously it would have reverted to the DB empty value). In practice this is rare and recoverable.
+
+**Corollary:** The fetch payload to `/api/admin/enrich-song` also sends `draft.artist_credit` and `draft.title_original || draft.title_zh` (not DB values) so that corrections inform the AI search, not just the merge.
+
+**Date:** 2026-05-19
+
+---
+
+## [ADMIN] `title_original` constraints: no Chinese, sentence case
+
+**Chosen:** `title_original` must be romanized or indigenous-script only. Chinese characters are rejected by a `hasChinese()` guard in `mergeEnriched`. If the AI only found a Chinese title, it goes to `title_zh` instead. The Gemini system prompt instructs sentence case (e.g. `"Senasenai"`, not `"SENASENAI"`).
+
+**Why:** `title_original` is frequently used as the primary display title in search and card views. Chinese characters in this field break romanization-first display logic and are misleading — an AI-translated Chinese title is not an "original" title. Sentence case normalizes the visual presentation across diverse orthographies.
+
+**Guard implementation:**
+```typescript
+function hasChinese(v: string | null | undefined): boolean {
+  return !!v && /[一-鿿㐀-䶿]/.test(v);
+}
+// In mergeEnriched:
+title_original: (e.title_original && !hasChinese(e.title_original))
+                 ? e.title_original : base.title_original,
+```
+
+**Date:** 2026-05-18
+
+---
+
+## [ADMIN] `artist_credit` vs `artist_display`
+
+**Chosen:** Two separate fields on `AdminSong`:
+- `artist_credit` — raw string from `songs.artist_credit`. Preserved exactly. Used as edit form value and as research API context parameter.
+- `artist_display` — computed from `song_artists → artists → artist_names` join. Format: `"EnglishName - 中文名"` per artist, joined with ` × ` for multiple. `null` if no artist is linked. Read-only in the UI (shown in the song card header).
+
+**Why:** The raw credit must be preserved for provenance and manual editing. The display string requires a DB join and can only be computed server-side. They serve different purposes and must not be conflated.
+
+**Implication:** Do not try to derive `artist_display` from `artist_credit` on the client — it requires the `artist_names` join. The `/api/admin/unaudited-songs` route computes it and returns it alongside `artist_credit`.
+
+**Date:** 2026-05-18
+
+---
+
+## [ADMIN] `lyrics.source` sentinel for no-lyrics search attempts
+
+**Chosen:** When AI research finds no lyrics, write `[not found — AI YYYY-MM-DD]` to `lyrics.source` with no lyrics content. This creates a lyrics row that marks the search attempt without adding any content.
+
+**Why:** Without the sentinel, a song with no lyrics row looks identical to a song that was never researched — both show the `lyrics` missing badge. The sentinel distinguishes "searched, found nothing" from "never tried", which matters for deciding whether to retry or accept the song has no available lyrics.
+
+**Implementation detail:** The `missing` badge logic checks:
+```typescript
+const lyricsSearched = (s.lyrics?.source ?? '').startsWith('[not found');
+if (!hasLyricsContent && !lyricsSearched) missing.push('lyrics');
+else if (hasLyricsContent && !s.lyrics?.show_publicly) missing.push('lyrics_unapproved');
+```
+A song with the sentinel gets neither badge — it is treated as "handled".
+
+**Date:** 2026-05-18
+
+---
+
+## [ADMIN] Grounding sources as `{ url, title }` objects
+
+**Chosen:** `/api/admin/enrich-song` returns `sources: { url: string; title: string | null }[]` extracted from `groundingMetadata.groundingChunks[].web`. The `title` field is the human-readable site name. The `url` is the Vertex AI proxy redirect.
+
+**Why:** The raw Vertex proxy URLs (`vertexaisearch.cloud.google.com/grounding-api-redirect/…`) are expiring, unreadable, and meaningless as saved references. The `title` field (e.g. "Klokah 族語E樂園", "MoJim 官方網站") is what the user actually cares about for source attribution. The URL is still needed as a click target within the session.
+
+**Downstream uses:**
+- Pills displayed below the form use `title ?? url` as the label.
+- When Gemini returns a generic `lyrics_source` like `"AI research — YYYY-MM-DD"` but grounding sources are present, the first source's `title` is promoted to `lyrics_source` as a better attribution.
+
+**Date:** 2026-05-18
+
+---
+
+## [ADMIN] `title_chinese` rules: official sources only, no AI translation
+
+**Chosen:** `title_zh` may only contain a Chinese name that is:
+1. Officially published (album cover, artist page, KKBOX, Spotify, 五大唱片), or
+2. Clearly present as the song's title in the YouTube video title.
+
+AI must not translate the indigenous title into Chinese and put it in `title_chinese`.
+
+Genre/style descriptors that appear in YouTube titles (e.g. "古調", "族語歌曲", "傳統歌謠") are labels, not titles — they must not be used as `title_chinese`.
+
+**Why:** An AI-generated Chinese title looks authoritative but is actually an interpretation. It can conflict with what the artist themselves published, confuse search results, and erode the dataset's trustworthiness. The Chinese title is only valuable if it's what the song is actually known by in the broader Taiwanese market.
+
+**Implication:** If the system prompt rule is ever weakened or removed, expect AI to start filling `title_zh` with plausible-sounding but unverified translations.
+
+**Date:** 2026-05-18

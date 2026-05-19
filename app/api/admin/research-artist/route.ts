@@ -56,21 +56,20 @@ Search strategy — follow in order:
 
 Return ONLY a valid JSON object (no markdown, no fences):
 {
-  "id": "leave as null, will be generated",
-  "name_display": "primary name for display (prefer indigenous form if exists)",
-  "names_zh": ["list", "of", "Chinese", "names"],
-  "names_rom": ["list", "of", "Romanized", "names"],
-  "names_indigenous": ["list", "of", "Indigenous", "script", "names", "if", "applicable"],
+  "name_display": "primary name for display (prefer indigenous/romanized form if exists)",
+  "names_zh": ["Chinese name variants — first entry is the primary one"],
+  "names_en": ["Latin/romanized name variants — first entry is the primary one, include all known spellings"],
+  "names_ab": ["Indigenous-script names if applicable (Cjavi, Puyuma script, etc.), else []"],
   "zh_surname": "Chinese surname if applicable, else null",
-  "ethnic_group": "one of the 16 official groups (Amis, Atayal, Paiwan, Bunun, Puyuma, Rukai, Tsou, Saisiyat, Tao (Yami), Thao, Kavalan, Truku, Sakizaya, Seediq, Hla'alua, Kanakanavu) or null",
+  "ethnic_groups": ["array of matching groups from: Amis, Atayal, Paiwan, Bunun, Puyuma, Rukai, Tsou, Saisiyat, Tao (Yami), Thao, Kavalan, Truku, Sakizaya, Seediq, Hla'alua, Kanakanavu — most artists have just one, some span two"],
   "language": "primary language used by artist, or null",
-  "is_group": true/false,
+  "is_group": true,
   "active_years": "string like '2010s–present' or null",
   "bio_zh": "short Chinese bio (1-2 sentences)",
   "bio_en": "short English bio (1-2 sentences)",
-  "notable_works": ["list", "of", "2-3", "notable", "songs", "or", "albums"],
   "youtube_channel": "URL if found, else null",
   "wikipedia_url": "URL if found, else null",
+  "photo_url": "A direct URL to a publicly accessible portrait photo (JPEG/PNG/WebP). Prefer: Wikipedia commons image files (e.g. https://upload.wikimedia.org/…), official press photos, or artist profile images. Must be a direct image URL, not a page URL. null if none found.",
   "sources": ["list", "of", "URLs", "used"],
   "notes": "any relevant context",
   "members": [{"name_display": "member name as commonly known"}]
@@ -84,7 +83,14 @@ function splitArtistString(raw: string): string[] {
     .split(/\s+(?:feat\.?|ft\.?|and|&|[×x])\s+/i)
     .map(p => p.trim())
     .filter(Boolean);
-  return parts.length > 1 ? parts : [raw];
+  // Also extract inner parenthetical names: "王宏恩 (Biung Wang)" → ["王宏恩 (Biung Wang)", "王宏恩", "Biung Wang"]
+  const tokens: string[] = [];
+  for (const part of parts.length > 1 ? parts : [raw]) {
+    tokens.push(part);
+    const m = part.match(/^(.+?)\s*\((.+?)\)\s*$/);
+    if (m) { tokens.push(m[1].trim(), m[2].trim()); }
+  }
+  return [...new Set(tokens)];
 }
 
 export async function POST(request: Request) {
@@ -147,17 +153,30 @@ export async function POST(request: Request) {
     `\nProvide the full metadata object.`,
   ].filter(Boolean).join('\n');
 
-  try {
+  async function callGemini(modelName: string) {
     const genai = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genai.getGenerativeModel(
-      { model: 'gemini-2.5-pro', tools: [{ googleSearch: {} } as any] },  // eslint-disable-line @typescript-eslint/no-explicit-any
+      { model: modelName, tools: [{ googleSearch: {} } as any] },  // eslint-disable-line @typescript-eslint/no-explicit-any
       { timeout: 110_000 },
     );
-
-    const result = await model.generateContent([
+    return model.generateContent([
       { text: SYSTEM_PROMPT },
       { text: userMessage },
     ]);
+  }
+
+  try {
+    let result: Awaited<ReturnType<typeof callGemini>>;
+    try {
+      result = await callGemini('gemini-2.5-pro');
+    } catch (proErr: unknown) {
+      const status = (proErr as any)?.status;  // eslint-disable-line @typescript-eslint/no-explicit-any
+      if (status === 503 || status === 429) {
+        result = await callGemini('gemini-2.5-flash');
+      } else {
+        throw proErr;
+      }
+    }
 
     const raw = result.response.text().trim();
     const jsonStr = raw.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim();

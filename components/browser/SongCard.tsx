@@ -11,8 +11,7 @@ function resolveArtistName(song: Song, artistMap: Map<string, Artist> | undefine
       .map(id => {
         const a = artistMap.get(id);
         if (!a) return null;
-        // Prefer name_display when romanized; fall back to names_rom[0] when display is Chinese
-        const rom = CJK.test(a.name_display) ? (a.names_rom[0] ?? a.name_display) : a.name_display;
+        const rom = CJK.test(a.name_display) ? (a.names_en[0] ?? a.name_display) : a.name_display;
         const zh  = a.names_zh[0];
         return showZh && zh ? `${rom} (${zh})` : rom;
       })
@@ -91,9 +90,10 @@ interface Props {
   artistMap?: Map<string, Artist>;
   showSongZh?: boolean;
   showArtistZh?: boolean;
+  onArtistClick?: (artistId: string) => void;
 }
 
-export default function SongCard({ song, isSelected, isPlaying, onSelect, compact = false, artistMap, showSongZh = true, showArtistZh = false }: Props) {
+export default function SongCard({ song, isSelected, isPlaying, onSelect, compact = false, artistMap, showSongZh = true, showArtistZh = false, onArtistClick }: Props) {
   const { isPlaying: globalIsPlaying, togglePlay, toggleFavorite, isFavorite } = usePlayer();
   const gradient = getLangGradient(song.language_claimed);
   const title = getDisplayTitle(song);
@@ -167,7 +167,14 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
         {/* Text */}
         <div className="flex-1 min-w-0">
           <p className={`text-sm font-semibold truncate leading-tight ${isPlaying ? 'text-emerald-500' : 'text-white'} ${titleFallback ? 'italic' : ''}`}>{title}</p>
-          <p className="text-stone-400 text-xs truncate mt-0.5">{artist}</p>
+          {onArtistClick && song.artist_ids?.length ? (
+            <button
+              onClick={e => { e.stopPropagation(); onArtistClick(song.artist_ids![0]); }}
+              className="text-stone-400 text-xs truncate mt-0.5 hover:text-stone-200 transition-colors text-left w-full"
+            >{artist}</button>
+          ) : (
+            <p className="text-stone-400 text-xs truncate mt-0.5">{artist}</p>
+          )}
         </div>
 
         {/* Indicators */}
@@ -259,7 +266,14 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
         </div>
         <div className="pl-0">
           {showSongZh && <p className="text-stone-400 text-xs truncate mt-0.5">{zhTitle}</p>}
-          <p className={`text-stone-300 text-xs font-medium truncate ${showSongZh ? 'mt-1.5' : 'mt-0.5'}`}>{artist}</p>
+          {onArtistClick && song.artist_ids?.length ? (
+            <button
+              onClick={e => { e.stopPropagation(); onArtistClick(song.artist_ids![0]); }}
+              className={`text-stone-300 text-xs font-medium truncate hover:text-white transition-colors text-left w-full ${showSongZh ? 'mt-1.5' : 'mt-0.5'}`}
+            >{artist}</button>
+          ) : (
+            <p className={`text-stone-300 text-xs font-medium truncate ${showSongZh ? 'mt-1.5' : 'mt-0.5'}`}>{artist}</p>
+          )}
         </div>
       </div>
     </div>

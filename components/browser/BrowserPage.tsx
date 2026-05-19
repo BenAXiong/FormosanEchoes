@@ -20,6 +20,8 @@ import { filterSongs, DEFAULT_FILTERS } from '@/lib/filters';
 import SongCard from '@/components/browser/SongCard';
 import NowPlaying from '@/components/browser/NowPlaying';
 import FilterSidebar from '@/components/browser/FilterSidebar';
+import ArtistCard from '@/components/browser/ArtistCard';
+import ArtistDetailPanel from '@/components/browser/ArtistDetailPanel';
 import { usePlayer } from '@/lib/PlayerContext';
 
 type LyricsMatch = {
@@ -68,6 +70,10 @@ export default function BrowserPage({ songs, artists }: Props) {
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
   const [selected, setSelected] = useState<Song | null>(null);
+  const [activeTab, setActiveTab] = useState<'songs' | 'artists'>('songs');
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [artistQuery, setArtistQuery] = useState('');
+  const [artistLanguage, setArtistLanguage] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [autoplay, setAutoplay] = useState(false);
   const [compact, setCompact] = useState(false);
@@ -120,6 +126,34 @@ export default function BrowserPage({ songs, artists }: Props) {
     for (const a of artists) m.set(a.id, a);
     return m;
   }, [artists]);
+
+  const songCountMap = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const s of songs) {
+      for (const id of s.artist_ids ?? []) {
+        m.set(id, (m.get(id) ?? 0) + 1);
+      }
+    }
+    return m;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [songs]);
+
+  const filteredArtists = useMemo(() => {
+    let list = artists;
+    if (artistLanguage) {
+      list = list.filter(a => a.language === artistLanguage);
+    }
+    if (artistQuery.trim()) {
+      const q = artistQuery.toLowerCase();
+      list = list.filter(a =>
+        a.name_display.toLowerCase().includes(q) ||
+        a.names_zh.some(n => n.toLowerCase().includes(q)) ||
+        a.names_en.some(n => n.toLowerCase().includes(q)) ||
+        a.names_ab.some(n => n.toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [artists, artistQuery, artistLanguage]);
 
   const results = useMemo(() => {
     const searched = searchSongs(songs, query);
@@ -259,6 +293,13 @@ export default function BrowserPage({ songs, artists }: Props) {
           totalCount={songs.length}
           allSongs={sidebarPool}
           allArtists={artists}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          artistQuery={artistQuery}
+          onArtistQueryChange={setArtistQuery}
+          artistLanguage={artistLanguage}
+          onArtistLanguageChange={setArtistLanguage}
+          filteredArtistCount={filteredArtists.length}
         />
       </div>
 
@@ -405,7 +446,34 @@ export default function BrowserPage({ songs, artists }: Props) {
         </div>
 
         <div className="flex-1 overflow-y-auto thin-scrollbar px-4 sm:px-5 py-5">
-          {results.length === 0 ? (
+          {activeTab === 'artists' ? (
+            filteredArtists.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-64 gap-3">
+                <span className="text-4xl text-stone-700" aria-hidden>♪</span>
+                <p className="text-stone-500 text-sm">No artists match your search.</p>
+                <button
+                  onClick={() => { setArtistQuery(''); setArtistLanguage(''); }}
+                  className="text-xs text-stone-400 hover:text-white transition-colors underline underline-offset-2"
+                >Clear</button>
+              </div>
+            ) : (
+              <ul
+                className="grid gap-4"
+                style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))' }}
+              >
+                {filteredArtists.map(artist => (
+                  <li key={artist.id}>
+                    <ArtistCard
+                      artist={artist}
+                      songCount={songCountMap.get(artist.id) ?? 0}
+                      isSelected={selectedArtist?.id === artist.id}
+                      onClick={() => setSelectedArtist(a => a?.id === artist.id ? null : artist)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )
+          ) : results.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 gap-3">
               <span className="text-4xl text-stone-700" aria-hidden>♪</span>
               <p className="text-stone-500 text-sm">No songs match your filters.</p>
@@ -427,6 +495,7 @@ export default function BrowserPage({ songs, artists }: Props) {
                     artistMap={artistMap}
                     showSongZh={showSongZh}
                     showArtistZh={showArtistZh}
+                    onArtistClick={id => { const a = artistMap.get(id); if (a) { setActiveTab('artists'); setSelectedArtist(a); } }}
                   />
                 </li>
               ))}
@@ -447,14 +516,15 @@ export default function BrowserPage({ songs, artists }: Props) {
                     artistMap={artistMap}
                     showSongZh={showSongZh}
                     showArtistZh={showArtistZh}
+                    onArtistClick={id => { const a = artistMap.get(id); if (a) { setActiveTab('artists'); setSelectedArtist(a); } }}
                   />
                 </li>
               ))}
             </ul>
           )}
 
-          {/* Lyrics matches */}
-          {query.length >= 2 && (lyricsLoading || lyricsResults.length > 0) && (
+          {/* Lyrics matches — songs tab only */}
+          {activeTab === 'songs' && query.length >= 2 && (lyricsLoading || lyricsResults.length > 0) && (
             <div className="mt-8">
               <div className="flex items-center gap-2 mb-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">Lyrics matches</p>
@@ -510,7 +580,16 @@ export default function BrowserPage({ songs, artists }: Props) {
           title="Drag to resize"
         />
         <div className="flex-1 border-l border-white/5 overflow-hidden flex flex-col">
-          {selected ? (
+          {activeTab === 'artists' && selectedArtist ? (
+            <ArtistDetailPanel
+              artist={selectedArtist}
+              songs={songs}
+              allArtists={artists}
+              onClose={() => setSelectedArtist(null)}
+              onSelectSong={song => { setActiveTab('songs'); setSelected(song); playTrack(song); }}
+              onSelectArtist={setSelectedArtist}
+            />
+          ) : activeTab === 'songs' && selected ? (
             <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} karaokeMode={false} onKaraokeToggle={() => {}} />
           ) : (
             <div className="relative flex flex-col items-center justify-center h-full px-8 text-center bg-[#07070a] overflow-hidden">
@@ -519,7 +598,9 @@ export default function BrowserPage({ songs, artists }: Props) {
               </div>
               <div className="relative z-10 flex flex-col items-center justify-center p-12 text-center">
                 <p className="text-white/20 text-sm max-w-xs">
-                  Select a song from the library to explore its history and lyrics
+                  {activeTab === 'artists'
+                    ? 'Select an artist to view their profile'
+                    : 'Select a song from the library to explore its history and lyrics'}
                 </p>
               </div>
             </div>

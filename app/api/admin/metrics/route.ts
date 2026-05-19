@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     yt_url,
     url,
     song_artists (artist_id),
-    lyrics (show_publicly, lyrics_original, lyrics_zh, lyrics_en)
+    lyrics (show_publicly, lyrics_original, lyrics_zh, lyrics_en, source)
   `);
 
   if (language)            q = q.eq('language',            language);
@@ -52,7 +52,10 @@ export async function GET(request: Request) {
         case 'ethnic_group':     return !s.ethnic_group;
         case 'no_artist':        return !s.artist_credit;
         case 'no_url':           return !s.yt_url && !s.url;
-        case 'lyrics':           return !hasLyricsContent;
+        case 'lyrics': {
+          const searched = toArray(s.lyrics).some((l: { source?: string }) => l.source?.startsWith('[not found'));
+          return !hasLyricsContent && !searched;
+        }
         case 'lyrics_unapproved':
           return hasLyricsContent && !toArray(s.lyrics).some(
             (l: { show_publicly?: boolean }) => l.show_publicly

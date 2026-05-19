@@ -22,6 +22,22 @@ Living document. Update at the end of any session that completes a task or chang
 - **Admin multi-song add** — playlist and channel import via YouTube Data API v3 (full pagination); per-item inline edit form with metadata + lyrics sections; AI research per item or batch
 - **Metadata pass 1** — oEmbed backfill: 72 `yt_title` and 15 `artist_credit` fields filled from YouTube oEmbed across all songs with a YouTube URL
 - **Metadata pass 2** — Gemini 2.5 Pro web-search pass across all 84 songs: 68 modified (indigenous titles added, channel names corrected to artist names, Chinese titles filled, cluttered YouTube titles cleaned)
+- **Admin song editor revamp (May 2026)** — full series of fixes and improvements to `SongsAdminView`:
+  - `title_original` Chinese guard (`hasChinese()`) — AI can no longer put Chinese characters in the indigenous title field; they fall through to `title_zh` instead
+  - `title_original` sentence-case instruction added to Gemini system prompt
+  - `title_chinese` constraint: official sources only, no AI translations, no genre descriptors
+  - Research button state machine: idle (violet) → researching (red Stop) → complete (blue "review & save")
+  - Non-YouTube URL field: strips YouTube URLs on load (they belong in `yt_url`)
+  - `artist_display` field: resolved "EnglishName - 中文名" format computed server-side from `song_artists` join, displayed in song card header
+  - Song card header redesign: compact, icon buttons (YouTube link, artist search), truncated title/artist text with ellipsis, max 1 missing badge shown
+  - Notes field moved to top of both Metadata and Lyrics tabs
+  - Form field reorder: Non-YouTube URL in left col; Language moved to right col position 2
+  - Grounding sources returned as `{ url, title }` — human-readable source titles shown as pills
+  - First grounding source `title` promoted to `lyrics_source` when AI gives generic attribution
+  - `[not found — AI date]` sentinel: now reliably written when AI finds no lyrics (was previously blocked by a fallback `lyrics_source` value overwrite)
+  - Three save paths audited — lyrics_source sentinel wiring verified across all three
+  - Research merge: base is now current `draft` (not DB-fresh `draftFromSong`) — manual edits survive re-research; corrected `artist_credit` and titles are sent to AI as context
+  - "Saved" row removed (redundant with button state); `setPanelMessage('')` on save
 
 ---
 
@@ -69,3 +85,37 @@ Pending field additions (when ready):
 - [ ] Lyrics correction workflow
 - [ ] Artist pages
 - [ ] Collection / label pages
+- [ ] Animated PWA launch — fake splash screen (full-screen overlay, CSS/Framer Motion on logo SVG, fades out once app is ready; `sessionStorage`-gated so it only plays on first open per session, not every navigation)
+
+---
+
+## Post-publish — Indigenous Music Brain
+
+The accumulated corpus (songs, verified lyrics, artist bios, cultural tags, language labels) can be turned into a self-reinforcing knowledge system where each new piece of content is assessed using everything already known.
+
+### What this means in practice
+
+**RAG-augmented research** — instead of relying purely on Google Search grounding, inject verified DB content directly into the Gemini prompt: songs by the same artist, lyrics in the same language, bios of related artists. The artist context injection shipped today is the first step; the full version would pull semantically similar songs too.
+
+**Embedding store** — add `pgvector` to Supabase; embed lyrics, bios, and song descriptions. Enables:
+- Similarity search ("find songs that sound like / are about the same thing as X")
+- Duplicate/cover detection ("this new song's lyrics are 80% similar to an existing entry")
+- Dialect fingerprinting ("this lyric pattern matches Bunun southern dialect")
+
+**Progressive trust** — verified songs and artists raise confidence on newly linked content. An artist with a confirmed bio and 10 verified songs provides strong prior for new songs attributed to them. Confidence scores flow through the graph.
+
+**Cultural context documents** — one curated document per ethnic group (ceremonies, musical traditions, common themes, key vocabulary) injected into AI prompts. Curation is manual once, then reused forever; AI research for that group gets meaningfully sharper.
+
+**Lyrics corpus → language resource** — the verified indigenous-language lyrics could become one of the only structured NLP training sets for several of these 16 languages. Even a small high-quality corpus has outsized value for communities where almost no digital language data exists. Requires explicit community consent and licensing decisions before any external release.
+
+### Architecture path
+
+1. `pgvector` extension on Supabase (free tier supports it)
+2. Embed on save: run text through an embedding model (Gemini `text-embedding-004`, free tier) whenever a song or artist is saved with new verified content
+3. Similarity endpoint: `GET /api/similar-songs?song_id=X` returns nearest neighbours by cosine distance
+4. Feed into enrich-song: top 3 similar verified songs injected as context
+5. Cultural context docs: a new `ethnic_group_context` table, one row per group, edited via admin
+
+### Sensitivity note
+
+Some ceremonial songs are not meant for general circulation or AI training. The `verification_status` + `show_publicly` gate already exists; extend it with a `ceremonial_restricted` flag before opening the corpus to any external use.

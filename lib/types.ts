@@ -81,27 +81,28 @@ export interface Song {
 }
 
 // ─── Artist ───────────────────────────────────────────────────────────────────
-// Matches the schema produced by GPT deep research & data/artists.json
 
 export interface Artist {
   id: string;
   name_display: string;
-  names_zh: string[];
-  names_rom: string[];
-  names_indigenous: string[];
+  names_zh: string[];       // script='zh'; first = official Chinese name, rest = aliases
+  names_en: string[];       // script='en'; first = official romanized name, rest = variants
+  names_ab: string[];       // script='ab'; indigenous-script names (Cjavi, etc.)
   zh_surname: string | null;
-  ethnic_group: string | null;
+  ethnic_groups: string[];  // multi-value; replaces ethnic_group
   language: string | null;
   is_group: boolean;
   active_years: string | null;
   bio_zh: string | null;
   bio_en: string | null;
-  notable_works: string[];
+  bio_ycm: string | null;
   youtube_channel: string | null;
   wikipedia_url: string | null;
-  sources: string[];
+  sources: string[];        // provenance URLs/refs; DB-backed
   notes: string | null;
-  group_ids?: string[];   // IDs of groups this person is a member of
+  photo_url: string | null;
+  group_ids: string[];      // groups this person belongs to
+  member_ids: string[];     // members of this group (non-empty when is_group=true)
 }
 
 // ─── Filters ──────────────────────────────────────────────────────────────────

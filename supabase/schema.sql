@@ -9,17 +9,19 @@ CREATE TABLE artists (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   legacy_id       TEXT UNIQUE,          -- art-001 etc, migration bridge
   name_display    TEXT NOT NULL,
-  ethnic_group    TEXT,
+  ethnic_groups   TEXT[] DEFAULT '{}',  -- multi-value; 0+ of the 16 official groups
   language        TEXT,
   dialect         TEXT,
   is_group        BOOLEAN NOT NULL DEFAULT FALSE,
   active_years    TEXT,
   bio_zh          TEXT,
   bio_en          TEXT,
-  bio_ycm         TEXT,                 -- future indigenous language translation
+  bio_ycm         TEXT,
   zh_surname      TEXT,
   youtube_channel TEXT,
   wikipedia_url   TEXT,
+  photo_url       TEXT,
+  sources         TEXT[] DEFAULT '{}',  -- provenance URLs/refs
   notes           TEXT,                 -- internal
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

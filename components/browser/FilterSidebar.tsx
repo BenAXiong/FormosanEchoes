@@ -79,11 +79,37 @@ interface Props {
   totalCount: number;
   allSongs: Song[];
   allArtists: Artist[];
+  activeTab: 'songs' | 'artists';
+  onTabChange: (t: 'songs' | 'artists') => void;
+  artistQuery: string;
+  onArtistQueryChange: (q: string) => void;
+  artistLanguage: string;
+  onArtistLanguageChange: (l: string) => void;
+  filteredArtistCount: number;
 }
 
-export default function FilterSidebar({ filters, onChange, resultCount, totalCount, allSongs, allArtists }: Props) {
+export default function FilterSidebar({
+  filters, onChange, resultCount, totalCount, allSongs, allArtists,
+  activeTab, onTabChange, artistQuery, onArtistQueryChange,
+  artistLanguage, onArtistLanguageChange, filteredArtistCount,
+}: Props) {
   const { playlists } = usePlayer();
-  
+
+  const artistLangCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const a of allArtists) {
+      if (a.language) counts[a.language] = (counts[a.language] ?? 0) + 1;
+    }
+    return counts;
+  }, [allArtists]);
+
+  const artistLangOptions = useMemo(() =>
+    CIP_LANGUAGES
+      .filter(l => (artistLangCounts[l.value] ?? 0) > 0)
+      .map(l => ({ ...l, count: artistLangCounts[l.value] ?? 0 }))
+      .sort((a, b) => b.count - a.count),
+  [artistLangCounts]);
+
   const updateFilters = (updates: Partial<FilterState>) => {
     onChange({ ...filters, ...updates });
   };
@@ -152,7 +178,76 @@ export default function FilterSidebar({ filters, onChange, resultCount, totalCou
         <p className="text-white font-bold text-sm tracking-tight">Formosan Echoes</p>
       </div>
 
-      {/* Library Section */}
+      {/* Tab switcher */}
+      <div className="px-3 py-2 border-b border-white/5 shrink-0">
+        <div className="flex gap-1 bg-white/5 rounded-lg p-0.5">
+          {(['songs', 'artists'] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => onTabChange(t)}
+              className={`flex-1 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                activeTab === t ? 'bg-white/15 text-white' : 'text-stone-500 hover:text-stone-300'
+              }`}
+            >
+              {t === 'songs' ? 'Songs' : 'Artists'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Library Section — songs only */}
+      {activeTab === 'artists' && (
+        <>
+          {/* Artist search */}
+          <div className="px-3 py-3 border-b border-white/5 shrink-0">
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5" aria-hidden>
+                <svg className="h-3 w-3 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="search"
+                value={artistQuery}
+                onChange={e => onArtistQueryChange(e.target.value)}
+                placeholder="Search artists…"
+                className="w-full rounded-lg bg-white/5 border border-white/10 pl-7 pr-3 py-1.5 text-xs text-white
+                  placeholder-stone-600 focus:outline-none focus:border-white/20 transition-colors"
+              />
+            </div>
+          </div>
+
+          {/* Artist count */}
+          <div className="flex items-center justify-between px-5 py-3 bg-white/2 shrink-0">
+            <p className="text-stone-500 text-xs tabular-nums">
+              <span className="text-white font-semibold">{filteredArtistCount}</span>
+              <span className="text-stone-600"> / {allArtists.length}</span>
+            </p>
+            {(artistQuery || artistLanguage) && (
+              <button
+                onClick={() => { onArtistQueryChange(''); onArtistLanguageChange(''); }}
+                className="text-xs text-stone-500 hover:text-white transition-colors underline underline-offset-4"
+              >Clear</button>
+            )}
+          </div>
+
+          {/* Artist language filter */}
+          <div className="flex-1 py-4 overflow-y-auto thin-scrollbar">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-5">Language</p>
+            <div className="px-2">
+              <PillList
+                options={artistLangOptions}
+                value={artistLanguage}
+                onChange={onArtistLanguageChange}
+                expandLabel="more languages"
+                allCount={allArtists.length}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {activeTab === 'songs' && <>{/* Library Section */}
       <div className="py-4 border-b border-white/5 shrink-0">
         <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-5">Library</p>
         <div className="px-2 flex flex-col gap-0.5">
@@ -249,6 +344,7 @@ export default function FilterSidebar({ filters, onChange, resultCount, totalCou
           </div>
         )}
       </div>
+      </>}
 
       {/* User profile pill — bottom */}
       <div className="px-4 py-3 border-t border-white/5 shrink-0">

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { createServerClient } from '@/lib/supabase';
 
 export const maxDuration = 120; // Gemini + search grounding can take 30–60 s
 
@@ -49,21 +50,93 @@ async function fetchYouTubeContext(videoId: string): Promise<string> {
   return lines.join('\n\n');
 }
 
+// ── Artist context from DB ────────────────────────────────────────────────────
+
+function splitCreditTokens(raw: string): string[] {
+  const parts = raw.split(/\s+(?:feat\.?|ft\.?|and|&|[×x])\s+/i).map(p => p.trim()).filter(Boolean);
+  const tokens: string[] = [];
+  for (const part of parts.length > 1 ? parts : [raw]) {
+    tokens.push(part);
+    const m = part.match(/^(.+?)\s*\((.+?)\)\s*$/);
+    if (m) { tokens.push(m[1].trim(), m[2].trim()); }
+  }
+  return [...new Set(tokens)];
+}
+
+async function fetchArtistContext(artistCredit: string): Promise<string> {
+  if (!artistCredit) return '';
+  const tokens = splitCreditTokens(artistCredit);
+  if (!tokens.length) return '';
+
+  try {
+    const supabase = createServerClient();
+    const seen = new Set<string>();
+    const blocks: string[] = [];
+
+    for (const token of tokens) {
+      const { data: nameRows } = await supabase
+        .from('artist_names')
+        .select('artist_id')
+        .ilike('name', token)
+        .limit(1);
+
+      const artistId = nameRows?.[0]?.artist_id;
+      if (!artistId || seen.has(artistId)) continue;
+      seen.add(artistId);
+
+      const { data: artist } = await supabase
+        .from('artists')
+        .select('*, artist_names(name, script)')
+        .eq('id', artistId)
+        .single();
+
+      if (!artist) continue;
+
+      type NameRow = { name: string; script: string };
+      const names = (artist.artist_names ?? []) as NameRow[];
+      const names_zh = names.filter(n => n.script === 'zh').map(n => n.name);
+      const names_en = names.filter(n => n.script === 'en').map(n => n.name);
+      const names_ab = names.filter(n => n.script === 'ab').map(n => n.name);
+
+      const lines: string[] = [];
+      const displayName = names_en[0] ?? names_ab[0] ?? names_zh[0] ?? token;
+      lines.push(`Artist: ${displayName}`);
+      if (names_zh.length) lines.push(`Chinese name(s): ${names_zh.join(', ')}`);
+      if (names_en.length > 1) lines.push(`Also known as: ${names_en.slice(1).join(', ')}`);
+      if (names_ab.length) lines.push(`Indigenous script name(s): ${names_ab.join(', ')}`);
+      if (artist.ethnic_groups?.length) lines.push(`Ethnic group: ${(artist.ethnic_groups as string[]).join(', ')}`);
+      if (artist.language) lines.push(`Language: ${artist.language}`);
+      if (artist.active_years) lines.push(`Active years: ${artist.active_years}`);
+      if (artist.bio_en) lines.push(`Bio: ${(artist.bio_en as string).slice(0, 600)}`);
+      else if (artist.bio_zh) lines.push(`Bio (ZH): ${(artist.bio_zh as string).slice(0, 400)}`);
+
+      blocks.push(lines.join('\n'));
+    }
+
+    if (!blocks.length) return '';
+    return `--- Known Artist Context (from our database) ---\n${blocks.join('\n\n')}`;
+  } catch {
+    return ''; // non-fatal
+  }
+}
+
 // ── System prompt ─────────────────────────────────────────────────────────────
 
 const SYSTEM_PROMPT = `You are an expert researcher specialising in Indigenous Taiwanese (Formosan) music.
 Taiwan officially recognises 16 Indigenous peoples: Amis (Pangcah), Atayal, Paiwan, Bunun, Puyuma,
 Rukai, Tsou, Saisiyat, Tao (Yami), Thao, Kavalan, Truku, Sakizaya, Seediq, Hla'alua, Kanakanavu.
 
-Your goal is to find accurate metadata and full lyrics for a given song. 
+Your goal is to find accurate metadata and full lyrics for a given song.
 Use Google Search to find official lyrics (e.g., from MoJim, album booklets, or artist websites).
 Check the provided YouTube context (description/comments) carefully as they often contain lyrics.
+If a "Known Artist Context" block is provided, use it to sharpen your search — the ethnic group,
+language, and biography narrow down which community and era the song belongs to.
 
 Rules for your JSON output:
 - Use null (not empty string) when a field is unknown.
-- "title_original": The song title in the original indigenous language (if it has one), else the most official title.
-- "title_chinese": Chinese title if known.
-- "artist": The primary artist(s). Use indigenous names where possible (e.g., "Samingad", "Sangpuy").
+- "title_original": The song title in the original indigenous language — romanized or indigenous script only. Do NOT put Chinese characters here. If you only know the Chinese title, leave "title_original" null and use "title_chinese" instead. Use sentence case: capitalize only the first letter (e.g. "Senasenai", not "SENASENAI" or "senasenai").
+- "title_chinese": The officially published Chinese name — from an album cover, artist page, or music database (KKBOX, Spotify, 五大唱片), OR clearly present as the song title in the YouTube video title. Do NOT translate the indigenous title yourself. Do NOT use genre/style descriptors from YouTube titles (e.g. "古調", "族語歌曲", "傳統歌謠" are labels, not titles). If the source is the YouTube title, say so in "notes". Leave null if no official Chinese title is known.
+- "artist": The primary artist's single canonical name only — do NOT combine multiple name forms (e.g., use "Biung Wang" OR "王宏恩", not "王宏恩 (Biung Wang)"). Prefer the indigenous/romanized name where one exists (e.g., "Samingad", "Sangpuy", "Biung").
 - "language_claimed": MUST be one of the 16 groups above. If it is a mix, pick the primary one.
 - "ethnic_group_claimed": Same 16-group list — the ethnic group associated with the song.
 - "genre": One of: Traditional, Traditional Choral, Modern Folk, Contemporary Folk, Contemporary Indigenous Folk-Pop, Indigenous Gospel / Folk.
@@ -72,7 +145,7 @@ Rules for your JSON output:
 - "lyrics_translation_zh": Provide a Traditional Chinese translation.
 - "lyrics_translation_en": Provide an English translation.
 - "notes": Mention where you found the lyrics or any ambiguities about the dialect.
-
+- "tags": Comma-separated content tags. Do NOT repeat information already in other fields — e.g., do not add the language name, ethnic group, or genre as a tag since those have dedicated fields. Focus on content themes or context not expressed elsewhere (e.g., "ceremonial", "lullaby", "love-song", "choral", "children", "harvest", "wedding").
 - "youtube_url": The most official YouTube video URL for this song (if you can find one), else null.
 
 Example Output:
@@ -85,11 +158,11 @@ Example Output:
   "genre": "Contemporary Indigenous Folk-Pop",
   "recording_type": "Studio",
   "year": "1999",
-  "album_or_source": "Voice of Puyuma",
   "lyrics_original": "senasenai kema lra... (full lyrics)",
   "lyrics_translation_zh": "大家一起來唱歌... (full translation)",
   "lyrics_translation_en": "Everyone come and sing... (full translation)",
   "lyrics_source": "Voice of Puyuma Album Booklet",
+  "tags": "love-song, traditional",
   "notes": "Classic Puyuma song by Samingad."
 }
 
@@ -102,20 +175,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'GEMINI_API_KEY not configured' }, { status: 500 });
   }
 
-  let body: { title?: string; channel?: string; youtube_url?: string; videoId?: string; titleMode?: boolean };
+  let body: { title?: string; channel?: string; youtube_url?: string; videoId?: string; titleMode?: boolean; artist_credit?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const { title = '', channel = '', youtube_url = '', videoId = '', titleMode = false } = body;
+  const { title = '', channel = '', youtube_url = '', videoId = '', titleMode = false, artist_credit = '' } = body;
   if (!title && !youtube_url) {
     return NextResponse.json({ error: 'Provide at least title or youtube_url' }, { status: 400 });
   }
 
-  // Optionally fetch YouTube description + comments
-  const ytContext = videoId ? await fetchYouTubeContext(videoId) : '';
+  // Fetch YouTube context and artist context in parallel (both non-fatal)
+  const [ytContext, artistContext] = await Promise.all([
+    videoId ? fetchYouTubeContext(videoId) : Promise.resolve(''),
+    artist_credit ? fetchArtistContext(artist_credit) : Promise.resolve(''),
+  ]);
 
   const userMessage = titleMode
     ? [
@@ -125,9 +201,10 @@ export async function POST(request: Request) {
       ].join('\n')
     : [
         `Video title: "${title}"`,
-        `Channel: "${channel}"`,
+        channel ? `Channel: "${channel}"` : '',
         `YouTube URL: ${youtube_url}`,
-        ytContext ? `\n${ytContext}` : '',
+        artistContext ? `\n${artistContext}` : '',
+        ytContext     ? `\n${ytContext}`     : '',
         `\nSearch for this song and return the JSON metadata object.`,
       ].filter(Boolean).join('\n');
 
@@ -178,10 +255,10 @@ export async function POST(request: Request) {
 
     // Include grounding sources if available (for UI provenance display)
     const groundingMeta = result.response.candidates?.[0]?.groundingMetadata;
-    const sources = (groundingMeta?.groundingChunks ?? [])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sources: { url: string; title: string | null }[] = (groundingMeta?.groundingChunks ?? [])
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((c: any) => c.web?.uri)
-      .filter(Boolean);
+      .flatMap((c: any) => c.web?.uri ? [{ url: c.web.uri as string, title: (c.web.title as string) ?? null }] : []);
 
     return NextResponse.json({ enriched, sources });
   } catch (err: unknown) {

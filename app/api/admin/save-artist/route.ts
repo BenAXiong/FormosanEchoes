@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 
 function inferScript(name: string): string {
-  return /[一-鿿㐀-䶿]/.test(name) ? 'zh' : 'ab';
+  return /[一-鿿㐀-䶿]/.test(name) ? 'zh' : 'en';
 }
 
 function splitArtistString(raw: string): string[] {
@@ -32,15 +32,18 @@ export async function POST(request: Request) {
     .from('artists')
     .insert({
       name_display:    artist.name_display,
-      ethnic_group:    artist.ethnic_group    ?? null,
+      ethnic_groups:   Array.isArray(artist.ethnic_groups) ? artist.ethnic_groups : (artist.ethnic_group ? [artist.ethnic_group] : []),
       language:        artist.language        ?? null,
       is_group:        artist.is_group        ?? false,
       active_years:    artist.active_years    ?? null,
       bio_zh:          artist.bio_zh          ?? null,
       bio_en:          artist.bio_en          ?? null,
+      bio_ycm:         artist.bio_ycm         ?? null,
       zh_surname:      artist.zh_surname      ?? null,
       youtube_channel: artist.youtube_channel ?? null,
       wikipedia_url:   artist.wikipedia_url   ?? null,
+      sources:         Array.isArray(artist.sources) ? artist.sources : [],
+      photo_url:       artist.photo_url       ?? null,
       notes:           artist.notes           ?? null,
     })
     .select('id')
@@ -55,10 +58,10 @@ export async function POST(request: Request) {
   for (const n of (artist.names_zh as string[]) ?? []) {
     names.push({ artist_id: saved.id, name: n, script: 'zh' });
   }
-  for (const n of (artist.names_rom as string[]) ?? []) {
-    names.push({ artist_id: saved.id, name: n, script: 'ab' });
+  for (const n of (artist.names_en as string[]) ?? []) {
+    names.push({ artist_id: saved.id, name: n, script: 'en' });
   }
-  for (const n of (artist.names_indigenous as string[]) ?? []) {
+  for (const n of (artist.names_ab as string[]) ?? []) {
     names.push({ artist_id: saved.id, name: n, script: 'ab' });
   }
   names.push({ artist_id: saved.id, name: artist.name_display, script: inferScript(artist.name_display) });
@@ -105,10 +108,10 @@ export async function POST(request: Request) {
         const { data: newMember } = await supabase
           .from('artists')
           .insert({
-            name_display: member.name_display,
-            ethnic_group: artist.ethnic_group ?? null,
-            language:     artist.language     ?? null,
-            is_group:     false,
+            name_display:  member.name_display,
+            ethnic_groups: Array.isArray(artist.ethnic_groups) ? artist.ethnic_groups : [],
+            language:      artist.language ?? null,
+            is_group:      false,
           })
           .select('id')
           .single();

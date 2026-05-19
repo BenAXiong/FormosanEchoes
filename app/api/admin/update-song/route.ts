@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const hasLyrics = !!(f.lyrics_original || f.lyrics_zh || f.lyrics_en);
+    const hasLyrics = !!(f.lyrics_original || f.lyrics_zh || f.lyrics_en || f.lyrics_source);
     if (hasLyrics) {
       const { error: lyricsErr } = await supabase.from('lyrics').upsert({
         song_id,
@@ -93,14 +93,18 @@ export async function POST(request: Request) {
     songs_updated = 1;
   }
 
-  const hasLyrics = !!(enriched.lyrics_original || enriched.lyrics_translation_zh || enriched.lyrics_translation_en);
+  const hasActualLyrics = !!(enriched.lyrics_original || enriched.lyrics_translation_zh || enriched.lyrics_translation_en);
+  const hasLyrics = hasActualLyrics || !!enriched.lyrics_source;
   let lyrics_updated = 0;
   if (hasLyrics) {
     const lyricsRow: Record<string, unknown> = { song_id, show_publicly: false };
     if (enriched.lyrics_original)       lyricsRow.lyrics_original = enriched.lyrics_original;
     if (enriched.lyrics_translation_zh) lyricsRow.lyrics_zh       = enriched.lyrics_translation_zh;
     if (enriched.lyrics_translation_en) lyricsRow.lyrics_en       = enriched.lyrics_translation_en;
-    if (enriched.lyrics_source)         lyricsRow.source          = enriched.lyrics_source;
+    // Use proper not-found sentinel when AI searched but found no lyrics
+    lyricsRow.source = hasActualLyrics
+      ? (enriched.lyrics_source || null)
+      : `[not found — AI ${new Date().toISOString().slice(0, 10)}]`;
 
     const { error } = await supabase.from('lyrics').upsert(lyricsRow, { onConflict: 'song_id', ignoreDuplicates: false });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });

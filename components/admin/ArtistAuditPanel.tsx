@@ -103,7 +103,7 @@ function BatchCard({
     <div className="flex items-start justify-between gap-3 px-3 py-2.5 hover:bg-white/2 transition-colors">
       <div className="min-w-0 flex-1">
         <p className="text-white text-xs font-semibold truncate">{data.name_display}</p>
-        <p className="text-stone-500 text-[10px]">{[data.ethnic_group, data.language].filter(Boolean).join(' · ') || 'Unknown group/language'}</p>
+        <p className="text-stone-500 text-[10px]">{[(data.ethnic_groups ?? [data.ethnic_group]).filter(Boolean).join(', '), data.language].filter(Boolean).join(' · ') || 'Unknown group/language'}</p>
         {data.bio_en && <p className="text-stone-600 text-[10px] line-clamp-1 mt-0.5">{data.bio_en}</p>}
         <SourceChips sources={sources} />
       </div>
@@ -294,7 +294,7 @@ export default function ArtistAuditPanel() {
         </div>
         <div className="flex gap-2 flex-wrap">
           <button
-            onClick={() => { setEditArtist({ name_display: '', ethnic_group: '', language: '', names_rom: [], names_zh: [], bio_zh: '', bio_en: '' }); setBatchResults([]); setStatus(''); }}
+            onClick={() => { setEditArtist({ name_display: '', ethnic_groups: [], language: '', names_en: [], names_zh: [], bio_zh: '', bio_en: '' }); setBatchResults([]); setStatus(''); }}
             className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-stone-300 text-xs font-semibold transition-colors"
           >
             + Add Artist
@@ -437,8 +437,8 @@ export default function ArtistAuditPanel() {
                         className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-xs text-white mt-1" />
                     </div>
                     <div>
-                      <label className="text-[10px] text-stone-500 uppercase font-bold tracking-widest">Ethnic Group</label>
-                      <input type="text" value={editArtist.ethnic_group ?? ''} onChange={e => setEditArtist({ ...editArtist, ethnic_group: e.target.value })}
+                      <label className="text-[10px] text-stone-500 uppercase font-bold tracking-widest">Ethnic Group(s)</label>
+                      <input type="text" value={(editArtist.ethnic_groups ?? []).join(', ')} onChange={e => setEditArtist({ ...editArtist, ethnic_groups: e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean) })}
                         className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-xs text-white mt-1" />
                     </div>
                     <div>
@@ -447,8 +447,8 @@ export default function ArtistAuditPanel() {
                         className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-xs text-white mt-1" />
                     </div>
                     <div className="col-span-2">
-                      <label className="text-[10px] text-stone-500 uppercase font-bold tracking-widest">Aliases — Romanized (comma-separated)</label>
-                      <input type="text" value={(editArtist.names_rom ?? []).join(', ')} onChange={e => setEditArtist({ ...editArtist, names_rom: e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean) })}
+                      <label className="text-[10px] text-stone-500 uppercase font-bold tracking-widest">English/Romanized Names (comma-separated, first = official)</label>
+                      <input type="text" value={(editArtist.names_en ?? editArtist.names_rom ?? []).join(', ')} onChange={e => setEditArtist({ ...editArtist, names_en: e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean) })}
                         className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-xs text-white mt-1" />
                     </div>
                     <div className="col-span-2">

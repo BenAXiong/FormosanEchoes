@@ -77,20 +77,23 @@ function mapArtist(row: Row): Artist {
     id:              row.id,
     name_display:    row.name_display,
     names_zh:        names.filter(n => n.script === 'zh').map(n => n.name as string),
-    names_rom:       names.filter(n => n.script === 'ab').map(n => n.name as string),
-    names_indigenous: [],
+    names_en:        names.filter(n => n.script === 'en').map(n => n.name as string),
+    names_ab:        names.filter(n => n.script === 'ab').map(n => n.name as string),
     zh_surname:      row.zh_surname      ?? null,
-    ethnic_group:    row.ethnic_group    ?? null,
+    ethnic_groups:   row.ethnic_groups   ?? [],
     language:        row.language        ?? null,
     is_group:        row.is_group        ?? false,
     active_years:    row.active_years    ?? null,
     bio_zh:          row.bio_zh          ?? null,
     bio_en:          row.bio_en          ?? null,
-    notable_works:   [],
+    bio_ycm:         row.bio_ycm         ?? null,
     youtube_channel: row.youtube_channel ?? null,
     wikipedia_url:   row.wikipedia_url   ?? null,
-    sources:         [],
+    sources:         row.sources         ?? [],
     notes:           row.notes           ?? null,
+    photo_url:       row.photo_url       ?? null,
+    group_ids:       [],
+    member_ids:      [],
   };
 }
 
@@ -121,17 +124,20 @@ export async function getArtists(): Promise<Artist[]> {
 
   if (error) throw new Error(`getArtists: ${error.message}`);
 
-  // Build member→groups map
+  // Build both directions from artist_members
   const memberGroupMap = new Map<string, string[]>();
+  const groupMemberMap = new Map<string, string[]>();
   for (const row of memberships ?? []) {
-    const existing = memberGroupMap.get(row.member_artist_id) ?? [];
-    memberGroupMap.set(row.member_artist_id, [...existing, row.group_artist_id]);
+    const mGroups = memberGroupMap.get(row.member_artist_id) ?? [];
+    memberGroupMap.set(row.member_artist_id, [...mGroups, row.group_artist_id]);
+    const gMembers = groupMemberMap.get(row.group_artist_id) ?? [];
+    groupMemberMap.set(row.group_artist_id, [...gMembers, row.member_artist_id]);
   }
 
   return (data ?? []).map(row => {
     const artist = mapArtist(row);
-    const groupIds = memberGroupMap.get(artist.id);
-    if (groupIds?.length) artist.group_ids = groupIds;
+    artist.group_ids  = memberGroupMap.get(artist.id) ?? [];
+    artist.member_ids = groupMemberMap.get(artist.id) ?? [];
     return artist;
   });
 }
