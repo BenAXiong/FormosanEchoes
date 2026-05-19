@@ -159,8 +159,8 @@ function SelectField({ label, value, onChange, options }: Readonly<{
       <label className="text-[10px] font-bold uppercase tracking-widest text-stone-500">{label}</label>
       <select value={value} onChange={e => onChange(e.target.value)}
         className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-white/30 transition-colors">
-        <option value="">— select —</option>
-        {options.map(o => <option key={o} value={o}>{o}</option>)}
+        <option value="" className="bg-stone-900 text-white">— select —</option>
+        {options.map(o => <option key={o} value={o} className="bg-stone-900 text-white">{o}</option>)}
       </select>
     </div>
   );
@@ -201,8 +201,8 @@ function BSelect({ label, value, onChange, options }: Readonly<{
       <label className="text-[9px] font-bold uppercase tracking-widest text-stone-500">{label}</label>
       <select value={value} onChange={e => onChange(e.target.value)}
         className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-white/30 transition-colors">
-        <option value="">— select —</option>
-        {options.map(o => <option key={o} value={o}>{o}</option>)}
+        <option value="" className="bg-stone-900 text-white">— select —</option>
+        {options.map(o => <option key={o} value={o} className="bg-stone-900 text-white">{o}</option>)}
       </select>
     </div>
   );
@@ -912,6 +912,13 @@ export default function SongsAdminView({ filters }: Readonly<{
 
                 {/* Header card */}
                 <div className="flex-1 flex items-center gap-2.5 bg-white/5 rounded-xl px-3 py-2 border border-white/10 min-w-0">
+                  <button
+                    onClick={deselect}
+                    className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 bg-white/10 hover:bg-white/20 text-stone-400 hover:text-white transition-colors text-[10px] leading-none"
+                    title="Close"
+                  >
+                    ✕
+                  </button>
                   {thumbId && (
                     <img
                       src={`https://img.youtube.com/vi/${thumbId}/mqdefault.jpg`}
@@ -956,13 +963,6 @@ export default function SongsAdminView({ filters }: Readonly<{
                       </p>
                     </div>
                   </div>
-                  <button
-                    onClick={deselect}
-                    className="text-stone-500 hover:text-white transition-colors text-xs leading-none shrink-0"
-                    title="Close"
-                  >
-                    ✕
-                  </button>
                 </div>
 
                 {/* Metadata + Lyrics toggles — stacked, mutually exclusive */}
@@ -990,38 +990,36 @@ export default function SongsAdminView({ filters }: Readonly<{
                 </div>
 
                 {/* Research button */}
-                <div className="shrink-0 flex w-20">
+                <div className="shrink-0 aspect-square flex">
                   {panelStatus === 'researching' ? (
                     <button onClick={stopEnrich}
-                      className="flex-1 flex flex-col items-center justify-center gap-1 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 text-[10px] font-semibold transition-colors">
+                      className="flex-1 flex flex-col items-center justify-center gap-0.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 text-[10px] font-semibold transition-colors">
                       <span>✕</span>
                       <span>Stop</span>
                     </button>
                   ) : songResearched ? (
-                    <div className="flex-1 flex flex-col items-center justify-center gap-1 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-300 text-[10px] font-semibold">
+                    <div className="flex-1 flex flex-col items-center justify-center gap-0.5 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-300 text-[10px] font-semibold">
                       <span className="text-sm">✓</span>
-                      <span className="leading-tight text-center text-[9px] whitespace-pre-line">Complete{'\n'}review & save</span>
+                      <span className="text-[9px]">Done</span>
                     </div>
                   ) : (
                     <button onClick={() => void enrichSong(selected)} disabled={batchRunning}
-                      className="flex-1 flex flex-col items-center justify-center gap-1 rounded-xl bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/30 text-violet-300 text-[10px] font-semibold transition-colors disabled:opacity-40">
+                      className="flex-1 flex flex-col items-center justify-center gap-0.5 rounded-xl bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/30 text-violet-300 text-[10px] font-semibold transition-colors disabled:opacity-40">
                       <span className="text-sm">✦</span>
-                      <span className="leading-tight text-center whitespace-pre-line">Research{'\n'}with AI</span>
+                      <span>AI</span>
                     </button>
                   )}
                 </div>
 
                 {/* Save button */}
-                <div className="shrink-0 flex w-20">
+                <div className="shrink-0 aspect-square flex">
                   <button
                     onClick={() => void saveSelected()}
                     disabled={panelStatus === 'saving' || panelStatus === 'researching'}
-                    className="flex-1 flex flex-col items-center justify-center gap-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-300 text-[10px] font-semibold transition-colors disabled:opacity-40"
+                    className="flex-1 flex flex-col items-center justify-center gap-0.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-300 text-[10px] font-semibold transition-colors disabled:opacity-40"
                   >
                     <span className="text-sm">{panelStatus === 'saving' ? '…' : '✓'}</span>
-                    <span className="leading-tight text-center whitespace-pre-line">
-                      {panelStatus === 'saving' ? 'Saving' : 'Save\nChanges'}
-                    </span>
+                    <span>{panelStatus === 'saving' ? 'Saving' : 'Save'}</span>
                   </button>
                 </div>
               </div>
