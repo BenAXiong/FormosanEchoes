@@ -1052,12 +1052,25 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
                             {' '}<span className="text-stone-700">{artist.song_count} song{artist.song_count !== 1 ? 's' : ''}</span>
                           </p>
                         </div>
-                        {artist.missing.length > 0 && (
-                          <div className="flex gap-0.5 flex-wrap justify-end shrink-0 max-w-24">
-                            {artist.missing.slice(0, 2).map(m => <MissingBadge key={m} label={m} />)}
-                            {artist.missing.length > 2 && <span className="text-[8px] text-stone-600 self-center">+{artist.missing.length - 2}</span>}
-                          </div>
-                        )}
+                        {(() => {
+                          const naVisible = naFilter ? artist.researched_fields.filter(m => m !== 'no_linked_songs') : [];
+                          const total = artist.missing.length + naVisible.length;
+                          if (total === 0) return null;
+                          const shownMissing = artist.missing.slice(0, 2);
+                          const shownNa = naVisible.slice(0, Math.max(0, 2 - shownMissing.length));
+                          const overflow = total - shownMissing.length - shownNa.length;
+                          return (
+                            <div className="flex gap-0.5 flex-wrap justify-end shrink-0 max-w-24">
+                              {shownMissing.map(m => <MissingBadge key={m} label={m} />)}
+                              {shownNa.map(m => (
+                                <span key={`na-${m}`} className="px-1.5 py-0.5 rounded text-[9px] border whitespace-nowrap leading-tight bg-stone-800/60 text-stone-500 border-stone-700/30 line-through decoration-stone-600">
+                                  {MISSING_LABELS[m] ?? m}
+                                </span>
+                              ))}
+                              {overflow > 0 && <span className="text-[8px] text-stone-600 self-center">+{overflow}</span>}
+                            </div>
+                          );
+                        })()}
                       </button>
                       <button
                         onClick={() => { handleArtistClick(artist); researchArtist(artist.name_display); }}
@@ -1382,17 +1395,19 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
                 const activeMissing = selected.missing
                   .filter(m => m !== 'no_linked_songs')
                   .filter(m => !draft.researched_fields.includes(m));
-                const naFields = draft.researched_fields.filter(m => m !== 'no_linked_songs');
-                if (activeMissing.length === 0) return null; // hide entirely once all resolved
+                const naFields = naFilter ? draft.researched_fields.filter(m => m !== 'no_linked_songs') : [];
+                if (activeMissing.length === 0 && naFields.length === 0) return null;
                 return (
                   <div className="flex flex-col gap-1.5 shrink-0">
                     <div className="flex items-center gap-2">
                       <label className="text-[10px] font-bold uppercase tracking-widest text-stone-500">Fields to resolve</label>
-                      <button
-                        onClick={() => void naAll(activeMissing)}
-                        className="text-[9px] px-1.5 py-0.5 rounded border border-orange-700/30 text-orange-500 hover:bg-orange-900/30 transition-colors">
-                        N/A all
-                      </button>
+                      {activeMissing.length > 0 && (
+                        <button
+                          onClick={() => void naAll(activeMissing)}
+                          className="text-[9px] px-1.5 py-0.5 rounded border border-orange-700/30 text-orange-500 hover:bg-orange-900/30 transition-colors">
+                          N/A all
+                        </button>
+                      )}
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {activeMissing.map(m => (
