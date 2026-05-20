@@ -93,6 +93,7 @@ type DupeMini = {
   is_group: boolean;
   photo_url: string | null;
   song_count: number;
+  songs: { id: string; title: string }[];
 };
 
 type DupePair = {
@@ -1243,28 +1244,31 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
                     </div>
 
                     {/* Expanded detail comparison */}
-                    {isExpanded && fullA && fullB && (() => {
-                      const rows: { label: string; a: string | null; b: string | null }[] = [
-                        { label: 'Names ZH',     a: fullA.names_zh.join(', ') || null,      b: fullB.names_zh.join(', ') || null },
-                        { label: 'Names EN',     a: fullA.names_en.join(', ') || null,      b: fullB.names_en.join(', ') || null },
-                        { label: 'Names AB',     a: fullA.names_ab.join(', ') || null,      b: fullB.names_ab.join(', ') || null },
-                        { label: 'Groups',       a: fullA.ethnic_groups.join(', ') || null, b: fullB.ethnic_groups.join(', ') || null },
-                        { label: 'Language',     a: fullA.language,                         b: fullB.language },
-                        { label: 'Active years', a: fullA.active_years,                     b: fullB.active_years },
-                        { label: 'YouTube',      a: fullA.youtube_channel,                  b: fullB.youtube_channel },
-                        { label: 'Wikipedia',    a: fullA.wikipedia_url,                    b: fullB.wikipedia_url },
-                        { label: 'Bio EN',       a: fullA.bio_en ? fullA.bio_en.slice(0, 220) + (fullA.bio_en.length > 220 ? '…' : '') : null,
-                                                 b: fullB.bio_en ? fullB.bio_en.slice(0, 220) + (fullB.bio_en.length > 220 ? '…' : '') : null },
-                        { label: 'Bio ZH',       a: fullA.bio_zh ? fullA.bio_zh.slice(0, 120) + (fullA.bio_zh.length > 120 ? '…' : '') : null,
-                                                 b: fullB.bio_zh ? fullB.bio_zh.slice(0, 120) + (fullB.bio_zh.length > 120 ? '…' : '') : null },
-                        { label: 'Missing',
-                          a: fullA.missing.filter(m => m !== 'no_linked_songs').map(m => MISSING_LABELS[m] ?? m).join(', ') || null,
-                          b: fullB.missing.filter(m => m !== 'no_linked_songs').map(m => MISSING_LABELS[m] ?? m).join(', ') || null },
-                      ];
-                      const isUrl = (v: string | null) => v?.startsWith('http');
-                      return (
-                        <div className="border-t border-white/8 pt-3 flex flex-col gap-0.5">
-                          {rows.map(row => {
+                    {isExpanded && (
+                      <div className="border-t border-white/8 pt-3 flex flex-col gap-0.5">
+                        {/* Scalar field diff — needs full artist data */}
+                        {fullA && fullB && (() => {
+                          const rows: { label: string; a: string | null; b: string | null }[] = [
+                            { label: 'Names ZH',     a: fullA.names_zh.join(', ') || null,      b: fullB.names_zh.join(', ') || null },
+                            { label: 'Names EN',     a: fullA.names_en.join(', ') || null,      b: fullB.names_en.join(', ') || null },
+                            { label: 'Names AB',     a: fullA.names_ab.join(', ') || null,      b: fullB.names_ab.join(', ') || null },
+                            { label: 'Groups',       a: fullA.ethnic_groups.join(', ') || null, b: fullB.ethnic_groups.join(', ') || null },
+                            { label: 'Language',     a: fullA.language,                         b: fullB.language },
+                            { label: 'Active years', a: fullA.active_years,                     b: fullB.active_years },
+                            { label: 'YouTube',      a: fullA.youtube_channel,                  b: fullB.youtube_channel },
+                            { label: 'Wikipedia',    a: fullA.wikipedia_url,                    b: fullB.wikipedia_url },
+                            { label: 'Bio EN',
+                              a: fullA.bio_en ? fullA.bio_en.slice(0, 220) + (fullA.bio_en.length > 220 ? '…' : '') : null,
+                              b: fullB.bio_en ? fullB.bio_en.slice(0, 220) + (fullB.bio_en.length > 220 ? '…' : '') : null },
+                            { label: 'Bio ZH',
+                              a: fullA.bio_zh ? fullA.bio_zh.slice(0, 120) + (fullA.bio_zh.length > 120 ? '…' : '') : null,
+                              b: fullB.bio_zh ? fullB.bio_zh.slice(0, 120) + (fullB.bio_zh.length > 120 ? '…' : '') : null },
+                            { label: 'Missing',
+                              a: fullA.missing.filter(m => m !== 'no_linked_songs').map(m => MISSING_LABELS[m] ?? m).join(', ') || null,
+                              b: fullB.missing.filter(m => m !== 'no_linked_songs').map(m => MISSING_LABELS[m] ?? m).join(', ') || null },
+                          ];
+                          const isUrl = (v: string | null) => v?.startsWith('http');
+                          return rows.map(row => {
                             const identical = same(row.a, row.b);
                             const baseText = identical ? 'text-stone-600' : 'text-stone-300';
                             const nullText = 'text-stone-700 italic';
@@ -1283,10 +1287,27 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
                                 ))}
                               </div>
                             );
-                          })}
+                          });
+                        })()}
+
+                        {/* Songs comparison */}
+                        <div className="grid grid-cols-2 gap-3 pt-2 mt-1 border-t border-white/5">
+                          {([pair.artist_a, pair.artist_b] as DupeMini[]).map(artist => (
+                            <div key={artist.id}>
+                              <p className="text-[9px] text-stone-600 font-medium mb-1">Songs ({artist.songs.length})</p>
+                              {artist.songs.length === 0
+                                ? <p className="text-[10px] text-stone-700 italic">none</p>
+                                : <ul className="flex flex-col gap-0.5">
+                                    {artist.songs.map(s => (
+                                      <li key={s.id} className="text-[10px] text-stone-400 truncate">{s.title}</li>
+                                    ))}
+                                  </ul>
+                              }
+                            </div>
+                          ))}
                         </div>
-                      );
-                    })()}
+                      </div>
+                    )}
 
                     {/* Dismiss */}
                     <button

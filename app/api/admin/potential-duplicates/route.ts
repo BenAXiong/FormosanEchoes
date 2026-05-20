@@ -42,11 +42,15 @@ export async function GET() {
 
   const songToArtists = new Map<string, string[]>();
   const artistSongCount = new Map<string, number>();
+  const artistSongs = new Map<string, string[]>(); // artist_id → song_ids
   for (const row of songArtists ?? []) {
     const ids = songToArtists.get(row.song_id) ?? [];
     if (!ids.includes(row.artist_id)) ids.push(row.artist_id);
     songToArtists.set(row.song_id, ids);
     artistSongCount.set(row.artist_id, (artistSongCount.get(row.artist_id) ?? 0) + 1);
+    const sids = artistSongs.get(row.artist_id) ?? [];
+    sids.push(row.song_id);
+    artistSongs.set(row.artist_id, sids);
   }
 
   // Intentional group/member pairs — exclude from duplicate detection
@@ -143,6 +147,7 @@ export async function GET() {
           is_group:      raw.is_group ?? false,
           photo_url:     raw.photo_url ?? null,
           song_count:    artistSongCount.get(id) ?? 0,
+          songs:         (artistSongs.get(id) ?? []).map(sid => ({ id: sid, title: songTitleMap.get(sid) ?? sid })),
         };
       };
 
