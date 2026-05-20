@@ -37,7 +37,7 @@ export async function GET() {
   // Song title map + song → [artist_ids] + song counts per artist
   const songTitleMap = new Map<string, string>();
   for (const s of songsRaw ?? []) {
-    songTitleMap.set(s.id, s.title_original ?? s.yt_title ?? s.title);
+    songTitleMap.set(s.id, s.title_original ?? s.yt_title ?? s.title ?? '(untitled)');
   }
 
   const songToArtists = new Map<string, string[]>();
