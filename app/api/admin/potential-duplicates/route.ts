@@ -15,7 +15,7 @@ export async function GET() {
     supabase.from('song_artists').select('song_id, artist_id'),
     supabase.from('artist_members').select('group_artist_id, member_artist_id'),
     supabase.from('artists').select('id, name_display, ethnic_groups, language, is_group, photo_url, bio_en, bio_zh, youtube_channel, wikipedia_url, active_years'),
-    supabase.from('songs').select('id, title, title_original, yt_title').limit(5000),
+    supabase.from('songs').select('id, title_original, yt_title, title_zh').limit(5000),
   ]);
 
   // Per-artist name lists (display) + normalized name → artist_ids (overlap detection)
@@ -37,7 +37,7 @@ export async function GET() {
   // Song title map + song → [artist_ids] + song counts per artist
   const songTitleMap = new Map<string, string>();
   for (const s of songsRaw ?? []) {
-    songTitleMap.set(s.id, s.title_original ?? s.yt_title ?? s.title ?? '(untitled)');
+    songTitleMap.set(s.id, s.title_original ?? s.title_zh ?? s.yt_title ?? '(untitled)');
   }
 
   const songToArtists = new Map<string, string[]>();
@@ -158,7 +158,7 @@ export async function GET() {
         confidence,
         suggested_keep,
         shared_names,
-        shared_songs: shared_songs.map(id => ({ id, title: songTitleMap.get(id) ?? id })),
+        shared_songs: shared_songs.map(id => ({ id, title: songTitleMap.get(id) || '(untitled)' })),
       };
     })
     .filter(Boolean)
