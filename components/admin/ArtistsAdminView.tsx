@@ -269,6 +269,7 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
   const [dupePairs, setDupePairs]           = useState<DupePair[]>([]);
   const [dupeLoading, setDupeLoading]       = useState(false);
   const [dismissedPairs, setDismissedPairs] = useState<Set<string>>(new Set());
+  const [expandedPairs, setExpandedPairs]   = useState<Set<string>>(new Set());
 
   // Song picker (linked songs section)
   const [allSongs, setAllSongs]           = useState<SongMini[] | null>(null);
@@ -1170,9 +1171,17 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
 
               {dupePairs.map(pair => {
                 const key = [pair.artist_a.id, pair.artist_b.id].sort().join('|');
+                const isExpanded = expandedPairs.has(key);
+                const fullA = artists.find(a => a.id === pair.artist_a.id);
+                const fullB = artists.find(a => a.id === pair.artist_b.id);
+
+                // Helper: dim a row when both values are identical
+                const same = (va: string | null | undefined, vb: string | null | undefined) =>
+                  (va ?? '') === (vb ?? '');
+
                 return (
                   <div key={key} className="bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col gap-3 shrink-0">
-                    {/* Confidence chip + shared label */}
+                    {/* Confidence chip + shared label + expand toggle */}
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className={`text-[9px] px-2 py-0.5 rounded-full border font-semibold uppercase tracking-wide ${
                         pair.confidence === 'high'
@@ -1187,9 +1196,15 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
                       {pair.confidence === 'medium' && pair.shared_songs.slice(0, 1).map(s => (
                         <span key={s.id} className="text-[9px] text-stone-500 truncate max-w-xs">{s.title}</span>
                       ))}
+                      <button
+                        onClick={() => setExpandedPairs(prev => { const n = new Set(prev); n.has(key) ? n.delete(key) : n.add(key); return n; })}
+                        className="ml-auto text-[9px] text-stone-500 hover:text-stone-300 transition-colors flex items-center gap-1"
+                      >
+                        {isExpanded ? '▴ hide' : '▾ details'}
+                      </button>
                     </div>
 
-                    {/* Side-by-side artist cards */}
+                    {/* Side-by-side mini cards */}
                     <div className="grid grid-cols-2 gap-3">
                       {([pair.artist_a, pair.artist_b] as DupeMini[]).map((artist, idx) => {
                         const isKeep = artist.id === pair.suggested_keep;
@@ -1226,6 +1241,52 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
                         );
                       })}
                     </div>
+
+                    {/* Expanded detail comparison */}
+                    {isExpanded && fullA && fullB && (() => {
+                      const rows: { label: string; a: string | null; b: string | null }[] = [
+                        { label: 'Names ZH',     a: fullA.names_zh.join(', ') || null,      b: fullB.names_zh.join(', ') || null },
+                        { label: 'Names EN',     a: fullA.names_en.join(', ') || null,      b: fullB.names_en.join(', ') || null },
+                        { label: 'Names AB',     a: fullA.names_ab.join(', ') || null,      b: fullB.names_ab.join(', ') || null },
+                        { label: 'Groups',       a: fullA.ethnic_groups.join(', ') || null, b: fullB.ethnic_groups.join(', ') || null },
+                        { label: 'Language',     a: fullA.language,                         b: fullB.language },
+                        { label: 'Active years', a: fullA.active_years,                     b: fullB.active_years },
+                        { label: 'YouTube',      a: fullA.youtube_channel,                  b: fullB.youtube_channel },
+                        { label: 'Wikipedia',    a: fullA.wikipedia_url,                    b: fullB.wikipedia_url },
+                        { label: 'Bio EN',       a: fullA.bio_en ? fullA.bio_en.slice(0, 220) + (fullA.bio_en.length > 220 ? '…' : '') : null,
+                                                 b: fullB.bio_en ? fullB.bio_en.slice(0, 220) + (fullB.bio_en.length > 220 ? '…' : '') : null },
+                        { label: 'Bio ZH',       a: fullA.bio_zh ? fullA.bio_zh.slice(0, 120) + (fullA.bio_zh.length > 120 ? '…' : '') : null,
+                                                 b: fullB.bio_zh ? fullB.bio_zh.slice(0, 120) + (fullB.bio_zh.length > 120 ? '…' : '') : null },
+                        { label: 'Missing',
+                          a: fullA.missing.filter(m => m !== 'no_linked_songs').map(m => MISSING_LABELS[m] ?? m).join(', ') || null,
+                          b: fullB.missing.filter(m => m !== 'no_linked_songs').map(m => MISSING_LABELS[m] ?? m).join(', ') || null },
+                      ];
+                      const isUrl = (v: string | null) => v?.startsWith('http');
+                      return (
+                        <div className="border-t border-white/8 pt-3 flex flex-col gap-0.5">
+                          {rows.map(row => {
+                            const identical = same(row.a, row.b);
+                            const baseText = identical ? 'text-stone-600' : 'text-stone-300';
+                            const nullText = 'text-stone-700 italic';
+                            return (
+                              <div key={row.label} className={`grid grid-cols-[64px_1fr_1fr] gap-2 text-[10px] py-0.5 rounded px-1 ${identical ? '' : 'bg-white/3'}`}>
+                                <span className="text-stone-600 font-medium pt-0.5 shrink-0">{row.label}</span>
+                                {[row.a, row.b].map((val, i) => (
+                                  <span key={i} className={val ? baseText : nullText}>
+                                    {val
+                                      ? isUrl(val)
+                                        ? <a href={val} target="_blank" rel="noreferrer" className="underline hover:text-white">{val.replace(/^https?:\/\//, '').slice(0, 40)}</a>
+                                        : val
+                                      : '—'
+                                    }
+                                  </span>
+                                ))}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
 
                     {/* Dismiss */}
                     <button
