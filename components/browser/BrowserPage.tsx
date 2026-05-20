@@ -495,7 +495,7 @@ export default function BrowserPage({ songs, artists }: Props) {
                     artistMap={artistMap}
                     showSongZh={showSongZh}
                     showArtistZh={showArtistZh}
-                    onArtistClick={id => { const a = artistMap.get(id); if (a) { setActiveTab('artists'); setSelectedArtist(a); } }}
+                    onArtistClick={isLargeScreen ? (id => { const a = artistMap.get(id); if (a) { setActiveTab('artists'); setSelectedArtist(a); } }) : undefined}
                   />
                 </li>
               ))}
@@ -516,7 +516,7 @@ export default function BrowserPage({ songs, artists }: Props) {
                     artistMap={artistMap}
                     showSongZh={showSongZh}
                     showArtistZh={showArtistZh}
-                    onArtistClick={id => { const a = artistMap.get(id); if (a) { setActiveTab('artists'); setSelectedArtist(a); } }}
+                    onArtistClick={isLargeScreen ? (id => { const a = artistMap.get(id); if (a) { setActiveTab('artists'); setSelectedArtist(a); } }) : undefined}
                   />
                 </li>
               ))}
