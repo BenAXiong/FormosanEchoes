@@ -1,10 +1,10 @@
 # PLAN.md — Formosan Echoes Roadmap
 
-Living document. Update at the end of any session that completes a task or changes scope.
+Living document. Update at the end of any session that completes a task or changes scope. **Agents: read this at the start of every session before advising on what is or isn't built.**
 
 ---
 
-## Current state (as of 2026-05-18)
+## Current state (as of 2026-05-19)
 
 ### Done
 - Working public browser (`/`): search, filters, language/artist facets, favorites, playlists, persistent bottom player
@@ -38,6 +38,10 @@ Living document. Update at the end of any session that completes a task or chang
   - Three save paths audited — lyrics_source sentinel wiring verified across all three
   - Research merge: base is now current `draft` (not DB-fresh `draftFromSong`) — manual edits survive re-research; corrected `artist_credit` and titles are sent to AI as context
   - "Saved" row removed (redundant with button state); `setPanelMessage('')` on save
+- **Admin artists view (May 2026)** — `ArtistsAdminView` replaces `ArtistAuditPanel`; full artist list with search/filter, inline edit form (three-script names, ethnic groups, bio, links, members), unlinked queue, Research with AI integration; `ArtistAuditPanel.tsx` deleted
+- **Song–artist auto-linking (May 2026)** — `enrich-song` returns `artist_match` after DB lookup; on research completion, song is auto-linked via `song_artists` if a match is found; right panel shows green linked-artist chips with one-click unlink; `POST/DELETE /api/admin/link-song-artist` route added
+- **Song delete** — red trashcan button in left rail; `DELETE /api/admin/delete-song` route; cascades clean up lyrics, song_artists, song_tags
+- **Artist display homogenised** — all three artist display locations in SongsAdminView (left rail, batch rows, right panel header) now use `artist_display || artist_credit`; priority order is `ab > en > zh`
 
 ---
 
@@ -66,6 +70,33 @@ Pending field additions (when ready):
 
 ---
 
+## Admin panel improvements — see `docs/SONGS_TAB_AUDIT.md`
+
+Full audit with gaps table and phased plan at `docs/SONGS_TAB_AUDIT.md`.
+
+### Phase A — Bug fixes (in progress)
+- [x] Load `lyrics_source` from DB in `draftFromSong()` (Gap #1)
+- [x] Research All confirmation for >10 songs (Gap #2)
+- [x] Re-populate form from server after save (Gap #5)
+- [x] Manual "Link artist…" type-ahead picker in song edit form (Gap #4)
+
+### Phase B — Artists tab homogenisation ✓
+- [x] Left rail: **All | Unlinked** tabs inline left of the All/Individual/Groups toggle
+- [x] Header card compact design matching Songs (close button, avatar, name, badges, meta row)
+- [x] Batch research with progress bar + elapsed timer + confirmation guard for >10
+- [x] Batch research now passes `link_song_id` to `save-artist` (was missing)
+- [x] `stopBatch` extracted from inline click handler
+- [x] Missing badges on artist rows already present (2 + `+N`) ✓
+- [ ] Extract shared `<Field>` / `<SelectField>` subcomponents (deferred — no user-visible impact)
+
+### Phase C — Bidirectional linking ✓
+- [x] "Add song…" picker in artist detail panel — lazy-loads songs, type-ahead search, links via `link-song-artist`
+- [x] Linked songs shown as chips with unlink buttons; optimistic count update on link/unlink
+- [x] "↺ re-scan" button — `POST /api/admin/rescan-artist-songs` re-runs ilike alias scan for this artist only
+- [x] Unlinked queue moved to Artists tab left-rail "Unlinked" tab (Phase B)
+
+---
+
 ## Admin tooling
 
 - [ ] Upgrade enrichment to Gemini 2.5 Pro for better accuracy
@@ -80,6 +111,7 @@ Pending field additions (when ready):
 
 ## Post-demo
 
+- [ ] **Type cleanup** — remove `title_romanized`, `lyrics_romanized`, and other unpopulated legacy stubs from `lib/types.ts` `Song` interface; confirm nothing in the app reads them before deleting
 - [ ] Dialect sub-tags
 - [ ] Contributor system — user-submitted songs with moderation queue
 - [ ] Lyrics correction workflow

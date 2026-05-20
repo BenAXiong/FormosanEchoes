@@ -34,13 +34,16 @@ export async function GET() {
     const song_count = songCountMap.get(row.id) ?? 0;
     const ethnic_groups: string[] = row.ethnic_groups ?? [];
 
-    const missing: string[] = [];
-    if (!row.bio_en && !row.bio_zh) missing.push('no_bio');
-    if (ethnic_groups.length === 0)  missing.push('no_ethnic_group');
-    if (!row.language)               missing.push('no_language');
-    if (!row.active_years)           missing.push('no_active_years');
-    if (!row.youtube_channel && !row.wikipedia_url) missing.push('no_links');
-    if (song_count === 0)            missing.push('no_linked_songs');
+    const researched_fields: string[] = row.researched_fields ?? [];
+
+    const rawMissing: string[] = [];
+    if (!row.bio_en && !row.bio_zh) rawMissing.push('no_bio');
+    if (ethnic_groups.length === 0)  rawMissing.push('no_ethnic_group');
+    if (!row.language)               rawMissing.push('no_language');
+    if (!row.active_years)           rawMissing.push('no_active_years');
+    if (!row.youtube_channel && !row.wikipedia_url) rawMissing.push('no_links');
+    if (song_count === 0)            rawMissing.push('no_linked_songs');
+    const missing = rawMissing.filter(m => !researched_fields.includes(m));
 
     return {
       id:              row.id,
@@ -58,9 +61,11 @@ export async function GET() {
       bio_ycm:         row.bio_ycm         ?? null,
       youtube_channel: row.youtube_channel ?? null,
       wikipedia_url:   row.wikipedia_url   ?? null,
+      website_url:     row.website_url     ?? null,
       sources:         row.sources         ?? [],
       notes:           row.notes           ?? null,
-      photo_url:       row.photo_url       ?? null,
+      photo_url:        row.photo_url        ?? null,
+      researched_fields,
       group_ids:  memberGroupMap.get(row.id) ?? [],
       member_ids: groupMemberMap.get(row.id) ?? [],
       song_count,

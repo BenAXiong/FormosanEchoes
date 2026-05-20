@@ -89,11 +89,13 @@ function mapArtist(row: Row): Artist {
     bio_ycm:         row.bio_ycm         ?? null,
     youtube_channel: row.youtube_channel ?? null,
     wikipedia_url:   row.wikipedia_url   ?? null,
+    website_url:     row.website_url     ?? null,
     sources:         row.sources         ?? [],
     notes:           row.notes           ?? null,
-    photo_url:       row.photo_url       ?? null,
-    group_ids:       [],
-    member_ids:      [],
+    photo_url:         row.photo_url         ?? null,
+    researched_fields: row.researched_fields  ?? [],
+    group_ids:         [],
+    member_ids:        [],
   };
 }
 

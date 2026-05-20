@@ -13,7 +13,7 @@ export type VerificationStatus =
 
 // ─── Performers ───────────────────────────────────────────────────────────────
 // Distinct from ethnic_group: a Performer is a specific person or ensemble
-// linked to a recording. One performer can have multiple romanized/Chinese names.
+// linked to a recording. One performer can have multiple Latin-script/Chinese names.
 
 export type PerformerRole = 'vocalist' | 'composer' | 'lyricist' | 'arranger' | 'group';
 
@@ -86,8 +86,8 @@ export interface Artist {
   id: string;
   name_display: string;
   names_zh: string[];       // script='zh'; first = official Chinese name, rest = aliases
-  names_en: string[];       // script='en'; first = official romanized name, rest = variants
-  names_ab: string[];       // script='ab'; indigenous-script names (Cjavi, etc.)
+  names_en: string[];       // script='en'; first = official Latin-script name, rest = variants
+  names_ab: string[];       // script='ab'; name in the indigenous language's own form
   zh_surname: string | null;
   ethnic_groups: string[];  // multi-value; replaces ethnic_group
   language: string | null;
@@ -98,9 +98,11 @@ export interface Artist {
   bio_ycm: string | null;
   youtube_channel: string | null;
   wikipedia_url: string | null;
+  website_url: string | null;
   sources: string[];        // provenance URLs/refs; DB-backed
   notes: string | null;
   photo_url: string | null;
+  researched_fields: string[];  // missing-badge keys confirmed N/A after research
   group_ids: string[];      // groups this person belongs to
   member_ids: string[];     // members of this group (non-empty when is_group=true)
 }

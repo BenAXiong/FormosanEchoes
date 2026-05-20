@@ -109,16 +109,18 @@ All name aliases per artist. Used for search, linking, and display.
 | `id` | `UUID PK` | |
 | `artist_id` | `UUID FK→artists` | |
 | `name` | `TEXT NOT NULL` | The name variant. |
-| `script` | `TEXT NOT NULL` | One of: `'zh'` (Chinese/hanzi), `'en'` (Latin/romanized), `'ab'` (indigenous script: Cjavi, Puyuma, etc.). |
+| `script` | `TEXT NOT NULL` | One of: `'zh'` (Chinese/hanzi), `'en'` (Latin-script), `'ab'` (indigenous/aboriginal name in the language's own form). |
 
 **Script semantics:**
 - `'zh'` — Chinese characters. First row = official display name; subsequent = aliases/variants.
-- `'en'` — Latin/romanized. First row = official romanized name; subsequent = spelling variants.
-- `'ab'` — Indigenous orthography (rare; most artists have none).
+- `'en'` — Latin-script names: romanized forms, English-language names, and any Latin-alphabet variants. First row = canonical; subsequent = spelling variants.
+- `'ab'` — The name as it appears in the indigenous language itself (aboriginal/indigenous form). Each of the 16 Formosan peoples has its own orthographic conventions; do not assume a single shared script system.
 
-Row order within a script = priority. The first `'en'` name is the canonical romanized name; the first `'zh'` is the canonical Chinese name. No extra "is_primary" flag.
+Row order within a script = priority. The first `'ab'` or `'en'` name is the canonical form for display; the first `'zh'` is the canonical Chinese name. No extra "is_primary" flag.
 
-**Important:** The old codebase used `'ab'` for romanized Latin names (incorrectly). A migration renamed all such rows to `'en'`. Do not re-introduce `'ab'` for romanized names.
+**Display priority:** `ab` > `en` > `zh`. The `artist_display` field is computed as `{ab ?? en} - {zh}`.
+
+**Important:** The old codebase used `'ab'` for Latin-script names (incorrectly). A migration renamed all such rows to `'en'`. Do not re-introduce `'ab'` for names that are simply Latin-alphabet spellings of the artist's name.
 
 ---
 
@@ -363,6 +365,8 @@ Legacy fields with no DB backing (all `undefined` at runtime):
 `language_evidence`, `ethnic_group_evidence`, `performers`, `source_platform`, `lyrics_url`, `source_snippets`, `verification_notes` (mapped from `notes`), `confidence` (hardcoded `'unknown'`), `needs_manual_verification` (hardcoded `true`), `checked_by_me` (hardcoded `false`), `title_romanized`, `lyrics.lyrics_romanized`, `lyrics.lyrics_rights_status`, `lyrics.lyrics_notes`, `lyrics.has_permission` (mirrors `show_publicly`).
 
 These are safe to read (they return `undefined` gracefully) but should not be written to or relied on for logic.
+
+`title_romanized` and `lyrics_romanized` deserve a note: they were designed as separate pronunciation-guide fields (e.g. CIP romanization for learners), but most Formosan languages already use Latin-based orthography, so `title_original` IS already in Latin script for the majority of songs. The fields were never given DB columns and are never populated. They are candidates for removal from `lib/types.ts` in a future cleanup.
 
 ---
 

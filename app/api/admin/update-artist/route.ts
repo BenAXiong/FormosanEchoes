@@ -33,9 +33,11 @@ export async function POST(request: Request) {
   if (fields.zh_surname      !== undefined) update.zh_surname      = fields.zh_surname      || null;
   if (fields.youtube_channel !== undefined) update.youtube_channel = fields.youtube_channel || null;
   if (fields.wikipedia_url   !== undefined) update.wikipedia_url   = fields.wikipedia_url   || null;
+  if (fields.website_url     !== undefined) update.website_url     = fields.website_url     || null;
   if (fields.photo_url       !== undefined) update.photo_url       = fields.photo_url       || null;
   if (fields.sources         !== undefined) update.sources         = Array.isArray(fields.sources) ? fields.sources : [];
-  if (fields.notes           !== undefined) update.notes           = fields.notes           || null;
+  if (fields.notes              !== undefined) update.notes              = fields.notes              || null;
+  if (fields.researched_fields  !== undefined) update.researched_fields  = Array.isArray(fields.researched_fields) ? fields.researched_fields : [];
 
   const { error: updateError } = await supabase
     .from('artists')

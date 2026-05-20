@@ -48,7 +48,7 @@ The public page uses ISR (`export const revalidate = 60` in `app/page.tsx`) — 
 | Admin songs view (list + edit form) | `components/admin/SongsAdminView.tsx` |
 | Admin multi-song add | `components/admin/AddMultipleSongsPanel.tsx` |
 | Admin metrics | `components/admin/MetricsPanel.tsx` |
-| Admin artist audit | `components/admin/ArtistAuditPanel.tsx` |
+| Admin artists view (list + edit form) | `components/admin/ArtistsAdminView.tsx` |
 | Gemini enrichment API | `app/api/admin/enrich-song/route.ts` |
 | Song save/update APIs | `app/api/admin/save-song/`, `app/api/admin/update-song/` |
 
@@ -97,9 +97,9 @@ Some songs only have a Chinese or romanized title. `title_original` is whatever 
 **`language` values must match `data/controlled-vocab.json`.**
 Do not invent values like `"Pangcah"` or `"Formosan"`. The vocab has `"Amis"` for Amis/Pangcah. Inconsistent values silently break language filters.
 
-**Keep PLAN.md current.** Update it whenever a significant task is completed or a decision changes scope.
+**Read and update PLAN.md every session.** At the start of any non-trivial task, read `PLAN.md` to understand what is already built, what is in progress, and what is deferred. Mark tasks done as they are completed. Never describe a feature as unbuilt if it appears in the Done section.
 
 **Docs to read before non-trivial changes:**
+- `PLAN.md` — current state, done features, and upcoming work — **read this first**
 - `docs/DECISIONS.md` — why things are the way they are
 - `docs/DATA_SCHEMA.md` — field-by-field reference
-- `PLAN.md` — current state and upcoming work

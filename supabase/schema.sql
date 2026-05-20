@@ -26,7 +26,7 @@ CREATE TABLE artists (
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- All name variants per artist (Chinese, English/romanized, Aboriginal)
+-- All name variants per artist (Chinese, Latin-script, Indigenous-script)
 -- Indexed for fast alias matching during song import and linking
 CREATE TABLE artist_names (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),

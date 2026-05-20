@@ -32,6 +32,7 @@ type AdminSong = {
   title_en: string | null;
   artist_credit: string;
   artist_display: string | null;
+  linked_artists: { id: string; name_display: string }[];
   yt_url: string;
   yt_video_id: string | null;
   url: string | null;
@@ -50,6 +51,7 @@ type AdminSong = {
   lyrics_original: string | null;
   lyrics_zh: string | null;
   lyrics_en: string | null;
+  lyrics_source: string | null;
   lyrics_show_publicly: boolean;
   missing: string[];
 };
@@ -105,7 +107,7 @@ function draftFromSong(s: AdminSong): DraftForm {
     lyrics_original:      s.lyrics_original     ?? '',
     lyrics_zh:            s.lyrics_zh           ?? '',
     lyrics_en:            s.lyrics_en           ?? '',
-    lyrics_source:        '',
+    lyrics_source:        s.lyrics_source        ?? '',
     lyrics_show_publicly: s.lyrics_show_publicly ?? false,
   };
 }
@@ -117,7 +119,7 @@ function hasChinese(v: string | null | undefined): boolean {
 function mergeEnriched(base: DraftForm, e: Record<string, string | null>): DraftForm {
   return {
     ...base,
-    // Don't put Chinese-only text into title_original — indigenous titles are romanized
+    // Don't put Chinese-only text into title_original — indigenous titles are Latin-script or indigenous-script
     title_original:  (e.title_original && !hasChinese(e.title_original)) ? e.title_original : base.title_original,
     title_zh:        e.title_chinese         ?? base.title_zh,
     language:        e.language_claimed      ?? base.language,
@@ -233,6 +235,12 @@ export default function SongsAdminView({ filters }: Readonly<{
   const [panelMessage, setPanelMessage]     = useState('');
   const [sources, setSources]               = useState<{ url: string; title: string | null }[]>([]);
 
+  // Artist link picker
+  const [linkPickerOpen, setLinkPickerOpen]       = useState(false);
+  const [linkQuery, setLinkQuery]                 = useState('');
+  const [allArtists, setAllArtists]               = useState<{ id: string; name_display: string }[] | null>(null);
+  const [loadingArtists, setLoadingArtists]       = useState(false);
+
   // Section toggles — mutually exclusive
   const [activeSection, setActiveSection] = useState<'metadata' | 'lyrics' | null>('metadata');
   const showData   = activeSection === 'metadata';
@@ -288,16 +296,19 @@ export default function SongsAdminView({ filters }: Readonly<{
 
   // ── Fetch ────────────────────────────────────────────────────────────────────
 
-  async function fetchSongs() {
+  async function fetchSongs(): Promise<AdminSong[]> {
     setLoading(true);
     setListMessage('');
     try {
       const res = await fetch('/api/admin/unaudited-songs?all=true');
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
-      setSongs(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? (data as AdminSong[]) : [];
+      setSongs(list);
+      return list;
     } catch (err) {
       setListMessage(`Error: ${err instanceof Error ? err.message : String(err)}`);
+      return [];
     } finally { setLoading(false); }
   }
 
@@ -312,6 +323,8 @@ export default function SongsAdminView({ filters }: Readonly<{
     setPanelMessage('');
     setSources([]);
     setSongResearched(false);
+    setLinkPickerOpen(false);
+    setLinkQuery('');
   }
 
   function handleSongClick(song: AdminSong) {
@@ -331,6 +344,21 @@ export default function SongsAdminView({ filters }: Readonly<{
       }
       setPanelStatus('idle');
       setSources([]);
+    }
+  }
+
+  // ── Delete ───────────────────────────────────────────────────────────────────
+
+  async function deleteSong(song: AdminSong) {
+    if (!window.confirm(`Delete "${song.title_original ?? song.yt_title ?? 'this song'}"? This cannot be undone.`)) return;
+    const res = await fetch('/api/admin/delete-song', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ song_id: song.id }),
+    });
+    if (res.ok) {
+      setSongs(prev => prev.filter(s => s.id !== song.id));
+      if (selected?.id === song.id) setSelected(null);
     }
   }
 
@@ -375,10 +403,76 @@ export default function SongsAdminView({ filters }: Readonly<{
       setSongResearched(true);
       setPanelStatus('idle');
       setPanelMessage('');
+
+      // Auto-link artist if a DB match was found
+      const match = json.artist_match as { id: string; name_display: string } | null;
+      if (match && !song.linked_artists.some(a => a.id === match.id)) {
+        const linkRes = await fetch('/api/admin/link-song-artist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ song_id: song.id, artist_id: match.id }),
+        });
+        if (linkRes.ok) {
+          const linkJson = await linkRes.json();
+          const linked = linkJson.linked as { id: string; name_display: string }[];
+          setSongs(prev => prev.map(s => s.id === song.id
+            ? { ...s, linked_artists: linked, artist_display: linked.map(a => a.name_display).join(' × ') }
+            : s
+          ));
+          if (selected?.id === song.id) setSelected(prev => prev ? { ...prev, linked_artists: linked, artist_display: linked.map(a => a.name_display).join(' × ') } : prev);
+        }
+      }
     } catch (err) {
       if (controller.signal.aborted) return;
       setPanelStatus('error');
       setPanelMessage(err instanceof Error ? err.message : 'Research failed');
+    }
+  }
+
+  async function unlinkArtist(song: AdminSong, artistId: string) {
+    const res = await fetch('/api/admin/link-song-artist', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ song_id: song.id, artist_id: artistId }),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      const linked = json.linked as { id: string; name_display: string }[];
+      const display = linked.length > 0 ? linked.map(a => a.name_display).join(' × ') : null;
+      setSongs(prev => prev.map(s => s.id === song.id ? { ...s, linked_artists: linked, artist_display: display } : s));
+      if (selected?.id === song.id) setSelected(prev => prev ? { ...prev, linked_artists: linked, artist_display: display } : prev);
+    }
+  }
+
+  async function openLinkPicker() {
+    setLinkPickerOpen(true);
+    setLinkQuery('');
+    if (allArtists === null && !loadingArtists) {
+      setLoadingArtists(true);
+      try {
+        const res = await fetch('/api/admin/all-artists');
+        const data = await res.json() as { id: string; name_display: string }[];
+        setAllArtists(data.map(a => ({ id: a.id, name_display: a.name_display })));
+      } finally {
+        setLoadingArtists(false);
+      }
+    }
+  }
+
+  async function linkArtist(song: AdminSong, artistId: string) {
+    const res = await fetch('/api/admin/link-song-artist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ song_id: song.id, artist_id: artistId }),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      const linked = json.linked as { id: string; name_display: string }[];
+      const display = linked.length > 0 ? linked.map(a => a.name_display).join(' × ') : null;
+      setSongs(prev => prev.map(s => s.id === song.id ? { ...s, linked_artists: linked, artist_display: display } : s));
+      if (selected?.id === song.id) setSelected(prev => prev ? { ...prev, linked_artists: linked, artist_display: display } : prev);
+      setLinkPickerOpen(false);
+      setLinkQuery('');
     }
   }
 
@@ -393,19 +487,25 @@ export default function SongsAdminView({ filters }: Readonly<{
 
   async function saveSelected() {
     if (!selected || !draft) return;
+    const savedId = selected.id;
     setPanelStatus('saving');
     setPanelMessage('');
     try {
       const res = await fetch('/api/admin/update-song', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ song_id: selected.id, fields: draft }),
+        body: JSON.stringify({ song_id: savedId, fields: draft }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? 'Save failed');
       setPanelStatus('saved');
-      setPanelMessage('');
-      fetchSongs();
+      setSongResearched(false);
+      const refreshed = await fetchSongs();
+      const updatedSong = refreshed.find(s => s.id === savedId);
+      if (updatedSong) {
+        setSelected(updatedSong);
+        setDraft(draftFromSong(updatedSong));
+      }
     } catch (err) {
       setPanelStatus('error');
       setPanelMessage(err instanceof Error ? err.message : 'Save failed');
@@ -423,6 +523,9 @@ export default function SongsAdminView({ filters }: Readonly<{
 
   // Auto-save batch — used by "Research All"
   async function handleBatchEnrich() {
+    if (filteredSongs.length > 10 && !window.confirm(
+      `Research all ${filteredSongs.length} songs? This will make ${filteredSongs.length} AI calls and may take several minutes.`
+    )) return;
     abortRef.current = false;
     setBatchRunning(true);
     const snapshot = [...filteredSongs]; // freeze list at start
@@ -718,7 +821,7 @@ export default function SongsAdminView({ filters }: Readonly<{
                         <p className={`text-xs font-medium truncate leading-tight ${song.title_original ? 'text-white' : 'text-stone-400 italic'}`}>
                           {song.title_original ?? song.yt_title ?? '(untitled)'}
                         </p>
-                        <p className="text-stone-600 text-[10px] truncate">{song.artist_credit || '—'}</p>
+                        <p className="text-stone-600 text-[10px] truncate">{song.artist_display || song.artist_credit || '—'}</p>
                       </div>
                       {song.missing.length > 0 && (
                         <div className="flex gap-0.5 flex-wrap justify-end shrink-0 max-w-24">
@@ -734,6 +837,13 @@ export default function SongsAdminView({ filters }: Readonly<{
                       className="shrink-0 px-1.5 py-0.5 rounded bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 text-[10px] font-bold transition-colors disabled:opacity-40"
                     >
                       ✦
+                    </button>
+                    <button
+                      onClick={e => { e.stopPropagation(); void deleteSong(song); }}
+                      title="Delete song"
+                      className="shrink-0 px-1.5 py-0.5 rounded bg-red-500/10 hover:bg-red-500/25 text-red-500/60 hover:text-red-400 text-[10px] transition-colors"
+                    >
+                      🗑
                     </button>
                   </div>
                 ))}
@@ -804,7 +914,7 @@ export default function SongsAdminView({ filters }: Readonly<{
                           <p className="text-xs text-white font-medium truncate leading-tight">
                             {song.title_original ?? song.yt_title ?? '(untitled)'}
                           </p>
-                          <p className="text-[10px] text-stone-500 truncate">{song.artist_credit || '—'}</p>
+                          <p className="text-[10px] text-stone-500 truncate">{song.artist_display || song.artist_credit || '—'}</p>
                         </div>
 
                         <div className="flex items-center gap-1.5 shrink-0" onClick={e => e.stopPropagation()}>
@@ -948,7 +1058,7 @@ export default function SongsAdminView({ filters }: Readonly<{
                       )}
                     </div>
                     {/* Artist row */}
-                    <div className="flex items-center gap-1.5 min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5 min-w-0">
                       <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(selected.artist_credit)}`}
                         target="_blank" rel="noopener noreferrer" title="Search artist"
                         className="shrink-0 text-stone-500 hover:text-stone-300 transition-colors">
@@ -959,8 +1069,52 @@ export default function SongsAdminView({ filters }: Readonly<{
                         </svg>
                       </a>
                       <p className="text-stone-400 text-xs truncate leading-tight flex-1 min-w-0">
-                        {selected.artist_display || selected.artist_credit || '—'}
+                        {selected.artist_credit || '—'}
                       </p>
+                      {selected.linked_artists.map(a => (
+                        <span key={a.id} className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-medium shrink-0">
+                          🔗 {a.name_display}
+                          <button onClick={() => void unlinkArtist(selected, a.id)} title="Unlink" className="hover:text-red-400 transition-colors leading-none">✕</button>
+                        </span>
+                      ))}
+                      {/* Manual link picker */}
+                      {linkPickerOpen ? (
+                        <div className="relative shrink-0">
+                          <input
+                            autoFocus
+                            type="text"
+                            value={linkQuery}
+                            onChange={e => setLinkQuery(e.target.value)}
+                            onBlur={() => setTimeout(() => { setLinkPickerOpen(false); setLinkQuery(''); }, 150)}
+                            placeholder={loadingArtists ? 'Loading…' : 'Search artist…'}
+                            className="text-[10px] px-2 py-0.5 rounded bg-white/10 border border-white/20 text-white placeholder-stone-600 focus:outline-none w-32"
+                          />
+                          {linkQuery.length >= 1 && (allArtists ?? []).filter(a => a.name_display.toLowerCase().includes(linkQuery.toLowerCase())).length > 0 && (
+                            <div className="absolute top-full left-0 mt-0.5 z-50 bg-stone-900 border border-white/15 rounded-lg shadow-xl overflow-hidden w-52 max-h-40 overflow-y-auto">
+                              {(allArtists ?? [])
+                                .filter(a => a.name_display.toLowerCase().includes(linkQuery.toLowerCase()))
+                                .slice(0, 8)
+                                .map(a => (
+                                  <button
+                                    key={a.id}
+                                    onMouseDown={() => void linkArtist(selected, a.id)}
+                                    className="w-full text-left px-2.5 py-1.5 text-[11px] text-stone-300 hover:bg-white/10 hover:text-white transition-colors"
+                                  >
+                                    {a.name_display}
+                                  </button>
+                                ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => void openLinkPicker()}
+                          className="shrink-0 px-1.5 py-0.5 rounded text-[9px] text-stone-600 hover:text-emerald-400 border border-transparent hover:border-emerald-500/30 transition-colors"
+                          title="Link artist"
+                        >
+                          + link
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

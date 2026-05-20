@@ -134,14 +134,14 @@ language, and biography narrow down which community and era the song belongs to.
 
 Rules for your JSON output:
 - Use null (not empty string) when a field is unknown.
-- "title_original": The song title in the original indigenous language — romanized or indigenous script only. Do NOT put Chinese characters here. If you only know the Chinese title, leave "title_original" null and use "title_chinese" instead. Use sentence case: capitalize only the first letter (e.g. "Senasenai", not "SENASENAI" or "senasenai").
+- "title_original": The song title in the original indigenous language — Latin-script or indigenous script only. Do NOT put Chinese characters here. If you only know the Chinese title, leave "title_original" null and use "title_chinese" instead. Use sentence case: capitalize only the first letter (e.g. "Senasenai", not "SENASENAI" or "senasenai").
 - "title_chinese": The officially published Chinese name — from an album cover, artist page, or music database (KKBOX, Spotify, 五大唱片), OR clearly present as the song title in the YouTube video title. Do NOT translate the indigenous title yourself. Do NOT use genre/style descriptors from YouTube titles (e.g. "古調", "族語歌曲", "傳統歌謠" are labels, not titles). If the source is the YouTube title, say so in "notes". Leave null if no official Chinese title is known.
-- "artist": The primary artist's single canonical name only — do NOT combine multiple name forms (e.g., use "Biung Wang" OR "王宏恩", not "王宏恩 (Biung Wang)"). Prefer the indigenous/romanized name where one exists (e.g., "Samingad", "Sangpuy", "Biung").
+- "artist": The primary artist's single canonical name only — do NOT combine multiple name forms (e.g., use "Biung Wang" OR "王宏恩", not "王宏恩 (Biung Wang)"). Prefer the indigenous Latin-script name where one exists (e.g., "Samingad", "Sangpuy", "Biung").
 - "language_claimed": MUST be one of the 16 groups above. If it is a mix, pick the primary one.
 - "ethnic_group_claimed": Same 16-group list — the ethnic group associated with the song.
 - "genre": One of: Traditional, Traditional Choral, Modern Folk, Contemporary Folk, Contemporary Indigenous Folk-Pop, Indigenous Gospel / Folk.
 - "recording_type": One of: Studio, Live, Home Recording, Field Recording.
-- "lyrics_original": Provide the FULL lyrics in the indigenous language (romanized script if applicable).
+- "lyrics_original": Provide the FULL lyrics in the indigenous language (Latin script if applicable).
 - "lyrics_translation_zh": Provide a Traditional Chinese translation.
 - "lyrics_translation_en": Provide an English translation.
 - "notes": Mention where you found the lyrics or any ambiguities about the dialect.
@@ -166,7 +166,28 @@ Example Output:
   "notes": "Classic Puyuma song by Samingad."
 }
 
-Return ONLY valid JSON. No commentary.`;
+CRITICAL: Your entire response must be a single valid JSON object. Do not include any text, explanation, markdown code fences, or commentary before or after the JSON.`;
+
+// ── JSON extraction (robust against preamble/epilogue text) ──────────────────
+
+function extractJsonObject(raw: string): Record<string, unknown> | null {
+  // Strip all markdown code fences globally, then trim
+  const s = raw.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
+  // Strategy 1: parse the whole stripped string
+  try { return JSON.parse(s) as Record<string, unknown>; } catch {}
+  // Strategy 2: first { to last } (handles leading/trailing prose)
+  const first = s.indexOf('{');
+  const last  = s.lastIndexOf('}');
+  if (first !== -1 && last > first) {
+    try { return JSON.parse(s.slice(first, last + 1)) as Record<string, unknown>; } catch {}
+    // Strategy 3: step forward through each { to skip preamble containing stray braces
+    for (let i = first + 1; i < last; i = s.indexOf('{', i + 1)) {
+      if (i === -1) break;
+      try { return JSON.parse(s.slice(i, last + 1)) as Record<string, unknown>; } catch {}
+    }
+  }
+  return null;
+}
 
 // ── Route handler ─────────────────────────────────────────────────────────────
 
@@ -222,26 +243,11 @@ export async function POST(request: Request) {
 
     const raw = result.response.text().trim();
 
-    // Strip markdown fences if Gemini wraps the JSON
-    const jsonStr = raw.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim();
-
-    let enriched: Record<string, unknown>;
-    const aiLabel = `[AI research — ${new Date().toISOString().slice(0, 10)}]`;
-    try {
-      enriched = JSON.parse(jsonStr);
-    } catch {
-      // Try to extract the first {...} block if Gemini added commentary
-      const match = jsonStr.match(/\{[\s\S]+\}/);
-      if (match) {
-        try {
-          enriched = JSON.parse(match[0]);
-        } catch {
-          return NextResponse.json({ error: 'Gemini returned non-JSON response', raw }, { status: 502 });
-        }
-      } else {
-        return NextResponse.json({ error: 'Gemini returned non-JSON response', raw }, { status: 502 });
-      }
+    const enriched = extractJsonObject(raw);
+    if (!enriched) {
+      return NextResponse.json({ error: 'Gemini returned non-JSON response', raw }, { status: 502 });
     }
+    const aiLabel = `[AI research — ${new Date().toISOString().slice(0, 10)}]`;
 
     // Label AI-generated fields
     if (enriched.notes) {
@@ -260,7 +266,27 @@ export async function POST(request: Request) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .flatMap((c: any) => c.web?.uri ? [{ url: c.web.uri as string, title: (c.web.title as string) ?? null }] : []);
 
-    return NextResponse.json({ enriched, sources });
+    // Artist DB match — try to find an existing artist record for auto-linking
+    let artist_match: { id: string; name_display: string } | null = null;
+    const resolvedArtist = (enriched.artist as string | null) ?? artist_credit;
+    if (resolvedArtist) {
+      try {
+        const supabase = createServerClient();
+        const tokens = splitCreditTokens(resolvedArtist);
+        for (const token of tokens) {
+          const { data } = await supabase
+            .from('artist_names')
+            .select('artist_id, artists(id, name_display)')
+            .ilike('name', token)
+            .limit(1);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const artist = (data?.[0]?.artists as any);
+          if (artist) { artist_match = { id: artist.id, name_display: artist.name_display }; break; }
+        }
+      } catch { /* non-fatal */ }
+    }
+
+    return NextResponse.json({ enriched, sources, artist_match });
   } catch (err: unknown) {
     console.error('[enrich-song]', err);
     if (err && typeof err === 'object' && 'status' in err) {

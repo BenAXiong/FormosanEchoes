@@ -17,10 +17,11 @@ export async function GET() {
   const unlinked = (data ?? [])
     .filter((s: any) => !(s.song_artists as any[]).length && s.artist_credit)
     .map((s: any) => ({
+      song_id:            s.id as string,
       song_artist_string: s.artist_credit as string,
-      song_title: (s.title_original ?? '') as string,
-      yt_url: (s.yt_url ?? '') as string,
-      suggested_action: `"${s.title_original ?? 'Unknown'}" — add artist to DB or link manually`,
+      song_title:         (s.title_original ?? '') as string,
+      yt_url:             (s.yt_url ?? '') as string,
+      suggested_action:   `"${s.title_original ?? 'Unknown'}" — add artist to DB or link manually`,
     }));
 
   return NextResponse.json(unlinked);

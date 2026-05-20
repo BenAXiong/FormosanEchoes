@@ -42,6 +42,7 @@ export async function POST(request: Request) {
       zh_surname:      artist.zh_surname      ?? null,
       youtube_channel: artist.youtube_channel ?? null,
       wikipedia_url:   artist.wikipedia_url   ?? null,
+      website_url:     artist.website_url     ?? null,
       sources:         Array.isArray(artist.sources) ? artist.sources : [],
       photo_url:       artist.photo_url       ?? null,
       notes:           artist.notes           ?? null,
@@ -78,6 +79,11 @@ export async function POST(request: Request) {
     .or(ilikeFilter);
 
   const toLink = (songRows ?? []).map(s => ({ song_id: s.id, artist_id: saved.id }));
+
+  // Also explicitly link the originating song if provided (fallback for credits that alias-scan might miss)
+  if (artist.link_song_id && !toLink.find(r => r.song_id === artist.link_song_id)) {
+    toLink.push({ song_id: artist.link_song_id as string, artist_id: saved.id });
+  }
 
   let songs_linked = 0;
   if (toLink.length > 0) {

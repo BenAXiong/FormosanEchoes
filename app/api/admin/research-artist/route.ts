@@ -56,10 +56,10 @@ Search strategy — follow in order:
 
 Return ONLY a valid JSON object (no markdown, no fences):
 {
-  "name_display": "primary name for display (prefer indigenous/romanized form if exists)",
+  "name_display": "primary name for display (prefer indigenous Latin-script name if one exists)",
   "names_zh": ["Chinese name variants — first entry is the primary one"],
-  "names_en": ["Latin/romanized name variants — first entry is the primary one, include all known spellings"],
-  "names_ab": ["Indigenous-script names if applicable (Cjavi, Puyuma script, etc.), else []"],
+  "names_en": ["Latin-script name variants — first entry is the primary one, include all known spellings"],
+  "names_ab": ["Name as it appears in the indigenous language's own form, else []"],
   "zh_surname": "Chinese surname if applicable, else null",
   "ethnic_groups": ["array of matching groups from: Amis, Atayal, Paiwan, Bunun, Puyuma, Rukai, Tsou, Saisiyat, Tao (Yami), Thao, Kavalan, Truku, Sakizaya, Seediq, Hla'alua, Kanakanavu — most artists have just one, some span two"],
   "language": "primary language used by artist, or null",
@@ -69,14 +69,16 @@ Return ONLY a valid JSON object (no markdown, no fences):
   "bio_en": "short English bio (1-2 sentences)",
   "youtube_channel": "URL if found, else null",
   "wikipedia_url": "URL if found, else null",
-  "photo_url": "A direct URL to a publicly accessible portrait photo (JPEG/PNG/WebP). Prefer: Wikipedia commons image files (e.g. https://upload.wikimedia.org/…), official press photos, or artist profile images. Must be a direct image URL, not a page URL. null if none found.",
+  "photo_url": "A permanently hosted, direct image URL ending in .jpg/.jpeg/.png/.webp/.gif. ONLY use: (1) Wikipedia Commons — URLs beginning with https://upload.wikimedia.org/ are stable and preferred; (2) official label or artist website CDN images known to be permanent. DO NOT use: news article images (they get removed), blog or WordPress upload paths (e.g. /wp-content/uploads/), social media images, or any URL you are not certain is permanently hosted. If no Wikipedia Commons or verified permanent image exists, return null — a missing photo is better than a broken link.",
   "sources": ["list", "of", "URLs", "used"],
   "notes": "any relevant context",
   "members": [{"name_display": "member name as commonly known"}]
 }
 
 If is_group is false, set members to [].
-If is_group is true, list every known member with their most common name. These will be auto-created as individual artist records.`;
+If is_group is true, list every known member with their most common name. These will be auto-created as individual artist records.
+
+CRITICAL: Your entire response must be a single valid JSON object. Do not include any text, explanation, markdown code fences, or commentary before or after the JSON.`;
 
 function splitArtistString(raw: string): string[] {
   const parts = raw
@@ -91,6 +93,21 @@ function splitArtistString(raw: string): string[] {
     if (m) { tokens.push(m[1].trim(), m[2].trim()); }
   }
   return [...new Set(tokens)];
+}
+
+function extractJsonObject(raw: string): Record<string, unknown> | null {
+  const s = raw.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
+  try { return JSON.parse(s) as Record<string, unknown>; } catch {}
+  const first = s.indexOf('{');
+  const last  = s.lastIndexOf('}');
+  if (first !== -1 && last > first) {
+    try { return JSON.parse(s.slice(first, last + 1)) as Record<string, unknown>; } catch {}
+    for (let i = first + 1; i < last; i = s.indexOf('{', i + 1)) {
+      if (i === -1) break;
+      try { return JSON.parse(s.slice(i, last + 1)) as Record<string, unknown>; } catch {}
+    }
+  }
+  return null;
 }
 
 export async function POST(request: Request) {
@@ -170,7 +187,8 @@ export async function POST(request: Request) {
     try {
       result = await callGemini('gemini-2.5-pro');
     } catch (proErr: unknown) {
-      const status = (proErr as any)?.status;  // eslint-disable-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const status = (proErr as any)?.status;
       if (status === 503 || status === 429) {
         result = await callGemini('gemini-2.5-flash');
       } else {
@@ -179,18 +197,10 @@ export async function POST(request: Request) {
     }
 
     const raw = result.response.text().trim();
-    const jsonStr = raw.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim();
 
-    let research: Record<string, unknown>;
-    try {
-      research = JSON.parse(jsonStr);
-    } catch {
-      const match = jsonStr.match(/\{[\s\S]+\}/);
-      if (match) {
-        research = JSON.parse(match[0]);
-      } else {
-        return NextResponse.json({ error: 'Gemini returned non-JSON response', raw }, { status: 502 });
-      }
+    const research = extractJsonObject(raw);
+    if (!research) {
+      return NextResponse.json({ error: 'Gemini returned non-JSON response', raw }, { status: 502 });
     }
 
     // Extract grounding sources for provenance display
@@ -205,10 +215,12 @@ export async function POST(request: Request) {
   } catch (err: unknown) {
     console.error('[research-artist]', err);
     if (err && typeof err === 'object' && 'status' in err) {
-      const e = err as { status: number; statusText: string };
-      if (e.status === 429) return NextResponse.json({ error: 'Rate limited — wait ~30s and try again.' }, { status: 429 });
-      return NextResponse.json({ error: `Gemini error: ${e.status} ${e.statusText}` }, { status: 502 });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const e = err as { status: number; statusText: string; message?: string; errorDetails?: any };
+      const detail = e.message ?? e.statusText ?? '';
+      if (e.status === 429) return NextResponse.json({ error: `Gemini 429 (rate limited): ${detail}` }, { status: 429 });
+      return NextResponse.json({ error: `Gemini ${e.status}: ${detail}` }, { status: 502 });
     }
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Gemini API error' }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }
 }

@@ -17,7 +17,7 @@ export type AdminFilters = {
   artist_missing_field: string;
 };
 
-const EMPTY_FILTERS: AdminFilters = { language: '', verification_status: '', artist: '', missing_field: 'any_core', ethnic_group: '', artist_missing_field: '' };
+const EMPTY_FILTERS: AdminFilters = { language: '', verification_status: '', artist: '', missing_field: 'any_core', ethnic_group: '', artist_missing_field: 'any_except_songs' };
 
 const MISSING_FIELDS = ['any', 'any_core', 'language', 'ethnic_group', 'no_artist', 'no_url', 'lyrics', 'lyrics_unapproved'];
 const MISSING_LABELS: Record<string, string> = {
@@ -31,15 +31,16 @@ const MISSING_LABELS: Record<string, string> = {
   lyrics_unapproved:'Lyrics unapproved',
 };
 
-const ARTIST_MISSING_FIELDS = ['any', 'no_bio', 'no_ethnic_group', 'no_language', 'no_active_years', 'no_links', 'no_linked_songs'];
+const ARTIST_MISSING_FIELDS = ['any', 'any_except_songs', 'no_bio', 'no_ethnic_group', 'no_language', 'no_active_years', 'no_links', 'no_linked_songs'];
 const ARTIST_MISSING_LABELS: Record<string, string> = {
-  any:             'Any missing',
-  no_bio:          'No bio',
-  no_ethnic_group: 'No ethnic group',
-  no_language:     'No language',
-  no_active_years: 'No active years',
-  no_links:        'No links',
-  no_linked_songs: 'No songs',
+  any:              'Any missing',
+  any_except_songs: 'Any missing*',
+  no_bio:           'No bio',
+  no_ethnic_group:  'No ethnic group',
+  no_language:      'No language',
+  no_active_years:  'No active years',
+  no_links:         'No links',
+  no_linked_songs:  'No songs',
 };
 
 const LANGUAGES = [

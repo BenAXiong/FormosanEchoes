@@ -9,7 +9,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase
     .from('songs')
-    .select('id, yt_title, title_original, title_zh, title_en, artist_credit, url, language, ethnic_group, region, location, genre, recording_type, year, album, description, notes, verification_status, yt_url, yt_video_id, song_tags(tags(value)), lyrics(song_id, lyrics_original, lyrics_zh, lyrics_en, source, show_publicly), song_artists(artists(name_display, artist_names(name, script)))')
+    .select('id, yt_title, title_original, title_zh, title_en, artist_credit, url, language, ethnic_group, region, location, genre, recording_type, year, album, description, notes, verification_status, yt_url, yt_video_id, song_tags(tags(value)), lyrics(song_id, lyrics_original, lyrics_zh, lyrics_en, source, show_publicly), song_artists(artist_id, artists(name_display, artist_names(name, script)))')
     .order('created_at', { ascending: false })
     .limit(500);
 
@@ -20,18 +20,28 @@ export async function GET(request: Request) {
     // Resolve linked artist names: "RomanizedName - 中文名" per artist
     type ArtistNameRow = { name: string; script: string };
     type ArtistRow = { name_display: string; artist_names: ArtistNameRow[] };
-    const linkedArtists: ArtistRow[] = (s.song_artists ?? [])
-      .map((sa: { artists: ArtistRow | null }) => sa.artists)
-      .filter(Boolean);
+    const seen = new Set<string>();
+    const linkedArtists: (ArtistRow & { artist_id: string })[] = (s.song_artists ?? [])
+      .map((sa: { artist_id: string; artists: ArtistRow | null }) => sa.artists ? { ...sa.artists, artist_id: sa.artist_id } : null)
+      .filter((a: (ArtistRow & { artist_id: string }) | null): a is ArtistRow & { artist_id: string } => {
+        if (!a) return false;
+        if (seen.has(a.name_display)) return false;
+        seen.add(a.name_display);
+        return true;
+      });
+
+    function resolveDisplay(a: ArtistRow): string {
+      const names = a.artist_names ?? [];
+      const indigenous = names.find(n => n.script === 'ab')?.name ?? names.find(n => n.script === 'en')?.name;
+      const zh = names.find(n => n.script === 'zh')?.name;
+      if (indigenous && zh) return `${indigenous} - ${zh}`;
+      return indigenous ?? zh ?? a.name_display;
+    }
+
     const artist_display = linkedArtists.length > 0
-      ? linkedArtists.map(a => {
-          const names = a.artist_names ?? [];
-          const en = names.find(n => n.script === 'en' || n.script === 'ab')?.name;
-          const zh = names.find(n => n.script === 'zh')?.name;
-          if (en && zh) return `${en} - ${zh}`;
-          return en ?? zh ?? a.name_display;
-        }).join(' × ')
+      ? linkedArtists.map(resolveDisplay).join(' × ')
       : null;
+    const linked_artists = linkedArtists.map(a => ({ id: a.artist_id, name_display: resolveDisplay(a) }));
     const missing: string[] = [];
     if (!s.language) missing.push('language');
     if (!s.ethnic_group) missing.push('ethnic_group');
@@ -55,6 +65,7 @@ export async function GET(request: Request) {
       title_en:             (s.title_en       ?? null) as string | null,
       artist_credit:        (s.artist_credit  || '')   as string,
       artist_display:       artist_display,
+      linked_artists:       linked_artists,
       url:                  (s.url            ?? null) as string | null,
       yt_url:               (s.yt_url         || '')   as string,
       yt_video_id:          (s.yt_video_id    ?? null) as string | null,
@@ -73,6 +84,7 @@ export async function GET(request: Request) {
       lyrics_original:      (s.lyrics?.lyrics_original ?? null) as string | null,
       lyrics_zh:            (s.lyrics?.lyrics_zh       ?? null) as string | null,
       lyrics_en:            (s.lyrics?.lyrics_en       ?? null) as string | null,
+      lyrics_source:        (s.lyrics?.source          ?? null) as string | null,
       lyrics_show_publicly: (s.lyrics?.show_publicly   ?? false) as boolean,
       missing,
     };

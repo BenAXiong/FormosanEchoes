@@ -367,9 +367,9 @@ const registerMirrorSeekFn = useCallback((fn) => { mirrorSeekFnRef.current = fn;
 
 ## [ADMIN] `title_original` constraints: no Chinese, sentence case
 
-**Chosen:** `title_original` must be romanized or indigenous-script only. Chinese characters are rejected by a `hasChinese()` guard in `mergeEnriched`. If the AI only found a Chinese title, it goes to `title_zh` instead. The Gemini system prompt instructs sentence case (e.g. `"Senasenai"`, not `"SENASENAI"`).
+**Chosen:** `title_original` must be Latin-script or indigenous-script only. Chinese characters are rejected by a `hasChinese()` guard in `mergeEnriched`. If the AI only found a Chinese title, it goes to `title_zh` instead. The Gemini system prompt instructs sentence case (e.g. `"Senasenai"`, not `"SENASENAI"`).
 
-**Why:** `title_original` is frequently used as the primary display title in search and card views. Chinese characters in this field break romanization-first display logic and are misleading — an AI-translated Chinese title is not an "original" title. Sentence case normalizes the visual presentation across diverse orthographies.
+**Why:** `title_original` is frequently used as the primary display title in search and card views. Chinese characters in this field break Latin-script-first display logic and are misleading — an AI-translated Chinese title is not an "original" title. Sentence case normalizes the visual presentation across diverse orthographies.
 
 **Guard implementation:**
 ```typescript
