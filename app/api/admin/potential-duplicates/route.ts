@@ -147,7 +147,7 @@ export async function GET() {
           is_group:      raw.is_group ?? false,
           photo_url:     raw.photo_url ?? null,
           song_count:    artistSongCount.get(id) ?? 0,
-          songs:         (artistSongs.get(id) ?? []).map(sid => ({ id: sid, title: songTitleMap.get(sid) ?? sid })),
+          songs:         (artistSongs.get(id) ?? []).filter(sid => songTitleMap.has(sid)).map(sid => ({ id: sid, title: songTitleMap.get(sid) ?? '(untitled)' })),
         };
       };
 
