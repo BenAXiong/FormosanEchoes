@@ -86,7 +86,7 @@ export default function BrowserPage({ songs, artists }: Props) {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [searchFocused, setSearchFocused] = useState(false);
   const [recentVisibleCount, setRecentVisibleCount] = useState(10);
-  const { playingTrack, playTrack, setQueue, setAutoAdvance, isFavorite, playlists, registerTogglePanelFn } = usePlayer();
+  const { playingTrack, playTrack, setQueue, setAutoAdvance, isFavorite, playlists, registerTogglePanelFn, karaokeMode, toggleKaraokeMode } = usePlayer();
 
   // History API refs for PWA back-button handling
   const historyDepth = useRef(0);
@@ -179,7 +179,7 @@ export default function BrowserPage({ songs, artists }: Props) {
 
   useEffect(() => { setQueue(results); }, [results, setQueue]);
   useEffect(() => { setAutoAdvance(autoplay); }, [autoplay, setAutoAdvance]);
-  useEffect(() => { setKaraokeMode(false); }, [selected?.id]);
+  useEffect(() => { if (karaokeMode) toggleKaraokeMode(); }, [selected?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keep refs in sync for use inside stable callbacks
   useEffect(() => { selectedRef.current = selected; }, [selected]);
