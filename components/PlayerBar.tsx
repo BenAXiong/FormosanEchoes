@@ -13,6 +13,7 @@ export default function PlayerBar() {
     volume, setVolume, toggleFavorite, isFavorite,
     playlists, addSongToPlaylist, createPlaylist,
     registerSeekFn, seekTo, seekMirror, autoAdvance, togglePanel,
+    karaokeMode, toggleKaraokeMode,
   } = usePlayer();
   const playerRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -146,21 +147,37 @@ export default function PlayerBar() {
           </div>
         </div>
 
-        {/* Row 2: playback controls */}
-        <div className="flex items-center justify-center gap-10 py-1">
-          <button onClick={prevTrack} className="text-stone-400 active:text-white transition-colors">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
-          </button>
-          <button onClick={togglePlay}
-            className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-black active:scale-95 transition-transform">
-            {isPlaying
-              ? <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-              : <svg className="w-6 h-6 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            }
-          </button>
-          <button onClick={nextTrack} className="text-stone-400 active:text-white transition-colors">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-          </button>
+        {/* Row 2: playback controls + flanking buttons */}
+        <div className="flex items-center justify-between px-6 py-1">
+          {/* Info button (not wired) */}
+          <button
+            aria-label="Song info"
+            className="w-8 h-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-[13px] text-stone-400 active:text-white transition-colors"
+          >ℹ</button>
+
+          {/* Prev / Play / Next */}
+          <div className="flex items-center gap-10">
+            <button onClick={prevTrack} className="text-stone-400 active:text-white transition-colors">
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+            </button>
+            <button onClick={togglePlay}
+              className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-black active:scale-95 transition-transform">
+              {isPlaying
+                ? <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                : <svg className="w-6 h-6 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              }
+            </button>
+            <button onClick={nextTrack} className="text-stone-400 active:text-white transition-colors">
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            </button>
+          </div>
+
+          {/* Karaoke toggle */}
+          <button
+            onClick={toggleKaraokeMode}
+            aria-label={karaokeMode ? 'Exit karaoke mode' : 'Enter karaoke mode'}
+            className={`w-8 h-8 rounded-full border flex items-center justify-center text-base transition-colors ${karaokeMode ? 'border-amber-400/40 bg-amber-400/10 text-amber-300' : 'border-white/10 bg-white/5 text-stone-400 active:text-white'}`}
+          >🎤</button>
         </div>
 
         {/* Row 3: full-width seek bar */}

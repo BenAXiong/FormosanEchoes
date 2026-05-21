@@ -86,14 +86,12 @@ export default function BrowserPage({ songs, artists }: Props) {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [searchFocused, setSearchFocused] = useState(false);
   const [recentVisibleCount, setRecentVisibleCount] = useState(10);
-  const [karaokeMode, setKaraokeMode] = useState(false);
   const { playingTrack, playTrack, setQueue, setAutoAdvance, isFavorite, playlists, registerTogglePanelFn } = usePlayer();
 
   // History API refs for PWA back-button handling
   const historyDepth = useRef(0);
   const skipNextPop = useRef(false);
   const selectedRef = useRef<Song | null>(null);
-  const karaokeModeRef = useRef(false);
 
   useEffect(() => {
     setMounted(true);
@@ -185,7 +183,6 @@ export default function BrowserPage({ songs, artists }: Props) {
 
   // Keep refs in sync for use inside stable callbacks
   useEffect(() => { selectedRef.current = selected; }, [selected]);
-  useEffect(() => { karaokeModeRef.current = karaokeMode; }, [karaokeMode]);
 
   // Push a history entry when the mobile sheet opens; replace when switching songs
   useEffect(() => {
@@ -590,7 +587,7 @@ export default function BrowserPage({ songs, artists }: Props) {
               onSelectArtist={setSelectedArtist}
             />
           ) : activeTab === 'songs' && selected ? (
-            <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} karaokeMode={false} onKaraokeToggle={() => {}} />
+            <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} />
           ) : (
             <div className="relative flex flex-col items-center justify-center h-full px-8 text-center bg-[#07070a] overflow-hidden">
               <div className="absolute inset-0 opacity-[0.04] pointer-events-none select-none">
@@ -611,7 +608,7 @@ export default function BrowserPage({ songs, artists }: Props) {
       {/* Mobile bottom sheet — only mount when not on a large screen to avoid dual NowPlaying registration */}
       {!isLargeScreen && selected && (
         <div className={`lg:hidden fixed inset-x-0 top-[52px] ${playingTrack ? 'bottom-[116px] sm:bottom-0' : 'bottom-0'} z-30 rounded-none overflow-hidden border-t border-white/10 shadow-2xl`}>
-          <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} karaokeMode={karaokeMode} onKaraokeToggle={() => setKaraokeMode(v => !v)} />
+          <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} />
         </div>
       )}
     </div>

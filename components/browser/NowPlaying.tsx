@@ -44,13 +44,11 @@ interface Props {
   song: Song;
   onClose: () => void;
   autoplay: boolean;
-  karaokeMode: boolean;
-  onKaraokeToggle: () => void;
 }
 
-export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKaraokeToggle }: Props) {
+export default function NowPlaying({ song, onClose, autoplay }: Props) {
   const {
-    playingTrack, playTrack, isPlaying, pauseTrack, resumeTrack, progress, setIsPanelOpen, seekTo, registerMirrorSeekFn,
+    playingTrack, playTrack, isPlaying, pauseTrack, resumeTrack, progress, setIsPanelOpen, seekTo, registerMirrorSeekFn, karaokeMode,
   } = usePlayer();
   const playerRef = useRef<any>(null);   // eslint-disable-line @typescript-eslint/no-explicit-any
   const lastMirrorTime = useRef(0);
@@ -173,27 +171,6 @@ export default function NowPlaying({ song, onClose, autoplay, karaokeMode, onKar
               aria-label="Show metadata"
               className="hidden lg:flex w-6 h-6 rounded-full bg-white/8 border border-white/10 items-center justify-center text-[11px] text-stone-400 hover:bg-white/15 hover:text-white transition-colors"
             >ℹ</button>
-
-            {/* Mobile: karaoke toggle */}
-            {karaokeMode ? (
-              <button
-                onClick={onKaraokeToggle}
-                aria-label="Exit karaoke mode"
-                className="lg:hidden flex flex-col items-center gap-0.5 text-stone-500 hover:text-stone-300 transition-colors"
-              >
-                <span className="text-xl leading-none">↓</span>
-                <span className="text-[8px] font-bold tracking-widest leading-none">VIDEO</span>
-              </button>
-            ) : (
-              <button
-                onClick={onKaraokeToggle}
-                aria-label="Enter karaoke mode"
-                className="lg:hidden flex flex-col items-center gap-0.5 text-amber-400 hover:text-amber-300 transition-colors"
-              >
-                <span className="text-xl leading-none">🎤</span>
-                <span className="text-[8px] font-bold tracking-widest leading-none">KARAOKE</span>
-              </button>
-            )}
 
             {showInfo && (
               <>

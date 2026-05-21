@@ -30,6 +30,8 @@ interface PlayerContextType {
   registerMirrorSeekFn: (fn: ((s: number) => void) | null) => void;
   togglePanel: () => void;
   registerTogglePanelFn: (fn: (() => void) | null) => void;
+  karaokeMode: boolean;
+  toggleKaraokeMode: () => void;
   favorites: string[];
   toggleFavorite: (songId: string) => void;
   isFavorite: (songId: string) => boolean;
@@ -59,6 +61,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const registerMirrorSeekFn = useCallback((fn: ((s: number) => void) | null) => { mirrorSeekFnRef.current = fn; }, []);
   const togglePanel = useCallback(() => togglePanelFnRef.current?.(), []);
   const registerTogglePanelFn = useCallback((fn: (() => void) | null) => { togglePanelFnRef.current = fn; }, []);
+
+  const [karaokeMode, setKaraokeMode] = useState(false);
+  const toggleKaraokeMode = useCallback(() => setKaraokeMode(v => !v), []);
 
   const [autoAdvance, setAutoAdvance] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -185,6 +190,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     registerMirrorSeekFn,
     togglePanel,
     registerTogglePanelFn,
+    karaokeMode,
+    toggleKaraokeMode,
     isPanelOpen,
     setIsPanelOpen,
     progress,
@@ -220,6 +227,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     registerMirrorSeekFn,
     togglePanel,
     registerTogglePanelFn,
+    karaokeMode,
+    toggleKaraokeMode,
     isPanelOpen,
     progress,
     duration,
