@@ -86,12 +86,13 @@ interface Props {
   artistLanguage: string;
   onArtistLanguageChange: (l: string) => void;
   filteredArtistCount: number;
+  onClose?: () => void;
 }
 
 export default function FilterSidebar({
   filters, onChange, resultCount, totalCount, allSongs, allArtists,
   activeTab, onTabChange, artistQuery, onArtistQueryChange,
-  artistLanguage, onArtistLanguageChange, filteredArtistCount,
+  artistLanguage, onArtistLanguageChange, filteredArtistCount, onClose,
 }: Props) {
   const { playlists } = usePlayer();
 
@@ -238,7 +239,7 @@ export default function FilterSidebar({
               <PillList
                 options={artistLangOptions}
                 value={artistLanguage}
-                onChange={onArtistLanguageChange}
+                onChange={(v) => { onArtistLanguageChange(v); if (v) onClose?.(); }}
                 expandLabel="more languages"
                 allCount={allArtists.length}
               />
@@ -300,7 +301,7 @@ export default function FilterSidebar({
             <PillList
               options={langOptions}
               value={filters.language}
-              onChange={(v) => updateFilters({ language: v, artist_id: '' })}
+              onChange={(v) => { updateFilters({ language: v, artist_id: '' }); if (v) onClose?.(); }}
               expandLabel="other languages"
               allCount={allSongs.length}
             />
@@ -320,7 +321,7 @@ export default function FilterSidebar({
               <PillList
                 options={artistOptions}
                 value={artistFilter}
-                onChange={setArtistFilter}
+                onChange={(v) => { setArtistFilter(v); if (v) onClose?.(); }}
                 expandLabel="more artists"
                 allCount={artistPool.length}
               />

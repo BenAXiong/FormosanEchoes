@@ -297,6 +297,7 @@ export default function BrowserPage({ songs, artists }: Props) {
           artistLanguage={artistLanguage}
           onArtistLanguageChange={setArtistLanguage}
           filteredArtistCount={filteredArtists.length}
+          onClose={() => setSidebarOpen(false)}
         />
       </div>
 
