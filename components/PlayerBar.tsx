@@ -152,7 +152,7 @@ export default function PlayerBar() {
           {/* Info button (not wired) */}
           <button
             aria-label="Song info"
-            className="w-8 h-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-[13px] text-stone-400 active:text-white transition-colors"
+            className="w-5 h-5 rounded-full border border-white/20 bg-white/5 flex items-center justify-center text-[15px] leading-none text-stone-400 active:text-white transition-colors"
           >ℹ</button>
 
           {/* Prev / Play / Next */}
@@ -176,7 +176,7 @@ export default function PlayerBar() {
           <button
             onClick={toggleKaraokeMode}
             aria-label={karaokeMode ? 'Exit karaoke mode' : 'Enter karaoke mode'}
-            className={`w-8 h-8 rounded-full border flex items-center justify-center text-base transition-colors ${karaokeMode ? 'border-amber-400/40 bg-amber-400/10 text-amber-300' : 'border-white/10 bg-white/5 text-stone-400 active:text-white'}`}
+            className={`flex items-center justify-center text-xl transition-opacity ${karaokeMode ? 'opacity-100' : 'opacity-40 active:opacity-70'}`}
           >🎤</button>
         </div>
 
