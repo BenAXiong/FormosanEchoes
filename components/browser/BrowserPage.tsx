@@ -201,7 +201,7 @@ export default function BrowserPage({ songs, artists }: Props) {
     const onPop = () => {
       if (skipNextPop.current) { skipNextPop.current = false; return; }
       setSelected(null);
-      setKaraokeMode(false);
+      if (karaokeMode) toggleKaraokeMode();
       historyDepth.current = 0;
     };
     window.addEventListener('popstate', onPop);
@@ -217,7 +217,7 @@ export default function BrowserPage({ songs, artists }: Props) {
           historyDepth.current = 0;
         }
         setSelected(null);
-        setKaraokeMode(false);
+        if (karaokeMode) toggleKaraokeMode();
       } else {
         setSelected(playingTrack ?? null);
       }
