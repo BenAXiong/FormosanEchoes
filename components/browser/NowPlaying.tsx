@@ -83,6 +83,8 @@ export default function NowPlaying({ song, onClose, autoplay }: Props) {
 
   const [activeMode, setActiveMode] = useState<ActiveMode>('original');
   const [showInfo, setShowInfo] = useState(false);
+  const swipeStartX = useRef(0);
+  const swipeStartY = useRef(0);
 
   const title = getDisplayTitle(song);
   const titleFallback = isTitleFallback(song);
@@ -110,6 +112,20 @@ export default function NowPlaying({ song, onClose, autoplay }: Props) {
       ), needsLyrics: true, alwaysDisabled: false },
     { id: 'notes'    as const, label: 'Notes',    needsLyrics: false, alwaysDisabled: true  },
   ];
+
+  const swipeableModes = MODE_OPTIONS
+    .filter(m => !m.alwaysDisabled && !(m.needsLyrics && !hasLyrics))
+    .map(m => m.id);
+
+  const handleSwipeEnd = (e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - swipeStartX.current;
+    const dy = e.changedTouches[0].clientY - swipeStartY.current;
+    if (Math.abs(dx) < 40 || Math.abs(dx) <= Math.abs(dy)) return;
+    const idx = swipeableModes.indexOf(activeMode);
+    if (idx === -1) return;
+    if (dx < 0) setActiveMode(swipeableModes[(idx + 1) % swipeableModes.length]);
+    else setActiveMode(swipeableModes[(idx - 1 + swipeableModes.length) % swipeableModes.length]);
+  };
 
   return (
     <div className="flex flex-col h-full bg-[#0f0f16] overflow-hidden">
@@ -209,7 +225,11 @@ export default function NowPlaying({ song, onClose, autoplay }: Props) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3">
+      <div
+        className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3"
+        onTouchStart={e => { swipeStartX.current = e.touches[0].clientX; swipeStartY.current = e.touches[0].clientY; }}
+        onTouchEnd={handleSwipeEnd}
+      >
         {activeMode === 'notes' ? (
           <div className="space-y-3">
             {[
