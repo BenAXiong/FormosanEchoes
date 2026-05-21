@@ -22,7 +22,7 @@ const SCROLLBAR = '[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-tr
 
 type InputMode = 'url' | 'name';
 
-type ItemStatus = 'pending' | 'fetching' | 'fetched' | 'researching' | 'saving' | 'saved' | 'error';
+type ItemStatus = 'pending' | 'fetching' | 'fetched' | 'researching' | 'saving' | 'saved' | 'error' | 'duplicate';
 
 type QueueItem = {
   videoId: string;
@@ -74,6 +74,7 @@ const STATUS_STYLES: Record<ItemStatus, string> = {
   saving:      'bg-amber-500/20 text-amber-300 animate-pulse',
   saved:       'bg-emerald-500/20 text-emerald-300',
   error:       'bg-red-500/20 text-red-400',
+  duplicate:   'bg-stone-700/50 text-stone-500',
 };
 
 const STATUS_LABELS: Record<ItemStatus, string> = {
@@ -84,6 +85,7 @@ const STATUS_LABELS: Record<ItemStatus, string> = {
   saving:      'Saving…',
   saved:       'Saved ✓',
   error:       'Error',
+  duplicate:   'In library',
 };
 
 const inputCls = 'w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-stone-600 focus:outline-none focus:border-white/30 transition-colors';
@@ -133,6 +135,29 @@ export default function AddMultipleSongsPanel() {
         : item
     ));
 
+  // ── Duplicate detection ───────────────────────────────────────────────────────
+
+  async function checkForDuplicates(items: QueueItem[]): Promise<Set<string>> {
+    const ids = items.map(i => i.videoId).filter(id => /^[\w-]{11}$/.test(id));
+    if (!ids.length) return new Set();
+    try {
+      const res = await fetch('/api/admin/check-duplicate-urls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ video_ids: ids }),
+      });
+      if (!res.ok) return new Set();
+      const { duplicates } = await res.json() as { duplicates: string[] };
+      return new Set(duplicates);
+    } catch {
+      return new Set(); // fail open
+    }
+  }
+
+  function tagDuplicates(items: QueueItem[], dupes: Set<string>): QueueItem[] {
+    return items.map(i => dupes.has(i.videoId) ? { ...i, status: 'duplicate' as ItemStatus } : i);
+  }
+
   // ── URL mode ─────────────────────────────────────────────────────────────────
 
   function buildNewUrlItems(urls: string[]): QueueItem[] {
@@ -173,7 +198,10 @@ export default function AddMultipleSongsPanel() {
           draft: { youtube_url: i.url, yt_title: i.title, _oembed: { title: i.title, channel: i.channel } },
           checked: true, enriched: false, activeSection: null,
         }));
-      if (newItems.length) setQueue(q => [...q, ...newItems]);
+      if (newItems.length) {
+        const dupes = await checkForDuplicates(newItems);
+        setQueue(q => [...q, ...tagDuplicates(newItems, dupes)]);
+      }
     } catch { /* silent */ }
     setRunning(false);
   }
@@ -187,9 +215,11 @@ export default function AddMultipleSongsPanel() {
     if (!urls.length) return;
     const newItems = buildNewUrlItems(urls);
     if (!newItems.length) return;
-    setQueue(q => [...q, ...newItems]);
+    const dupes = await checkForDuplicates(newItems);
+    const tagged = tagDuplicates(newItems, dupes);
+    setQueue(q => [...q, ...tagged]);
     setText('');
-    fetchItems(newItems);
+    fetchItems(tagged.filter(i => i.status === 'pending'));
   }
 
   async function handlePaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
@@ -205,8 +235,10 @@ export default function AddMultipleSongsPanel() {
     e.preventDefault();
     const newItems = buildNewUrlItems(urls);
     if (!newItems.length) return;
-    setQueue(q => [...q, ...newItems]);
-    fetchItems(newItems);
+    const dupes = await checkForDuplicates(newItems);
+    const tagged = tagDuplicates(newItems, dupes);
+    setQueue(q => [...q, ...tagged]);
+    fetchItems(tagged.filter(i => i.status === 'pending'));
   }
 
   async function fetchItems(items: QueueItem[]) {
@@ -367,10 +399,11 @@ export default function AddMultipleSongsPanel() {
   const checkedFetched = queue.filter(i => i.checked && i.status === 'fetched').length;
   const allChecked = queue.length > 0 && queue.every(i => i.checked);
   const counts = {
-    pending: queue.filter(i => i.status === 'pending').length,
-    fetched: queue.filter(i => i.status === 'fetched').length,
-    saved:   queue.filter(i => i.status === 'saved').length,
-    errors:  queue.filter(i => i.status === 'error').length,
+    pending:    queue.filter(i => i.status === 'pending').length,
+    fetched:    queue.filter(i => i.status === 'fetched').length,
+    saved:      queue.filter(i => i.status === 'saved').length,
+    errors:     queue.filter(i => i.status === 'error').length,
+    duplicates: queue.filter(i => i.status === 'duplicate').length,
   };
 
   // ── Render ────────────────────────────────────────────────────────────────────
@@ -475,8 +508,9 @@ export default function AddMultipleSongsPanel() {
           </button>
 
           <div className="flex items-center gap-2 ml-auto text-xs tabular-nums">
-            {counts.saved  > 0 && <span className="text-emerald-400">✓ {counts.saved} saved</span>}
-            {counts.errors > 0 && <span className="text-red-400">✗ {counts.errors} errors</span>}
+            {counts.saved      > 0 && <span className="text-emerald-400">✓ {counts.saved} saved</span>}
+            {counts.errors     > 0 && <span className="text-red-400">✗ {counts.errors} errors</span>}
+            {counts.duplicates > 0 && <span className="text-stone-500">{counts.duplicates} in library</span>}
             <button
               onClick={() => { if (window.confirm('Clear all songs from the queue?')) setQueue([]); }}
               disabled={running}
@@ -501,13 +535,13 @@ export default function AddMultipleSongsPanel() {
           {queue.map(item => {
             const d = item.draft ?? {};
             return (
-              <div key={item.videoId} className="shrink-0 flex items-start gap-2">
+              <div key={item.videoId} className={`shrink-0 flex items-start gap-2 ${item.status === 'duplicate' ? 'opacity-40' : ''}`}>
                 {/* Checkbox — outside card, aligns with "All" above */}
                 <input
                   type="checkbox"
                   checked={item.checked}
                   onChange={e => updateItem(item.videoId, { checked: e.target.checked })}
-                  disabled={item.status === 'saved'}
+                  disabled={item.status === 'saved' || item.status === 'duplicate'}
                   className="mt-[10px] accent-violet-400 shrink-0"
                 />
 
@@ -594,6 +628,18 @@ export default function AddMultipleSongsPanel() {
                         onClick={() => void fetchItems([item])}
                         className="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-stone-400 hover:text-white transition-colors"
                       >Retry</button>
+                    )}
+                    {item.status === 'duplicate' && (
+                      <>
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLES.duplicate}`}>
+                          {STATUS_LABELS.duplicate}
+                        </span>
+                        <button
+                          onClick={() => setQueue(q => q.filter(i => i.videoId !== item.videoId))}
+                          className="text-[11px] text-stone-600 hover:text-stone-400 transition-colors leading-none"
+                          title="Dismiss"
+                        >✕</button>
+                      </>
                     )}
                   </div>
 
