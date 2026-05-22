@@ -4,7 +4,7 @@ Living document. Update at the end of any session that completes a task or chang
 
 ---
 
-## Current state (as of 2026-05-19)
+## Current state (as of 2026-05-23)
 
 ### Done
 - Working public browser (`/`): search, filters, language/artist facets, favorites, playlists, persistent bottom player
@@ -42,6 +42,11 @@ Living document. Update at the end of any session that completes a task or chang
 - **Song–artist auto-linking (May 2026)** — `enrich-song` returns `artist_match` after DB lookup; on research completion, song is auto-linked via `song_artists` if a match is found; right panel shows green linked-artist chips with one-click unlink; `POST/DELETE /api/admin/link-song-artist` route added
 - **Song delete** — red trashcan button in left rail; `DELETE /api/admin/delete-song` route; cascades clean up lyrics, song_artists, song_tags
 - **Artist display homogenised** — all three artist display locations in SongsAdminView (left rail, batch rows, right panel header) now use `artist_display || artist_credit`; priority order is `ab > en > zh`
+- **Bilingual UI (May 2026)** — custom i18n system: `LangProvider` in `lib/lang.tsx`, `useT()` / `useLang()` hooks, typed `LocaleStrings` interface enforced across `lib/locales/en.ts` and `lib/locales/zh.ts`; all user-visible strings in browser UI replaced with locale keys; Traditional Chinese and English fully translated
+- **Lyrics swipe gestures** — swipe left/right on the lyrics area in NowPlaying cycles through lyric display modes (romanized / Chinese / English / notes)
+- **Duplicate URL detection in Add Songs panel** — URLs already present in the DB are flagged at extraction time in AddMultipleSongsPanel; duplicate rows are visually marked before the user imports
+- **Metrics dashboard visualizations** — segmented ring charts and triple-segment gap bars in MetricsPanel; fixed fill-% rendering (bars always correct color/length regardless of segment values)
+- **Share feature (May 2026)** — `ShareModal` component with 6 social platforms (Instagram, Facebook, WhatsApp, X, Email, Reddit); `openShare()` in BrowserPage tries Web Share API first (native mobile sheet), falls back to modal; share buttons in: song context menu, NowPlaying title row, artist detail panel header, playlist rows in bookmark dropdown; deep links `/?song=<uuid>` / `/?artist=<uuid>` / `/?playlist=<uuid>` consumed once on mount and cleared; public playlist API route `GET /api/playlists/[id]` using anon Supabase client (requires RLS policy); lyrics text payload included in share when `show_publicly` is true
 
 ---
 
@@ -64,7 +69,7 @@ Pending field additions (when ready):
 - [ ] **Play count tracking** — add `play_count` to `songs` table; increment via `POST /api/play/[id]` after 30s of continuous play (fired from PlayerContext); optimistic local increment for instant feedback; ISR handles display lag. Needed as input to the sorting matrix above.
 - [ ] **Karaoke auto-scroll** — timed lyric highlighting for singing practice (requires timestamp data; basic karaoke mode already shipped)
 - [ ] **Lyrics search** — full-text search returning songs that contain a given word or phrase (Supabase FTS)
-- [ ] **Language toggle** — zh / en / ab display switch across the UI
+- [ ] **Language toggle** — user-facing zh / en switcher in the browser UI (i18n infrastructure already shipped; this is the visible toggle control)
 - [ ] **OAuth** — replace hard-coded admin key with Supabase Auth
 - [ ] **Save-artist duplicate guard** — check for existing `name_display` before INSERT in `/api/admin/save-artist` (rapid-fire clicks can create duplicates)
 

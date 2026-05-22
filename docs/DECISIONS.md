@@ -532,3 +532,35 @@ The current "stale shell, updates on force-close" behaviour is inconsistent but 
 **Rejected:** Adding a SW now — demo risk outweighs update-consistency benefit.
 
 **Date:** 2026-05-22
+
+---
+
+## [UI] Custom i18n system over next-intl / react-i18next
+
+**Chosen:** `lib/lang.tsx` — `LangProvider` with `'zh' | 'en'` state, `useT()` hook returning a typed `(key: keyof LocaleStrings) => string` function. Locale strings live in `lib/locales/en.ts` and `lib/locales/zh.ts`, both implementing a shared `LocaleStrings` interface.
+
+**Why:** The app has exactly two UI languages. A library like next-intl requires locale-prefixed URL segments or middleware-based detection and adds routing overhead for a two-language case. react-i18next brings interpolation and pluralization machinery we don't use. Rolling a typed context costs ~50 lines and gives compile-time exhaustiveness: TypeScript errors if any key is missing from either locale file. No dynamic imports, no routing changes, no config.
+
+**Rejected:** next-intl — locale URL segments we don't want. react-i18next — no compile-time key checking by default, heavier bundle.
+
+**Implication:** Adding a UI string requires: (1) add the key to `LocaleStrings` in `en.ts`, (2) add the value in both `en.ts` and `zh.ts`. TypeScript enforces completeness. Never hardcode user-visible strings — always go through `useT()`.
+
+**Date:** 2026-05-23
+
+---
+
+## [UI] Share: Web Share API first, custom modal fallback
+
+**Chosen:** `openShare()` in `BrowserPage.tsx` calls `navigator.share({ url, title, text })` first. `AbortError` (user dismissed the native sheet) closes silently with no fallback. Any other failure opens `ShareModal`. The modal shows 6 social platforms: Instagram, Facebook, WhatsApp, X, Email, Reddit. Instagram has no web-intent URL — clicking it copies the URL to clipboard and shows an inline hint message instead.
+
+**Why:** The native share sheet is far better on mobile (recipient app picker, OS-level integration). The custom modal covers desktop and unsupported mobile cases. Instagram clipboard + hint is the accepted workaround for its missing web intent.
+
+**Rejected:** Custom modal only — wastes the native sheet on mobile. Web Share API only — no fallback for desktop or Firefox Android.
+
+**Deep link scheme:** `/?song=<uuid>`, `/?artist=<uuid>`, `/?playlist=<uuid>` — consumed once on mount in a single `useEffect`, then cleared with `router.replace('/', { scroll: false })`. This keeps URLs clean after the param is acted on.
+
+**Playlist access:** `GET /api/playlists/[id]` uses the Supabase anon key. Requires `CREATE POLICY "Public read by id" ON user_playlists FOR SELECT USING (true)`. The UUID v4 acts as the access token — length makes brute-force infeasible.
+
+**Lyrics payload:** Included in the share text only when `lyrics.show_publicly === true` and a lyrics mode is active. Format: `title — artist\n\nlyricsText\n\nListen on Formosan Echoes:\nurl`.
+
+**Date:** 2026-05-23
