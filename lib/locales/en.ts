@@ -56,6 +56,19 @@ const en = {
   clear: 'Clear',
   clearAll: 'Clear all',
 
+  // Share modal
+  shareModal: 'Share',
+  copyLink: 'Copy link',
+  copied: 'Copied!',
+  instagramCopyHint: 'Link copied — paste it into Instagram',
+  shareOnInstagram: 'Instagram',
+  shareOnFacebook: 'Facebook',
+  shareOnWhatsApp: 'WhatsApp',
+  shareOnX: 'X',
+  shareViaEmail: 'Email',
+  shareOnReddit: 'Reddit',
+  sharePlaylist: 'Share playlist',
+
   // Song context menu
   share: 'Share',
   like: 'Like',

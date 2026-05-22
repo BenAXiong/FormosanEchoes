@@ -4,6 +4,8 @@ import type { Song } from '@/lib/types';
 import { getDisplayTitle, isTitleFallback, isYouTubeUrl, getYouTubeId, getYouTubeStartTime } from '@/lib/normalize';
 import HoverableWord from '@/components/browser/HoverableWord';
 import { usePlayer } from '@/lib/PlayerContext';
+import { useT } from '@/lib/lang';
+import type { ShareTarget } from '@/components/ShareModal';
 import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
@@ -44,9 +46,10 @@ interface Props {
   song: Song;
   onClose: () => void;
   autoplay: boolean;
+  onShare: (target: ShareTarget) => void;
 }
 
-export default function NowPlaying({ song, onClose, autoplay }: Props) {
+export default function NowPlaying({ song, onClose, autoplay, onShare }: Props) {
   const {
     playingTrack, playTrack, isPlaying, pauseTrack, resumeTrack, progress, setIsPanelOpen, seekTo, registerMirrorSeekFn, karaokeMode,
   } = usePlayer();
@@ -81,6 +84,7 @@ export default function NowPlaying({ song, onClose, autoplay }: Props) {
     }
   }, []); // only on mount
 
+  const t = useT();
   const [activeMode, setActiveMode] = useState<ActiveMode>('original');
   const [showInfo, setShowInfo] = useState(false);
   const swipeStartX = useRef(0);
@@ -180,7 +184,26 @@ export default function NowPlaying({ song, onClose, autoplay }: Props) {
             {song.artist && <p className="text-stone-300 text-sm mt-1 font-medium truncate">{song.artist}</p>}
           </div>
 
-          <div className="relative shrink-0 mt-0.5">
+          <div className="relative shrink-0 mt-0.5 flex items-center gap-1">
+            <button
+              onClick={() => {
+                const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin}/?song=${song.id}`;
+                const lyricsMode = activeMode !== 'notes' && hasLyrics;
+                const lyricsText = lyricsMode
+                  ? (activeMode === 'zh' ? zhText : activeMode === 'en' ? enText : romText)
+                  : undefined;
+                const payload = lyricsText
+                  ? `${song.title_original ?? song.artist ?? '—'}${song.artist ? ` — ${song.artist}` : ''}\n\n${lyricsText}\n\nListen on Formosan Echoes:\n${url}`
+                  : undefined;
+                onShare({ url, title: song.title_original ?? song.title_chinese ?? song.artist ?? '—', text: payload });
+              }}
+              aria-label={t('share')}
+              className="w-6 h-6 rounded-md flex items-center justify-center text-stone-500 hover:text-white hover:bg-white/8 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/>
+              </svg>
+            </button>
             {/* Desktop: info button + tooltip */}
             <button
               onClick={() => setShowInfo(!showInfo)}

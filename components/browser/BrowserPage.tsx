@@ -34,6 +34,8 @@ import ArtistDetailPanel from '@/components/browser/ArtistDetailPanel';
 import { usePlayer } from '@/lib/PlayerContext';
 import { useLang, useT } from '@/lib/lang';
 import UserProfile from '@/components/browser/UserProfile';
+import ShareModal, { type ShareTarget } from '@/components/ShareModal';
+import { useRouter } from 'next/navigation';
 
 type LyricsMatch = {
   song_id: string;
@@ -75,9 +77,12 @@ function HeaderSelect({
 interface Props {
   songs: Song[];
   artists: Artist[];
+  initialSongId?: string;
+  initialArtistId?: string;
+  initialPlaylistId?: string;
 }
 
-export default function BrowserPage({ songs, artists }: Props) {
+export default function BrowserPage({ songs, artists, initialSongId, initialArtistId, initialPlaylistId }: Props) {
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
   const [selected, setSelected] = useState<Song | null>(null);
@@ -107,9 +112,11 @@ export default function BrowserPage({ songs, artists }: Props) {
   const [searchMode, setSearchMode] = useState<'songs' | 'lyrics'>('songs');
   const overlayInputRef = useRef<HTMLInputElement>(null);
   const [defaultLanguage, setDefaultLanguage] = useState('');
+  const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null);
   const { playingTrack, playTrack, setQueue, setAutoAdvance, isFavorite, toggleFavorite, playlists, addSongToPlaylist, createPlaylist, deletePlaylist, registerTogglePanelFn, karaokeMode, toggleKaraokeMode, isSignedIn } = usePlayer();
   const t = useT();
   const { lang, toggleLang } = useLang();
+  const router = useRouter();
 
   const goHome = useCallback(() => {
     setSelected(null);
@@ -119,6 +126,41 @@ export default function BrowserPage({ songs, artists }: Props) {
     setBookmarkOpen(false);
     setBookmarkPinned(false);
   }, []);
+
+  const openShare = useCallback(async (target: ShareTarget) => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ url: target.url, title: target.title, text: target.text });
+        return;
+      } catch (e) {
+        if ((e as Error).name === 'AbortError') return;
+      }
+    }
+    setShareTarget(target);
+  }, []);
+
+  // Consume deep-link params on first mount, then clear the URL
+  useEffect(() => {
+    if (initialSongId) {
+      const song = songs.find(s => s.id === initialSongId);
+      if (song) { setSelected(song); playTrack(song, songs); }
+    } else if (initialArtistId) {
+      const artist = artists.find(a => a.id === initialArtistId);
+      if (artist) { setActiveTab('artists'); setSelectedArtist(artist); }
+    } else if (initialPlaylistId) {
+      fetch(`/api/playlists/${initialPlaylistId}`)
+        .then(r => r.json())
+        .then(({ songIds }: { songIds: string[] }) => {
+          const queue = songIds.map(id => songs.find(s => s.id === id)).filter((s): s is Song => !!s);
+          if (queue.length) { playTrack(queue[0], queue); setSelected(queue[0]); }
+        })
+        .catch(() => {});
+    }
+    if (initialSongId || initialArtistId || initialPlaylistId) {
+      router.replace('/', { scroll: false });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally run once on mount only
 
   // History API refs for PWA back-button handling
   const historyDepth = useRef(0);
@@ -577,6 +619,21 @@ export default function BrowserPage({ songs, artists }: Props) {
                               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                             </svg>
                             <span className="flex-1 text-left truncate">{p.name}</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin}/?playlist=${p.id}`;
+                                setBookmarkPinned(false);
+                                setBookmarkOpen(false);
+                                openShare({ url, title: p.name });
+                              }}
+                              className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:text-stone-200 transition-all"
+                              aria-label={t('sharePlaylist')}
+                            >
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/>
+                              </svg>
+                            </button>
                             {isSignedIn && (
                               <button
                                 onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(p.id); setBookmarkPinned(true); }}
@@ -795,9 +852,10 @@ export default function BrowserPage({ songs, artists }: Props) {
               onClose={() => setSelectedArtist(null)}
               onSelectSong={song => { setActiveTab('songs'); setSelected(song); playTrack(song); }}
               onSelectArtist={setSelectedArtist}
+              onShare={openShare}
             />
           ) : activeTab === 'songs' && selected ? (
-            <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} />
+            <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} onShare={openShare} />
           ) : (
             <div className="relative flex flex-col items-center justify-center h-full px-8 text-center bg-[#07070a] overflow-hidden">
               <div className="absolute inset-0 opacity-[0.04] pointer-events-none select-none">
@@ -818,7 +876,7 @@ export default function BrowserPage({ songs, artists }: Props) {
       {/* Mobile bottom sheet — only mount when not on a large screen to avoid dual NowPlaying registration */}
       {!isLargeScreen && selected && (
         <div className={`lg:hidden fixed inset-x-0 top-13 ${playingTrack ? 'bottom-29 sm:bottom-0' : 'bottom-0'} z-30 rounded-none overflow-hidden border-t border-white/10 shadow-2xl`}>
-          <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} />
+          <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} onShare={openShare} />
         </div>
       )}
 
@@ -988,7 +1046,14 @@ export default function BrowserPage({ songs, artists }: Props) {
                     {song.artist && <p className="text-[10px] text-stone-500 truncate">{song.artist}</p>}
                   </div>
                   <div className="py-1">
-                    <button disabled className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-stone-600 cursor-not-allowed">
+                    <button
+                      onClick={() => {
+                        const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin}/?song=${song.id}`;
+                        setSongMenu(null);
+                        openShare({ url, title: song.title_original ?? song.title_chinese ?? song.artist ?? '—' });
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-stone-300 hover:bg-white/5 hover:text-white transition-colors"
+                    >
                       <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
                       {t('share')}
                     </button>
@@ -1060,6 +1125,15 @@ export default function BrowserPage({ songs, artists }: Props) {
           </>
         );
       })()}
+
+      {shareTarget && (
+        <ShareModal
+          url={shareTarget.url}
+          title={shareTarget.title}
+          text={shareTarget.text}
+          onClose={() => setShareTarget(null)}
+        />
+      )}
     </div>
   );
 }

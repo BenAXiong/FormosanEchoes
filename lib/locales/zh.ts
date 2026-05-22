@@ -58,6 +58,19 @@ const zh: Locale = {
   clear: '清除',
   clearAll: '清除全部',
 
+  // Share modal
+  shareModal: '分享',
+  copyLink: '複製連結',
+  copied: '已複製！',
+  instagramCopyHint: '連結已複製，請貼到 Instagram',
+  shareOnInstagram: 'Instagram',
+  shareOnFacebook: 'Facebook',
+  shareOnWhatsApp: 'WhatsApp',
+  shareOnX: 'X',
+  shareViaEmail: '電子郵件',
+  shareOnReddit: 'Reddit',
+  sharePlaylist: '分享播放清單',
+
   // Song context menu
   share: '分享',
   like: '加入最愛',

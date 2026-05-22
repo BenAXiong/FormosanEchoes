@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import type { Artist, Song } from '@/lib/types';
 import { getDisplayTitle, isYouTubeUrl, getYouTubeId } from '@/lib/normalize';
+import type { ShareTarget } from '@/components/ShareModal';
 
 interface Props {
   artist: Artist;
@@ -10,9 +11,10 @@ interface Props {
   onClose: () => void;
   onSelectSong: (song: Song) => void;
   onSelectArtist: (artist: Artist) => void;
+  onShare: (target: ShareTarget) => void;
 }
 
-export default function ArtistDetailPanel({ artist, songs, allArtists, onClose, onSelectSong, onSelectArtist }: Props) {
+export default function ArtistDetailPanel({ artist, songs, allArtists, onClose, onSelectSong, onSelectArtist, onShare }: Props) {
   const [bioExpanded, setBioExpanded] = useState(false);
 
   const artistMap = new Map(allArtists.map(a => [a.id, a]));
@@ -58,11 +60,25 @@ export default function ArtistDetailPanel({ artist, songs, allArtists, onClose, 
                   <p className="text-stone-500 text-xs mt-0.5 line-clamp-2">{aliases.join(' · ')}</p>
                 )}
               </div>
-              <button
-                onClick={onClose}
-                aria-label="Close"
-                className="shrink-0 w-6 h-6 rounded-full bg-white/5 hover:bg-white/15 text-stone-400 hover:text-white transition-colors flex items-center justify-center text-sm"
-              >✕</button>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={() => {
+                    const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin}/?artist=${artist.id}`;
+                    onShare({ url, title: artist.name_display });
+                  }}
+                  aria-label="Share"
+                  className="w-6 h-6 rounded-full bg-white/5 hover:bg-white/15 text-stone-400 hover:text-white transition-colors flex items-center justify-center"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/>
+                  </svg>
+                </button>
+                <button
+                  onClick={onClose}
+                  aria-label="Close"
+                  className="w-6 h-6 rounded-full bg-white/5 hover:bg-white/15 text-stone-400 hover:text-white transition-colors flex items-center justify-center text-sm"
+                >✕</button>
+              </div>
             </div>
             <div className="flex flex-wrap gap-1 mt-1.5">
               {artist.is_group && (
