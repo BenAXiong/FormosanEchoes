@@ -130,19 +130,20 @@ function barColor(pct: number): string {
   return 'bg-red-400';
 }
 
-function GapBar({ label, missing, total, naCount = 0 }: Readonly<{
-  label: string; missing: number; total: number; naCount?: number;
+function GapBar({ label, missing, total, naCount = 0, alwaysGreen = false }: Readonly<{
+  label: string; missing: number; total: number; naCount?: number; alwaysGreen?: boolean;
 }>) {
   const filled = total - missing;
   const safeNA = Math.min(naCount, missing);
   const filledPct = total > 0 ? (filled / total) * 100 : 0;
   const naPct = total > 0 ? (safeNA / total) * 100 : 0;
   const displayPct = Math.round(filledPct);
+  const fillClass = alwaysGreen ? 'bg-emerald-400' : barColor(displayPct);
   return (
     <div className="flex items-center gap-3">
       <span className="text-xs text-stone-500 w-32 shrink-0">{label}</span>
       <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden relative">
-        <div className={'absolute inset-y-0 left-0 ' + barColor(displayPct)} style={{ width: filledPct + '%' }} />
+        <div className={'absolute inset-y-0 left-0 ' + fillClass} style={{ width: filledPct + '%' }} />
         {safeNA > 0 && <div className="absolute inset-y-0 bg-violet-500/50" style={{ left: filledPct + '%', width: naPct + '%' }} />}
       </div>
       <span className="text-xs tabular-nums text-stone-500 w-20 text-right">{filled}/{total}<span className="ml-1 text-stone-600">({displayPct}%)</span></span>
@@ -279,13 +280,13 @@ export default function MetricsPanel({ filters }: Readonly<{ filters?: Filters }
           {artists.total > 0 ? (
             <div className="bg-white/5 border border-white/10 rounded-xl p-5 flex flex-col gap-3.5">
               <p className="text-[10px] font-semibold text-stone-600 uppercase tracking-wider">Metadata</p>
-              <GapBar label="Has songs"    missing={artists.no_songs}             total={artists.total} naCount={artists.na.no_songs} />
+              <GapBar label="Has songs"    missing={artists.no_songs}             total={artists.total} naCount={artists.na.no_songs} alwaysGreen />
               <GapBar label="Bio"          missing={artists.gaps.no_bio}          total={artists.total} naCount={artists.na.no_bio} />
               <GapBar label="Ethnic group" missing={artists.gaps.no_ethnic_group} total={artists.total} naCount={artists.na.no_ethnic_group} />
               <GapBar label="Language"     missing={artists.gaps.no_language}     total={artists.total} naCount={artists.na.no_language} />
               <GapBar label="Active years" missing={artists.gaps.no_active_years} total={artists.total} naCount={artists.na.no_active_years} />
               <GapBar label="Links"        missing={artists.gaps.no_links}        total={artists.total} naCount={artists.na.no_links} />
-              <GapBar label="Photo"        missing={artists.gaps.no_photo}        total={artists.total} />
+              <GapBar label="Photo"        missing={artists.gaps.no_photo}        total={artists.total} alwaysGreen />
             </div>
           ) : (
             <div className="bg-white/5 border border-white/10 rounded-xl p-5">
