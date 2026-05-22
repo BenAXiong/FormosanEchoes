@@ -111,6 +111,24 @@ Full audit with gaps table and phased plan at `docs/SONGS_TAB_AUDIT.md`.
 
 ## Post-demo
 
+- [ ] **Service worker** — add SW for consistent update behaviour; decision rationale in `docs/DECISIONS.md [PWA]`.
+
+  Implementation plan:
+  1. Register SW in `app/layout.tsx` (client component), pointing at `/sw.js`
+  2. Place `sw.js` in `/public/` (Next.js will not serve it from `/app/`)
+  3. Use `updateViaCache: 'none'` in `register()` to bypass HTTP cache on SW script fetch
+  4. SW strategies: network-first for HTML navigation (ISR updates reach the user); cache-first for `/_next/static/**` (immutable hashed assets); pass-through for all cross-origin requests (YouTube, Supabase, Gemini)
+  5. `self.skipWaiting()` in install handler; `self.clients.claim()` in activate handler
+
+  Smoke tests (iOS first, then Android):
+  - Install as PWA → force-close → reopen → confirm latest build (not stale shell)
+  - Play a song start to finish → confirm no double-audio (SW must not intercept the audio stream)
+  - Open a song with `show_publicly: true` lyrics → confirm lyrics appear; without → confirm they don't
+  - Navigate to `/admin?key=654321` → confirm admin routes are not cached
+  - Trigger a Vercel deploy mid-session → confirm new build visible within ~60 s (ISR window)
+
+  Tradeoffs: SW lifecycle bugs (stuck "waiting", cache poisoning) are hard to debug remotely; iOS Safari has edge cases around install/update timing. Use Workbox rather than hand-rolling — it handles cache versioning and cleanup reliably.
+
 - [ ] **Type cleanup** — remove `title_romanized`, `lyrics_romanized`, and other unpopulated legacy stubs from `lib/types.ts` `Song` interface; confirm nothing in the app reads them before deleting
 - [ ] Dialect sub-tags
 - [ ] Contributor system — user-submitted songs with moderation queue

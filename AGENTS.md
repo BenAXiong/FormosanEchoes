@@ -99,6 +99,8 @@ Do not invent values like `"Pangcah"` or `"Formosan"`. The vocab has `"Amis"` fo
 
 **Read and update PLAN.md every session.** At the start of any non-trivial task, read `PLAN.md` to understand what is already built, what is in progress, and what is deferred. Mark tasks done as they are completed. Never describe a feature as unbuilt if it appears in the Done section.
 
+**Never touch `tdl.txt`.** This file is the user's personal scratchpad. Do not read it, reference it, or write to it under any circumstances — not even when asked to "log a task" or "add a note". Task logging goes in `PLAN.md`.
+
 **Docs to read before non-trivial changes:**
 - `PLAN.md` — current state, done features, and upcoming work — **read this first**
 - `docs/DECISIONS.md` — why things are the way they are
