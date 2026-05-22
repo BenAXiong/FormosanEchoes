@@ -63,14 +63,11 @@ export default function UserProfile({ variant = 'icon' }: Props) {
         <button
           onClick={signIn}
           aria-label={t('signInWithGoogle')}
-          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/15 transition-colors"
+          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors"
         >
-          <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
-            <svg className="w-3.5 h-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-            </svg>
-          </div>
-          <span className="text-xs font-semibold text-amber-400 leading-tight">{t('signIn')}</span>
+          <span className="shrink-0 px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-xs font-semibold text-amber-400 leading-tight">
+            {t('signIn')}
+          </span>
           <span className="text-[10px] text-amber-500/60 leading-tight truncate">{t('saveFavorites')}</span>
         </button>
       );
@@ -80,12 +77,9 @@ export default function UserProfile({ variant = 'icon' }: Props) {
       <button
         onClick={signIn}
         aria-label={t('signInWithGoogle')}
-        title={t('signIn')}
-        className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
+        className="px-3 py-1 rounded-full text-xs font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 transition-colors shrink-0"
       >
-        <svg className="w-4 h-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-        </svg>
+        {t('signIn')}
       </button>
     );
   }

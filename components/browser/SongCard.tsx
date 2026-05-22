@@ -48,9 +48,10 @@ interface Props {
   showArtistZh?: boolean;
   onArtistClick?: (artistId: string) => void;
   onOpenMenu?: (song: Song, rect: DOMRect) => void;
+  onOpenMenuAtPlaylists?: (song: Song, rect: DOMRect) => void;
 }
 
-export default function SongCard({ song, isSelected, isPlaying, onSelect, compact = false, artistMap, showSongZh = true, showArtistZh = false, onArtistClick, onOpenMenu }: Props) {
+export default function SongCard({ song, isSelected, isPlaying, onSelect, compact = false, artistMap, showSongZh = true, showArtistZh = false, onArtistClick, onOpenMenu, onOpenMenuAtPlaylists }: Props) {
   const { isPlaying: globalIsPlaying, togglePlay, toggleFavorite, isFavorite } = usePlayer();
   const gradient = getLangGradient(song.language_claimed);
   const title = getDisplayTitle(song);
@@ -197,6 +198,19 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
           </div>
         </div>
 
+        {/* Playlist Add */}
+        {onOpenMenuAtPlaylists && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onOpenMenuAtPlaylists(song, e.currentTarget.getBoundingClientRect()); }}
+            className="absolute top-2 left-2 z-10 w-7 h-7 rounded-md bg-black/60 flex items-center justify-center text-stone-400 hover:text-white transition-all duration-200 opacity-0 group-hover:opacity-100"
+            aria-label="Add to playlist"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4.5L5 21V5z"/>
+            </svg>
+          </button>
+        )}
+
         {/* Fav Toggle (Normal) */}
         <button
           onClick={(e) => {
@@ -217,9 +231,15 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
           </span>
         )}
         {song.lyrics?.show_publicly && (
-          <span className="absolute bottom-3 right-3 z-10 px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider bg-black/60 backdrop-blur text-emerald-400 border border-emerald-500/30">
-            ♪ Lyrics
-          </span>
+          <div className="absolute bottom-2.5 right-2.5 z-10 w-6 h-6 rounded bg-black/60 backdrop-blur flex items-center justify-center border border-emerald-500/20" aria-label="Has lyrics">
+            <svg className="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+              <rect x="0.5" y="3" width="9" height="1.2" rx="0.6"/>
+              <rect x="0.5" y="6.4" width="9" height="1.2" rx="0.6"/>
+              <rect x="0.5" y="9.8" width="5.5" height="1.2" rx="0.6"/>
+              <rect x="13.2" y="2" width="1" height="7.5" rx="0.5"/>
+              <ellipse cx="12" cy="10" rx="2" ry="1.4" transform="rotate(-20 12 10)"/>
+            </svg>
+          </div>
         )}
       </div>
 

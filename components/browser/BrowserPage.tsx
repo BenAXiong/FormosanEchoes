@@ -100,8 +100,8 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
   const [showArtistZh, setShowArtistZh] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [genreOpen, setGenreOpen] = useState(false);
+  const [showPlaylistsView, setShowPlaylistsView] = useState(false);
   const [bookmarkOpen, setBookmarkOpen] = useState(false);
-  const [bookmarkPinned, setBookmarkPinned] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [songMenu, setSongMenu] = useState<{ song: Song; rect: DOMRect } | null>(null);
   const [songMenuView, setSongMenuView] = useState<'main' | 'playlists'>('main');
@@ -111,6 +111,7 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
   const [searchOverlayOpen, setSearchOverlayOpen] = useState(false);
   const [searchMode, setSearchMode] = useState<'songs' | 'lyrics'>('songs');
   const overlayInputRef = useRef<HTMLInputElement>(null);
+  const bookmarkDropdownRef = useRef<HTMLDivElement>(null);
   const [defaultLanguage, setDefaultLanguage] = useState('');
   const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null);
   const { playingTrack, playTrack, setQueue, setAutoAdvance, isFavorite, toggleFavorite, playlists, addSongToPlaylist, createPlaylist, deletePlaylist, registerTogglePanelFn, karaokeMode, toggleKaraokeMode, isSignedIn } = usePlayer();
@@ -123,8 +124,7 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
     setSelectedArtist(null);
     setActiveTab('songs');
     setFilters(f => ({ ...f, only_favorites: false, playlist_id: null }));
-    setBookmarkOpen(false);
-    setBookmarkPinned(false);
+    setShowPlaylistsView(false);
   }, []);
 
   const openShare = useCallback(async (target: ShareTarget) => {
@@ -184,6 +184,16 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
 
   useEffect(() => { if (mounted) localStorage.setItem('fe-show-song-zh', String(showSongZh)); }, [showSongZh, mounted]);
   useEffect(() => { if (mounted) localStorage.setItem('fe-show-artist-zh', String(showArtistZh)); }, [showArtistZh, mounted]);
+
+  useEffect(() => {
+    if (!bookmarkOpen || !bookmarkDropdownRef.current) return;
+    const rect = bookmarkDropdownRef.current.getBoundingClientRect();
+    if (rect.left < 8) {
+      bookmarkDropdownRef.current.style.transform = `translateX(${8 - rect.left}px)`;
+    } else {
+      bookmarkDropdownRef.current.style.transform = '';
+    }
+  }, [bookmarkOpen]);
 
   const saveRecentSearch = useCallback((q: string) => {
     const trimmed = q.trim();
@@ -437,7 +447,7 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 12h10M11 20h2" />
               </svg>
             </button>
-            <div className="hidden lg:block relative flex-1 min-w-0">
+            <div className="hidden lg:block relative flex-1 min-w-0 max-w-[45vw]">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3" aria-hidden>
                 <svg className="h-3.5 w-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -483,178 +493,119 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
                 </div>
               )}
             </div>
-            <button
-              onClick={toggleLyricsFilter}
-              aria-label={t('filterHasLyrics')}
-              aria-pressed={!!filters.has_lyrics}
-              className={`p-2 rounded-full transition-colors border shrink-0 ${
-                filters.has_lyrics
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                  : 'bg-white/5 text-stone-400 border-white/10 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 11h10M4 16h13" />
-              </svg>
-            </button>
-            {/* Genre filter */}
-            <div className="relative shrink-0">
+            <div className="flex items-center gap-2 ml-auto shrink-0">
               <button
-                onClick={() => setGenreOpen(o => !o)}
-                aria-label={t('filterByGenre')}
-                aria-pressed={!!filters.genre}
-                className={`p-2 rounded-full transition-colors border ${
-                  filters.genre
+                onClick={toggleLyricsFilter}
+                aria-label={t('filterHasLyrics')}
+                aria-pressed={!!filters.has_lyrics}
+                className={`p-2 rounded-full transition-colors border shrink-0 ${
+                  filters.has_lyrics
                     ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                     : 'bg-white/5 text-stone-400 border-white/10 hover:text-white hover:bg-white/10'
                 }`}
               >
-                {filters.genre
-                  ? <span className="w-3.5 h-3.5 flex items-center justify-center">{GENRES.find(g => g.value === filters.genre)?.icon}</span>
-                  : <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
-                      <circle cx="9" cy="18" r="3"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 18V7l9-2v11"/><circle cx="21" cy="16" r="3"/>
-                    </svg>
-                }
-              </button>
-              {genreOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setGenreOpen(false)} />
-                  <div className="absolute left-0 top-full mt-1 w-52 bg-[#1a1a24] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
-                    {filters.genre && (
-                      <button
-                        onClick={() => { setFilters(f => ({ ...f, genre: '' })); setGenreOpen(false); }}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-stone-400 hover:bg-white/5 hover:text-white transition-colors border-b border-white/5"
-                      >
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                        {t('clearGenreFilter')}
-                      </button>
-                    )}
-                    {GENRES.map(g => (
-                      <button
-                        key={g.value}
-                        onClick={() => { setFilters(f => ({ ...f, genre: g.value })); setGenreOpen(false); }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors ${
-                          filters.genre === g.value
-                            ? 'bg-emerald-500/10 text-emerald-300'
-                            : 'text-stone-300 hover:bg-white/5 hover:text-white'
-                        }`}
-                      >
-                        <span className="w-3 h-3 shrink-0 flex items-center justify-center">{g.icon}</span>
-                        {g.label}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Bookmark / Library */}
-            <div
-              className="relative shrink-0"
-              onMouseEnter={() => setBookmarkOpen(true)}
-              onMouseLeave={() => { if (!bookmarkPinned) setBookmarkOpen(false); }}
-            >
-              <button
-                onClick={() => setBookmarkPinned(p => !p)}
-                aria-label={t('library')}
-                aria-pressed={!!(filters.only_favorites || filters.playlist_id)}
-                className={`p-2 rounded-full transition-colors border ${
-                  (filters.only_favorites || filters.playlist_id)
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                    : 'bg-white/5 text-stone-400 border-white/10 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                <svg className="w-3.5 h-3.5" fill={filters.only_favorites || filters.playlist_id ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4.5L5 21V5z"/>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 11h10M4 16h13" />
                 </svg>
               </button>
-              {(bookmarkOpen || bookmarkPinned) && (
-                <>
-                  {bookmarkPinned && <div className="fixed inset-0 z-40" onClick={() => { setBookmarkPinned(false); setBookmarkOpen(false); }} />}
-                  <div className="absolute right-0 top-full mt-1 w-52 bg-[#1a1a24] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
-                    {/* Favorite Songs — pinned */}
-                    <button
-                      onClick={() => { setFilters(f => ({ ...f, only_favorites: !f.only_favorites, playlist_id: null })); setBookmarkPinned(false); setBookmarkOpen(false); setConfirmDeleteId(null); }}
-                      className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs transition-colors ${
-                        filters.only_favorites
-                          ? 'bg-emerald-500/10 text-emerald-300'
-                          : 'text-stone-300 hover:bg-white/5 hover:text-white'
-                      }`}
-                    >
-                      <svg className="w-3.5 h-3.5 shrink-0" fill={filters.only_favorites ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+              {/* Genre filter */}
+              <div className="relative">
+                <button
+                  onClick={() => setGenreOpen(o => !o)}
+                  aria-label={t('filterByGenre')}
+                  aria-pressed={!!filters.genre}
+                  className={`p-2 rounded-full transition-colors border ${
+                    filters.genre
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                      : 'bg-white/5 text-stone-400 border-white/10 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  {filters.genre
+                    ? <span className="w-3.5 h-3.5 flex items-center justify-center">{GENRES.find(g => g.value === filters.genre)?.icon}</span>
+                    : <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+                        <circle cx="9" cy="18" r="3"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 18V7l9-2v11"/><circle cx="21" cy="16" r="3"/>
                       </svg>
-                      {t('favoriteSongs')}
+                  }
+                </button>
+                {genreOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setGenreOpen(false)} />
+                    <div className="absolute right-0 top-full mt-1 w-52 bg-[#1a1a24] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                      {filters.genre && (
+                        <button
+                          onClick={() => { setFilters(f => ({ ...f, genre: '' })); setGenreOpen(false); }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs text-stone-400 hover:bg-white/5 hover:text-white transition-colors border-b border-white/5"
+                        >
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                          {t('clearGenreFilter')}
+                        </button>
+                      )}
+                      {GENRES.map(g => (
+                        <button
+                          key={g.value}
+                          onClick={() => { setFilters(f => ({ ...f, genre: g.value })); setGenreOpen(false); }}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors ${
+                            filters.genre === g.value
+                              ? 'bg-emerald-500/10 text-emerald-300'
+                              : 'text-stone-300 hover:bg-white/5 hover:text-white'
+                          }`}
+                        >
+                          <span className="w-3 h-3 shrink-0 flex items-center justify-center">{g.icon}</span>
+                          {g.label}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+              {/* Bookmark / Library */}
+              <div
+                className="relative"
+                onMouseEnter={() => setBookmarkOpen(true)}
+                onMouseLeave={() => setBookmarkOpen(false)}
+              >
+                <button
+                  onClick={() => setShowPlaylistsView(v => !v)}
+                  aria-label={t('library')}
+                  aria-pressed={!!(filters.only_favorites || filters.playlist_id || showPlaylistsView)}
+                  className={`p-2 rounded-full transition-colors border ${
+                    (filters.only_favorites || filters.playlist_id || showPlaylistsView)
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                      : 'bg-white/5 text-stone-400 border-white/10 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <svg className="w-3.5 h-3.5" fill={filters.only_favorites || filters.playlist_id ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4.5L5 21V5z"/>
+                  </svg>
+                </button>
+                {bookmarkOpen && (
+                  <div ref={bookmarkDropdownRef} className="absolute right-0 top-full mt-1 w-52 bg-[#1a1a24] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                    <button
+                      onClick={() => { setFilters(f => ({ ...f, only_favorites: !f.only_favorites, playlist_id: null })); setBookmarkOpen(false); setShowPlaylistsView(false); }}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors ${filters.only_favorites ? 'bg-emerald-500/10 text-emerald-300' : 'text-stone-300 hover:bg-white/5 hover:text-white'}`}
+                    >
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                      <span className="truncate flex-1 text-left">{t('favoriteSongs')}</span>
+                      <span className="ml-auto text-stone-600 tabular-nums text-[10px]">{songs.filter(s => isFavorite(s.id)).length}</span>
                     </button>
-                    <div className="border-t border-white/5 mx-3" />
-                    {!isSignedIn ? (
-                      <p className="px-3 py-2.5 text-[11px] text-stone-600 italic">{t('signInToCreatePlaylists')}</p>
-                    ) : playlists.length === 0 ? (
-                      <p className="px-3 py-2.5 text-[11px] text-stone-600 italic">{t('noPlaylistsYet')}</p>
-                    ) : null}
-                    {playlists.map(p => (
-                      <div key={p.id} className="group relative">
-                        {confirmDeleteId === p.id ? (
-                          <div className="flex items-center gap-2 px-3 py-2.5 text-xs">
-                            <span className="text-stone-400 flex-1">{t('deletePlaylistConfirm', { name: p.name })}</span>
-                            <button
-                              onClick={() => { deletePlaylist(p.id); if (filters.playlist_id === p.id) setFilters(f => ({ ...f, playlist_id: null })); setConfirmDeleteId(null); }}
-                              className="px-2 py-0.5 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
-                            >{t('yes')}</button>
-                            <button
-                              onClick={() => setConfirmDeleteId(null)}
-                              className="px-2 py-0.5 rounded bg-white/5 text-stone-400 hover:bg-white/10 transition-colors"
-                            >{t('no')}</button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => { setFilters(f => ({ ...f, playlist_id: f.playlist_id === p.id ? null : p.id, only_favorites: false })); setBookmarkPinned(false); setBookmarkOpen(false); setConfirmDeleteId(null); }}
-                            className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs transition-colors ${
-                              filters.playlist_id === p.id
-                                ? 'bg-emerald-500/10 text-emerald-300'
-                                : 'text-stone-300 hover:bg-white/5 hover:text-white'
-                            }`}
-                          >
-                            <svg className="w-3.5 h-3.5 shrink-0 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                            </svg>
-                            <span className="flex-1 text-left truncate">{p.name}</span>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin}/?playlist=${p.id}`;
-                                setBookmarkPinned(false);
-                                setBookmarkOpen(false);
-                                openShare({ url, title: p.name });
-                              }}
-                              className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:text-stone-200 transition-all"
-                              aria-label={t('sharePlaylist')}
-                            >
-                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/>
-                              </svg>
-                            </button>
-                            {isSignedIn && (
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(p.id); setBookmarkPinned(true); }}
-                                className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:text-red-400 transition-all"
-                                aria-label={t('deletePlaylistAriaLabel', { name: p.name })}
-                              >
-                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                              </button>
-                            )}
-                          </button>
-                        )}
-                      </div>
+                    {playlists.map(pl => (
+                      <button
+                        key={pl.id}
+                        onClick={() => { setFilters(f => ({ ...f, playlist_id: f.playlist_id === pl.id ? null : pl.id, only_favorites: false })); setBookmarkOpen(false); setShowPlaylistsView(false); }}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors ${filters.playlist_id === pl.id ? 'bg-emerald-500/10 text-emerald-300' : 'text-stone-300 hover:bg-white/5 hover:text-white'}`}
+                      >
+                        <svg className="w-3.5 h-3.5 shrink-0 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h10"/></svg>
+                        <span className="truncate flex-1 text-left">{pl.name}</span>
+                        <span className="ml-auto text-stone-600 tabular-nums text-[10px]">{pl.songIds.length}</span>
+                      </button>
                     ))}
+                    {!isSignedIn && (
+                      <p className="px-3 py-2 text-[10px] text-stone-600 italic border-t border-white/5 mt-1">{t('signInToCreatePlaylists')}</p>
+                    )}
                   </div>
-                </>
-              )}
-            </div>
+                )}
+              </div>
 
-            <div className="flex items-center gap-2 ml-auto shrink-0">
               <button
                 onClick={toggleLang}
                 aria-label={t('langToggleLabel')}
@@ -709,7 +660,105 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
         </div>
 
         <div className="flex-1 overflow-y-auto thin-scrollbar px-4 sm:px-5 py-5">
-          {activeTab === 'artists' ? (
+          {showPlaylistsView ? (
+            <>
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-sm font-bold text-white">{t('library')}</h2>
+                {isSignedIn && (
+                  <button
+                    onClick={() => createPlaylist('New Playlist')}
+                    className="flex items-center gap-1.5 text-xs text-stone-400 hover:text-white transition-colors"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    {t('newPlaylist')}
+                  </button>
+                )}
+              </div>
+              <ul className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
+                <li>
+                  <button
+                    onClick={() => { setFilters(f => ({ ...f, only_favorites: !f.only_favorites, playlist_id: null })); setShowPlaylistsView(false); }}
+                    className={`w-full rounded-xl overflow-hidden border transition-colors hover:bg-white/10 ${filters.only_favorites ? 'bg-emerald-900/20 border-emerald-500/30' : 'bg-white/5 border-white/5'}`}
+                  >
+                    <div className="relative aspect-square bg-gradient-to-br from-rose-900/40 to-rose-800/20 flex items-center justify-center">
+                      <svg className="w-9 h-9 text-rose-500/70" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                      </svg>
+                      <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/60 text-[9px] tabular-nums text-stone-300">{songs.filter(s => isFavorite(s.id)).length}</span>
+                    </div>
+                    <div className="p-2.5 text-left">
+                      <p className="text-xs font-semibold text-white truncate">{t('favoriteSongs')}</p>
+                    </div>
+                  </button>
+                </li>
+                {playlists.map(pl => {
+                  const firstSong = pl.songIds.map(id => songs.find(s => s.id === id)).find((s): s is Song => !!s);
+                  const ytId = firstSong?.youtube_url && isYouTubeUrl(firstSong.youtube_url) ? getYouTubeId(firstSong.youtube_url) : null;
+                  return (
+                    <li key={pl.id} className="relative group">
+                      {confirmDeleteId === pl.id ? (
+                        <div className="rounded-xl bg-white/5 border border-white/10 p-3 flex flex-col gap-3" style={{ minHeight: 130 }}>
+                          <p className="text-xs text-stone-400 leading-snug flex-1">{t('deletePlaylistConfirm', { name: pl.name })}</p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => { deletePlaylist(pl.id); if (filters.playlist_id === pl.id) setFilters(f => ({ ...f, playlist_id: null })); setConfirmDeleteId(null); }}
+                              className="flex-1 py-1 rounded-md bg-red-500/20 text-red-400 text-xs hover:bg-red-500/30 transition-colors"
+                            >{t('yes')}</button>
+                            <button
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="flex-1 py-1 rounded-md bg-white/5 text-stone-400 text-xs hover:bg-white/10 transition-colors"
+                            >{t('no')}</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => { setFilters(f => ({ ...f, playlist_id: f.playlist_id === pl.id ? null : pl.id, only_favorites: false })); setShowPlaylistsView(false); }}
+                            className={`w-full rounded-xl overflow-hidden border transition-colors hover:bg-white/10 ${filters.playlist_id === pl.id ? 'bg-emerald-900/20 border-emerald-500/30' : 'bg-white/5 border-white/5'}`}
+                          >
+                            <div className="relative aspect-square bg-white/5 flex items-center justify-center overflow-hidden">
+                              {ytId ? (
+                                <img src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt="" aria-hidden className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                              ) : (
+                                <svg className="w-8 h-8 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                              )}
+                              <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/60 text-[9px] tabular-nums text-stone-300">{pl.songIds.length}</span>
+                            </div>
+                            <div className="p-2.5 text-left">
+                              <p className="text-xs font-semibold text-white truncate">{pl.name}</p>
+                            </div>
+                          </button>
+                          <div className="absolute top-1.5 right-1.5 hidden group-hover:flex gap-1">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin}/?playlist=${pl.id}`; openShare({ url, title: pl.name }); }}
+                              className="w-6 h-6 rounded-md bg-black/60 flex items-center justify-center text-stone-400 hover:text-white transition-colors"
+                              aria-label={t('sharePlaylist')}
+                            >
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                            </button>
+                            {isSignedIn && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(pl.id); }}
+                                className="w-6 h-6 rounded-md bg-black/60 flex items-center justify-center text-stone-400 hover:text-red-400 transition-colors"
+                                aria-label={t('deletePlaylistAriaLabel', { name: pl.name })}
+                              >
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                              </button>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+              {!isSignedIn && (
+                <p className="text-xs text-stone-600 italic mt-4">{t('signInToCreatePlaylists')}</p>
+              )}
+            </>
+          ) : activeTab === 'artists' ? (
             filteredArtists.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-64 gap-3">
                 <span className="text-4xl text-stone-700" aria-hidden>♪</span>
@@ -781,6 +830,7 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
                     showSongZh={showSongZh}
                     showArtistZh={showArtistZh}
                     onArtistClick={isLargeScreen ? (id => { const a = artistMap.get(id); if (a) { setActiveTab('artists'); setSelectedArtist(a); } }) : undefined}
+                    onOpenMenuAtPlaylists={(s, rect) => { setSongMenu({ song: s, rect }); setSongMenuView('playlists'); }}
                   />
                 </li>
               ))}
@@ -788,7 +838,7 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
           )}
 
           {/* Lyrics matches — songs tab only */}
-          {activeTab === 'songs' && query.length >= 2 && (lyricsLoading || lyricsResults.length > 0) && (
+          {!showPlaylistsView && activeTab === 'songs' && query.length >= 2 && (lyricsLoading || lyricsResults.length > 0) && (
             <div className="mt-8">
               <div className="flex items-center gap-2 mb-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">{t('lyricsMatches')}</p>
@@ -1099,6 +1149,11 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
                     {t('addToPlaylist')}
                   </button>
                   <div className="py-1 max-h-56 overflow-y-auto thin-scrollbar">
+                    {!isSignedIn && (
+                      <div className="px-3 py-2.5 border-b border-white/5 mb-1">
+                        <p className="text-[10px] text-stone-500">{t('signInToCreatePlaylists')}</p>
+                      </div>
+                    )}
                     {playlists.map(pl => (
                       <button
                         key={pl.id}
