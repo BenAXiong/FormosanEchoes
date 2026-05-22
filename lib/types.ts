@@ -118,6 +118,7 @@ export interface FilterState {
   verification_status: string;
   has_lyrics: boolean | null;
   recording_type: string;
+  genre: string;
   only_favorites: boolean;
   playlist_id: string | null;
 }

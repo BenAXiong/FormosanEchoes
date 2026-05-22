@@ -36,50 +36,6 @@ function getLangGradient(lang?: string) {
   return LANG_GRADIENT[lang] ?? 'from-stone-600 via-stone-700 to-stone-800';
 }
 
-function GenreIcon({ genre, className }: Readonly<{ genre?: string | null; className?: string }>) {
-  const cls = `inline-block shrink-0 ${className ?? 'w-3 h-3 text-stone-400'}`;
-  switch (genre) {
-    case 'Traditional':
-      // Solid upward triangle — ancient, timeless
-      return <svg className={cls} viewBox="0 0 12 12" fill="currentColor" aria-hidden><polygon points="6,1 11.5,11 0.5,11"/></svg>;
-    case 'Traditional Choral':
-      // Three vertical bars — choir standing together
-      return <svg className={cls} viewBox="0 0 12 12" fill="currentColor" aria-hidden>
-        <rect x="0.5" y="2" width="2.5" height="8" rx="1.25"/>
-        <rect x="4.75" y="2" width="2.5" height="8" rx="1.25"/>
-        <rect x="9" y="2" width="2.5" height="8" rx="1.25"/>
-      </svg>;
-    case 'Modern Folk':
-      // Single quarter note
-      return <svg className={cls} viewBox="0 0 12 12" fill="currentColor" aria-hidden>
-        <circle cx="3.5" cy="9.5" r="2.5"/>
-        <rect x="5.7" y="0.5" width="1.5" height="9.3"/>
-      </svg>;
-    case 'Contemporary Folk':
-      // Two beamed eighth notes
-      return <svg className={cls} viewBox="0 0 12 12" fill="currentColor" aria-hidden>
-        <circle cx="2.5" cy="9.5" r="2"/>
-        <circle cx="8.5" cy="8.5" r="2"/>
-        <rect x="4.2" y="1.5" width="1.2" height="8.2"/>
-        <rect x="10.1" y="1.5" width="1.2" height="7.2"/>
-        <rect x="4.2" y="1.5" width="7.1" height="1.5"/>
-      </svg>;
-    case 'Contemporary Indigenous Folk-Pop':
-      // Four-pointed star / sparkle
-      return <svg className={cls} viewBox="0 0 12 12" fill="currentColor" aria-hidden>
-        <path d="M6 0 L7.1 4.9 L12 6 L7.1 7.1 L6 12 L4.9 7.1 L0 6 L4.9 4.9 Z"/>
-      </svg>;
-    case 'Indigenous Gospel / Folk':
-      // Cross
-      return <svg className={cls} viewBox="0 0 12 12" fill="currentColor" aria-hidden>
-        <rect x="4.5" y="0" width="3" height="12" rx="1.5"/>
-        <rect x="0" y="3.5" width="12" height="3" rx="1.5"/>
-      </svg>;
-    default:
-      // Small filled circle for unknown
-      return <svg className={cls} viewBox="0 0 12 12" fill="currentColor" aria-hidden><circle cx="6" cy="6" r="3"/></svg>;
-  }
-}
 
 interface Props {
   song: Song;
@@ -91,9 +47,10 @@ interface Props {
   showSongZh?: boolean;
   showArtistZh?: boolean;
   onArtistClick?: (artistId: string) => void;
+  onOpenMenu?: (song: Song, rect: DOMRect) => void;
 }
 
-export default function SongCard({ song, isSelected, isPlaying, onSelect, compact = false, artistMap, showSongZh = true, showArtistZh = false, onArtistClick }: Props) {
+export default function SongCard({ song, isSelected, isPlaying, onSelect, compact = false, artistMap, showSongZh = true, showArtistZh = false, onArtistClick, onOpenMenu }: Props) {
   const { isPlaying: globalIsPlaying, togglePlay, toggleFavorite, isFavorite } = usePlayer();
   const gradient = getLangGradient(song.language_claimed);
   const title = getDisplayTitle(song);
@@ -122,7 +79,7 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
           ${isSelected ? 'bg-white/10' : 'hover:bg-white/5'}`}
       >
         {/* Square thumbnail */}
-        <div className={`relative shrink-0 w-11 h-11 rounded-md overflow-hidden bg-gradient-to-br ${gradient}`}>
+        <div className={`relative shrink-0 w-11 h-11 rounded-md overflow-hidden bg-linear-to-br ${gradient}`}>
           {thumbUrl && (
             <img
               src={thumbUrl}
@@ -142,21 +99,22 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
               <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
               </svg>
-            ) : isPlaying && !globalIsPlaying ? (
-              <span className="text-white text-xs pl-0.5" aria-hidden>▶</span>
             ) : (
               <span className="text-white text-xs pl-0.5" aria-hidden>▶</span>
             )}
           </div>
 
+          {/* Lyrics badge — top left */}
+          {song.lyrics?.show_publicly && (
+            <span className="absolute top-1 left-1 z-10 text-emerald-400 text-[8px] leading-none bg-black/50 rounded px-1 py-0.5" aria-label="Has lyrics">♪</span>
+          )}
+
           {/* Fav Toggle */}
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleFavorite(song.id);
-            }}
-            className={`absolute top-1.5 right-1.5 transition-all duration-200 z-10
-              ${isFavorite(song.id) ? 'text-emerald-500 scale-110' : 'text-white/40 hover:text-white opacity-0 group-hover:opacity-100'}`}
+            onClick={(e) => { e.stopPropagation(); toggleFavorite(song.id); }}
+            className={`absolute top-1 right-1 transition-all duration-200 z-10
+              ${isFavorite(song.id) ? 'opacity-100 text-emerald-500 scale-110' : 'text-white/40 hover:text-white opacity-0 group-hover:opacity-100'}`}
+            aria-label={isFavorite(song.id) ? 'Unlike' : 'Like'}
           >
             <svg className="w-4 h-4" fill={isFavorite(song.id) ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -166,7 +124,9 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
 
         {/* Text */}
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-semibold truncate leading-tight ${isPlaying ? 'text-emerald-500' : 'text-white'} ${titleFallback ? 'italic' : ''}`}>{title}</p>
+          <p className={`text-sm font-semibold truncate leading-tight ${isPlaying ? 'text-emerald-500' : 'text-white'} ${titleFallback ? 'italic' : ''}`}>
+            {title}{showSongZh && song.title_chinese ? <span className="ml-1.5 text-stone-500 font-normal text-xs not-italic">({song.title_chinese})</span> : null}
+          </p>
           {onArtistClick && song.artist_ids?.length ? (
             <button
               onClick={e => { e.stopPropagation(); onArtistClick(song.artist_ids![0]); }}
@@ -177,13 +137,18 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
           )}
         </div>
 
-        {/* Indicators */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          {song.lyrics?.show_publicly && (
-            <span className="text-emerald-500 text-[10px]" title="Has lyrics">♪</span>
-          )}
-          <GenreIcon genre={song.genre} className="w-3 h-3 text-stone-400 shrink-0" />
-        </div>
+        {/* Song menu */}
+        {onOpenMenu && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onOpenMenu(song, e.currentTarget.getBoundingClientRect()); }}
+            className="shrink-0 p-2 -mr-1 text-stone-600 hover:text-stone-300 transition-colors"
+            aria-label="More options"
+          >
+            <svg className="w-1.5 h-4" fill="currentColor" viewBox="0 0 6 16" aria-hidden>
+              <circle cx="3" cy="2" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="3" cy="14" r="1.5"/>
+            </svg>
+          </button>
+        )}
       </div>
     );
   }
@@ -206,7 +171,7 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
         ${isSelected ? 'ring-2 ring-white/40 shadow-2xl scale-[1.02]' : 'hover:scale-[1.02] hover:shadow-xl'}`}
     >
       {/* Artwork area */}
-      <div className={`relative w-full aspect-square bg-gradient-to-br ${gradient} flex items-end p-3`}>
+      <div className={`relative w-full aspect-square bg-linear-to-br ${gradient} flex items-end p-3`}>
         {thumbUrl && (
           <img
             src={thumbUrl}
@@ -262,7 +227,6 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
       <div className="bg-[#1a1a24] group-hover:bg-[#1e1e2a] transition-colors px-3 py-2.5">
         <div className="flex items-center gap-2">
           <p className={`text-sm font-semibold truncate leading-tight ${isPlaying ? 'text-emerald-500' : 'text-white'} ${titleFallback ? 'italic' : ''}`}>{title}</p>
-          <GenreIcon genre={song.genre} className="w-3 h-3 text-stone-400 shrink-0" />
         </div>
         <div className="pl-0">
           {showSongZh && <p className="text-stone-400 text-xs truncate mt-0.5">{zhTitle}</p>}

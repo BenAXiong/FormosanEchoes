@@ -3,6 +3,15 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import type { Song, Artist, FilterState } from '@/lib/types';
 
+const GENRES = [
+  { value: 'Traditional',                         label: 'Traditional',        icon: <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden><polygon points="6,1 11.5,11 0.5,11"/></svg> },
+  { value: 'Traditional Choral',                  label: 'Traditional Choral', icon: <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden><rect x="0.5" y="2" width="2.5" height="8" rx="1.25"/><rect x="4.75" y="2" width="2.5" height="8" rx="1.25"/><rect x="9" y="2" width="2.5" height="8" rx="1.25"/></svg> },
+  { value: 'Modern Folk',                         label: 'Modern Folk',        icon: <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden><circle cx="3.5" cy="9.5" r="2.5"/><rect x="5.7" y="0.5" width="1.5" height="9.3"/></svg> },
+  { value: 'Contemporary Folk',                   label: 'Contemporary Folk',  icon: <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden><circle cx="2.5" cy="9.5" r="2"/><circle cx="8.5" cy="8.5" r="2"/><rect x="4.2" y="1.5" width="1.2" height="8.2"/><rect x="10.1" y="1.5" width="1.2" height="7.2"/><rect x="4.2" y="1.5" width="7.1" height="1.5"/></svg> },
+  { value: 'Contemporary Indigenous Folk-Pop',    label: 'Folk-Pop',           icon: <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden><path d="M6 0 L7.1 4.9 L12 6 L7.1 7.1 L6 12 L4.9 7.1 L0 6 L4.9 4.9 Z"/></svg> },
+  { value: 'Indigenous Gospel / Folk',            label: 'Gospel / Folk',      icon: <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden><rect x="4.5" y="0" width="3" height="12" rx="1.5"/><rect x="0" y="3.5" width="12" height="3" rx="1.5"/></svg> },
+] as const;
+
 function ToggleRow({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
     <button onClick={() => onChange(!value)}
@@ -83,10 +92,13 @@ export default function BrowserPage({ songs, artists }: Props) {
   const [showSongZh, setShowSongZh] = useState(true);
   const [showArtistZh, setShowArtistZh] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [genreOpen, setGenreOpen] = useState(false);
+  const [songMenu, setSongMenu] = useState<{ song: Song; rect: DOMRect } | null>(null);
+  const [songMenuView, setSongMenuView] = useState<'main' | 'playlists'>('main');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [searchFocused, setSearchFocused] = useState(false);
   const [recentVisibleCount, setRecentVisibleCount] = useState(10);
-  const { playingTrack, playTrack, setQueue, setAutoAdvance, isFavorite, playlists, registerTogglePanelFn, karaokeMode, toggleKaraokeMode } = usePlayer();
+  const { playingTrack, playTrack, setQueue, setAutoAdvance, isFavorite, toggleFavorite, playlists, addSongToPlaylist, createPlaylist, registerTogglePanelFn, karaokeMode, toggleKaraokeMode } = usePlayer();
 
   // History API refs for PWA back-button handling
   const historyDepth = useRef(0);
@@ -275,7 +287,7 @@ export default function BrowserPage({ songs, artists }: Props) {
   }, [panelWidth]);
 
   return (
-    <div className={`h-screen flex overflow-hidden bg-[#0a0a0f] text-white select-none ${(mounted && playingTrack) ? 'pb-[116px] sm:pb-20' : ''}`}>
+    <div className={`h-screen flex overflow-hidden bg-[#0a0a0f] text-white select-none ${(mounted && playingTrack) ? 'pb-29 sm:pb-20' : ''}`}>
 
       {/* Sidebar */}
       {sidebarOpen && (
@@ -307,7 +319,7 @@ export default function BrowserPage({ songs, artists }: Props) {
           <div className="lg:hidden flex items-center px-4 py-3 border-b border-white/5">
             <img src="/FE_logo_1d.png" alt="Logo" className="w-7 h-7 object-contain mr-2" />
             <span className="text-white font-bold text-sm tracking-tight">Formosan Echoes</span>
-            <div className="ml-auto w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-xs font-bold text-white shrink-0">B</div>
+            <div className="ml-auto w-7 h-7 rounded-full bg-linear-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-xs font-bold text-white shrink-0">B</div>
           </div>
           <div className="flex items-center gap-2 px-4 sm:px-5 py-2.5">
             <button
@@ -319,7 +331,7 @@ export default function BrowserPage({ songs, artists }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 12h10M11 20h2" />
               </svg>
             </button>
-            <div className="relative flex-1 min-w-0 max-w-xs">
+            <div className="relative flex-1 min-w-0">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3" aria-hidden>
                 <svg className="h-3.5 w-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -367,27 +379,83 @@ export default function BrowserPage({ songs, artists }: Props) {
             </div>
             <button
               onClick={toggleLyricsFilter}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border shrink-0 flex items-center gap-1.5 ${
+              aria-label="Filter: has lyrics"
+              aria-pressed={!!filters.has_lyrics}
+              className={`p-2 rounded-full transition-colors border shrink-0 ${
                 filters.has_lyrics
                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                   : 'bg-white/5 text-stone-400 border-white/10 hover:text-white hover:bg-white/10'
               }`}
             >
-              ♪ Lyrics
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 11h10M4 16h13" />
+              </svg>
             </button>
             <button
               onClick={() => setFilters({ ...filters, only_favorites: !filters.only_favorites })}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border shrink-0 flex items-center gap-1.5 ${
+              aria-label="Filter: liked songs"
+              aria-pressed={filters.only_favorites}
+              className={`p-2 rounded-full transition-colors border shrink-0 ${
                 filters.only_favorites
                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                   : 'bg-white/5 text-stone-400 border-white/10 hover:text-white hover:bg-white/10'
               }`}
             >
-              <svg className={`w-3 h-3 ${filters.only_favorites ? 'fill-current' : 'fill-none'}`} viewBox="0 0 24 24" stroke="currentColor">
+              <svg className={`w-3.5 h-3.5 ${filters.only_favorites ? 'fill-current' : 'fill-none'}`} viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
-              Liked
             </button>
+            {/* Genre filter */}
+            <div className="relative shrink-0">
+              <button
+                onClick={() => setGenreOpen(o => !o)}
+                aria-label="Filter by genre"
+                aria-pressed={!!filters.genre}
+                className={`p-2 rounded-full transition-colors border ${
+                  filters.genre
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                    : 'bg-white/5 text-stone-400 border-white/10 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                {filters.genre
+                  ? <span className="w-3.5 h-3.5 flex items-center justify-center">{GENRES.find(g => g.value === filters.genre)?.icon}</span>
+                  : <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+                      <circle cx="9" cy="18" r="3"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 18V7l9-2v11"/><circle cx="21" cy="16" r="3"/>
+                    </svg>
+                }
+              </button>
+              {genreOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setGenreOpen(false)} />
+                  <div className="absolute left-0 top-full mt-1 w-52 bg-[#1a1a24] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                    {filters.genre && (
+                      <button
+                        onClick={() => { setFilters(f => ({ ...f, genre: '' })); setGenreOpen(false); }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-stone-400 hover:bg-white/5 hover:text-white transition-colors border-b border-white/5"
+                      >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        Clear genre filter
+                      </button>
+                    )}
+                    {GENRES.map(g => (
+                      <button
+                        key={g.value}
+                        onClick={() => { setFilters(f => ({ ...f, genre: g.value })); setGenreOpen(false); }}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors ${
+                          filters.genre === g.value
+                            ? 'bg-emerald-500/10 text-emerald-300'
+                            : 'text-stone-300 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <span className="w-3 h-3 shrink-0 flex items-center justify-center">{g.icon}</span>
+                        {g.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
             <div className="flex items-center gap-2 ml-auto shrink-0">
               <button
                 onClick={() => setCompact(!compact)}
@@ -407,17 +475,6 @@ export default function BrowserPage({ songs, artists }: Props) {
                   </svg>
                 )}
               </button>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-stone-500 hidden sm:inline">Autoplay</span>
-                <button
-                  onClick={() => setAutoplay(!autoplay)}
-                  aria-pressed={autoplay}
-                  aria-label="Toggle autoplay"
-                  className={`relative w-9 h-5 rounded-full transition-colors ${autoplay ? 'bg-emerald-500' : 'bg-white/10'}`}
-                >
-                  <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${autoplay ? 'translate-x-4' : ''}`} />
-                </button>
-              </div>
 
               {/* Settings dropdown */}
               <div className="relative">
@@ -434,6 +491,9 @@ export default function BrowserPage({ songs, artists }: Props) {
                       <div className="p-2">
                         <ToggleRow label="Song Chinese names" value={showSongZh} onChange={setShowSongZh} />
                         <ToggleRow label="Artist Chinese names" value={showArtistZh} onChange={setShowArtistZh} />
+                      </div>
+                      <div className="border-t border-white/5 p-2">
+                        <ToggleRow label="Autoplay" value={autoplay} onChange={setAutoplay} />
                       </div>
                     </div>
                   </>
@@ -494,6 +554,7 @@ export default function BrowserPage({ songs, artists }: Props) {
                     showSongZh={showSongZh}
                     showArtistZh={showArtistZh}
                     onArtistClick={isLargeScreen ? (id => { const a = artistMap.get(id); if (a) { setActiveTab('artists'); setSelectedArtist(a); } }) : undefined}
+                    onOpenMenu={(s, rect) => { setSongMenu({ song: s, rect }); setSongMenuView('main'); }}
                   />
                 </li>
               ))}
@@ -608,10 +669,104 @@ export default function BrowserPage({ songs, artists }: Props) {
 
       {/* Mobile bottom sheet — only mount when not on a large screen to avoid dual NowPlaying registration */}
       {!isLargeScreen && selected && (
-        <div className={`lg:hidden fixed inset-x-0 top-[52px] ${playingTrack ? 'bottom-[116px] sm:bottom-0' : 'bottom-0'} z-30 rounded-none overflow-hidden border-t border-white/10 shadow-2xl`}>
+        <div className={`lg:hidden fixed inset-x-0 top-13 ${playingTrack ? 'bottom-29 sm:bottom-0' : 'bottom-0'} z-30 rounded-none overflow-hidden border-t border-white/10 shadow-2xl`}>
           <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} />
         </div>
       )}
+
+      {/* Song context menu */}
+      {songMenu && (() => {
+        const { song, rect } = songMenu;
+        const spaceBelow = typeof window !== 'undefined' ? window.innerHeight - rect.bottom : 999;
+        const menuStyle: React.CSSProperties = {
+          position: 'fixed',
+          right: typeof window !== 'undefined' ? window.innerWidth - rect.right : 0,
+          ...(spaceBelow > 230 ? { top: rect.bottom + 4 } : { bottom: (typeof window !== 'undefined' ? window.innerHeight : 0) - rect.top + 4 }),
+          width: 208,
+          zIndex: 60,
+        };
+        const liked = isFavorite(song.id);
+        return (
+          <>
+            <div className="fixed inset-0 z-50" onClick={() => setSongMenu(null)} />
+            <div className="bg-[#1a1a24] border border-white/10 rounded-xl shadow-2xl overflow-hidden" style={menuStyle}>
+              {songMenuView === 'main' ? (
+                <>
+                  <div className="px-3 pt-2.5 pb-1.5 border-b border-white/5">
+                    <p className="text-xs font-semibold text-white truncate">{song.title_original ?? song.title_chinese ?? song.artist ?? '—'}</p>
+                    {song.artist && <p className="text-[10px] text-stone-500 truncate">{song.artist}</p>}
+                  </div>
+                  <div className="py-1">
+                    <button disabled className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-stone-600 cursor-not-allowed">
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                      Share
+                    </button>
+                    <button
+                      onClick={() => { toggleFavorite(song.id); setSongMenu(null); }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-stone-300 hover:bg-white/5 hover:text-white transition-colors"
+                    >
+                      <svg className={`w-3.5 h-3.5 shrink-0 ${liked ? 'fill-current text-emerald-400' : ''}`} fill={liked ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                      </svg>
+                      {liked ? 'Unlike' : 'Like'}
+                    </button>
+                    <button
+                      onClick={() => setSongMenuView('playlists')}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-stone-300 hover:bg-white/5 hover:text-white transition-colors"
+                    >
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+                      Add to playlist
+                      <svg className="w-3 h-3 ml-auto shrink-0 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                    {song.artist_ids?.length ? (
+                      <button
+                        onClick={() => { const a = artistMap.get(song.artist_ids![0]); if (a) { setActiveTab('artists'); setSelectedArtist(a); } setSongMenu(null); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-stone-300 hover:bg-white/5 hover:text-white transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        Open artist
+                      </button>
+                    ) : null}
+                    <button disabled className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-stone-600 cursor-not-allowed">
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                      Song info
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setSongMenuView('main')}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-stone-400 hover:text-white transition-colors border-b border-white/5"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    Add to playlist
+                  </button>
+                  <div className="py-1 max-h-56 overflow-y-auto thin-scrollbar">
+                    {playlists.map(pl => (
+                      <button
+                        key={pl.id}
+                        onClick={() => { addSongToPlaylist(pl.id, song.id); setSongMenu(null); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-stone-300 hover:bg-white/5 hover:text-white transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5 shrink-0 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h10"/></svg>
+                        {pl.name}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => createPlaylist('New Playlist')}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-stone-400 hover:bg-white/5 hover:text-white transition-colors border-t border-white/5 mt-1"
+                    >
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+                      New playlist
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </>
+        );
+      })()}
     </div>
   );
 }
