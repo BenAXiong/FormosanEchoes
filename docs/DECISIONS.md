@@ -446,3 +446,31 @@ Genre/style descriptors that appear in YouTube titles (e.g. "古調", "族語歌
 **Implication:** If the system prompt rule is ever weakened or removed, expect AI to start filling `title_zh` with plausible-sounding but unverified translations.
 
 **Date:** 2026-05-18
+
+---
+
+## [PWA] Service worker — deferred past initial demo phase
+
+**Chosen:** No service worker. PWA is bare-bones: manifest + icons only. The app relies on standard browser HTTP caching and Next.js ISR for freshness.
+
+**Why:** The primary motivation for a SW would be to control update timing and avoid users landing on stale cached shells while new builds are live. However, adding a SW before the first demo round introduces debugging risk that outweighs that benefit:
+
+- SW lifecycle bugs (stuck "waiting" state, activate failures, cache poisoning) are hard to reproduce and harder to debug remotely on a user's device.
+- YouTube embeds are cross-origin — they pass through unchanged regardless of SW strategy — but a misconfigured SW could still break navigation or intercept the wrong resources.
+- The lyrics display gate (`show_publicly`) lives server-side, so a stale HTML shell is annoying but not a rights violation.
+- iOS Safari's SW support has edge cases around install/update timing that require explicit device testing.
+
+The current "stale shell, updates on force-close" behaviour is inconsistent but not harmful. Demo participants can be told to force-close if they see outdated content.
+
+**When to implement:** After the initial demo round, once the play experience is confirmed stable and there are no active bugs in the audio/mirror sync path.
+
+**What to implement when ready:**
+- Workbox or hand-rolled SW registered in `app/layout.tsx` (client component).
+- Strategy: network-first for HTML navigation (so ISR updates are seen immediately); cache-first for `/_next/static/**` (immutable hashed assets); pass-through (no interception) for all cross-origin requests (YouTube, Supabase, Gemini).
+- `skipWaiting` + `clients.claim` in the SW install handler for instant activation on update.
+- `updateViaCache: 'none'` in `navigator.serviceWorker.register()` to bypass HTTP cache on SW script fetches.
+- Smoke tests: install on iOS → force-close → reopen (confirm updated build loaded); play a song (confirm no double-audio); view lyrics (confirm `show_publicly` gate still works); navigate to `/admin?key=654321` (confirm admin routes not cached).
+
+**Rejected:** Adding a SW now — demo risk outweighs update-consistency benefit.
+
+**Date:** 2026-05-22
