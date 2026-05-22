@@ -31,6 +31,10 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
     if (stored && stored in LOCALES) setLangState(stored);
   }, []);
 
+  useEffect(() => {
+    document.title = LOCALES[lang].appName;
+  }, [lang]);
+
   const setLang = useCallback((l: LocaleCode) => {
     setLangState(l);
     localStorage.setItem(STORAGE_KEY, l);

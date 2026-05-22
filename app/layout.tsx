@@ -9,13 +9,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Formosan Echoes — Formosan-Language Song Metadata Browser',
+  title: "Chill'ey ~",
   description:
     'A cultural metadata browser for Formosan-language songs. Search and explore songs from Indigenous Taiwanese peoples, with evidence, verification status, and source links.',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Formosan Echoes',
+    title: "Chill'ey ~",
   },
 };
 

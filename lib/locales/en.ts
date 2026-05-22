@@ -1,6 +1,6 @@
 const en = {
   // App
-  appName: 'Formosan Echoes',
+  appName: "Chill'ey ~",
   goHome: 'Go to home',
 
   // Lang toggle

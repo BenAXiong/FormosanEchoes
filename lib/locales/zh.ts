@@ -2,7 +2,7 @@ import type { Locale } from './en';
 
 const zh: Locale = {
   // App
-  appName: 'Formosan Echoes',
+  appName: '契咧！',
   goHome: '回首頁',
 
   // Lang toggle
