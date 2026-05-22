@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import type { Song, Playlist } from './types';
-import { createAuthBrowserClient } from './supabase';
+import { createAuthBrowserClient } from './supabase-browser';
 
 interface PlayerContextType {
   playingTrack: Song | null;

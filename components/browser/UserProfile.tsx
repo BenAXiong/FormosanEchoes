@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
-import { createAuthBrowserClient } from '@/lib/supabase';
+import { createAuthBrowserClient } from '@/lib/supabase-browser';
 
 export default function UserProfile() {
   const [user, setUser] = useState<User | null>(null);
@@ -64,7 +64,7 @@ export default function UserProfile() {
 
       {open && (
         <>
-          <div className="fixed inset-0 z-40" role="presentation" onClick={() => setOpen(false)} onKeyDown={e => { if (e.key === 'Escape') setOpen(false); }} />
+          <div className="fixed inset-0 z-40" aria-hidden="true" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-full mt-1.5 w-56 bg-[#1a1a24] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
             <div className="px-3 py-3 border-b border-white/5">
               {name && <p className="text-xs font-semibold text-white truncate">{name}</p>}

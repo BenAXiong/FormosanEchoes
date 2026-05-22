@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { createServerClient as createSSRServer, createBrowserClient as createSSRBrowser } from '@supabase/ssr';
+import { createServerClient as createSSRServer } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
 // ── Service role client ────────────────────────────────────────────────────────
@@ -28,18 +28,4 @@ export async function createAuthServerClient() {
       },
     }
   );
-}
-
-// ── Auth browser client ────────────────────────────────────────────────────────
-// Used in client components (PlayerContext, UserProfile). Singleton.
-// User JWT is attached automatically; RLS protects all user-specific tables.
-let _browserClient: ReturnType<typeof createSSRBrowser> | null = null;
-export function createAuthBrowserClient() {
-  if (!_browserClient) {
-    _browserClient = createSSRBrowser(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-  }
-  return _browserClient;
 }
