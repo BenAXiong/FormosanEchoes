@@ -1,16 +1,29 @@
-import { createAuthServerClient } from '@/lib/supabase';
-import { NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  // 'next' controls where to land after auth; defaults to public browser
   const next = searchParams.get('next') ?? '/';
 
+  const response = NextResponse.redirect(`${origin}${next}`);
+
   if (code) {
-    const supabase = await createAuthServerClient();
+    const incomingCookies = request.cookies.getAll();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => incomingCookies,
+          setAll: (cs) => {
+            cs.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+          },
+        },
+      }
+    );
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  return NextResponse.redirect(`${origin}${next}`);
+  return response;
 }

@@ -38,13 +38,23 @@ interface PlayerContextType {
   toggleFavorite: (songId: string) => void;
   isFavorite: (songId: string) => boolean;
   playlists: Playlist[];
-  createPlaylist: (name: string) => void;
+  createPlaylist: (name: string, initialSongId?: string) => void;
   deletePlaylist: (id: string) => void;
   addSongToPlaylist: (playlistId: string, songId: string) => void;
   removeSongFromPlaylist: (playlistId: string, songId: string) => void;
+  signOutAuth: () => void;
+  isSignedIn: boolean;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
+
+const post = (url: string, body: object) =>
+  fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .catch(() => {});
+
+const del = (url: string, body: object) =>
+  fetch(url, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .catch(() => {});
 
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [playingTrack, setPlayingTrackState] = useState<Song | null>(null);
@@ -70,10 +80,13 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [autoAdvance, setAutoAdvance] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const authModeRef = useRef<'anon' | 'supabase'>('anon');
-  const userIdRef = useRef<string | null>(null);
 
-  // Load anon data from localStorage
+  // Auth mode as React state so persistence effects always see a consistent snapshot.
+  // Ref is synced from state for use in write callbacks (no stale-closure risk).
+  const [authMode, setAuthMode] = useState<'loading' | 'anon' | 'supabase'>('loading');
+  const authModeRef = useRef<'loading' | 'anon' | 'supabase'>('loading');
+  useEffect(() => { authModeRef.current = authMode; }, [authMode]);
+
   const loadFromLocalStorage = useCallback(() => {
     const savedFavs = localStorage.getItem('sof-favorites');
     if (savedFavs) { try { setFavorites(JSON.parse(savedFavs)); } catch { /* ignore */ } }
@@ -81,65 +94,77 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     if (savedPls) { try { setPlaylists(JSON.parse(savedPls)); } catch { /* ignore */ } }
   }, []);
 
-  // Watch auth state — switch between Supabase and localStorage backing store
-  useEffect(() => {
-    const supabase = createAuthBrowserClient();
-    loadFromLocalStorage();
+  // All Supabase reads go through /api/user-data — server reads the session cookie
+  // directly, bypassing the GoTrueClient lock that causes 5-second delays.
+  const loadFromSupabase = useCallback(async () => {
+    const res = await fetch('/api/user-data');
+    if (!res.ok) return;
+    const { favorites: favs, playlists: pls } = await res.json() as {
+      favorites: string[];
+      playlists: Playlist[];
+    };
+    setFavorites(favs);
+    setPlaylists(pls);
+  }, []);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_: AuthChangeEvent, session: Session | null) => {
-      if (session?.user) {
-        authModeRef.current = 'supabase';
-        userIdRef.current = session.user.id;
-        // Load favorites
-        const { data: favRows } = await supabase.from('user_favorites').select('song_id');
-        setFavorites((favRows as { song_id: string }[] | null)?.map(r => r.song_id) ?? []);
-        // Load playlists + songs
-        const { data: plRows } = await supabase
-          .from('user_playlists')
-          .select('id, name, user_playlist_songs(song_id, position)')
-          .order('created_at');
-        if (plRows) {
-          setPlaylists((plRows as { id: string; name: string; user_playlist_songs: { song_id: string; position: number }[] }[]).map(p => ({
-            id: p.id,
-            name: p.name,
-            songIds: p.user_playlist_songs
-              .sort((a, b) => a.position - b.position)
-              .map(ps => ps.song_id),
-          })));
-        }
-      } else {
-        authModeRef.current = 'anon';
-        userIdRef.current = null;
-        loadFromLocalStorage();
-      }
-    });
-    return () => subscription.unsubscribe();
+  const signOutAuth = useCallback(() => {
+    setAuthMode('anon');
+    loadFromLocalStorage();
   }, [loadFromLocalStorage]);
 
-  // Persist to localStorage only in anon mode
+  // Determine initial auth state via /api/me (server read — no GoTrue lock contention).
+  // onAuthStateChange handles only live cross-tab changes; INITIAL_SESSION is intentionally
+  // ignored because /api/me already handles the initial load correctly.
   useEffect(() => {
-    if (authModeRef.current === 'anon') localStorage.setItem('sof-favorites', JSON.stringify(favorites));
-  }, [favorites]);
+    const supabase = createAuthBrowserClient();
+
+    fetch('/api/me')
+      .then(r => r.json())
+      .then(async ({ user }: { user: { id: string } | null }) => {
+        if (user) {
+          setAuthMode('supabase');
+          await loadFromSupabase();
+        } else {
+          setAuthMode('anon');
+          loadFromLocalStorage();
+        }
+      })
+      .catch(() => { setAuthMode('anon'); loadFromLocalStorage(); });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event: AuthChangeEvent, session: Session | null) => {
+        if (event === 'SIGNED_OUT') {
+          setAuthMode('anon');
+          loadFromLocalStorage();
+        } else if (event === 'SIGNED_IN' && session?.user) {
+          setAuthMode('supabase');
+          await loadFromSupabase();
+        }
+        // INITIAL_SESSION, TOKEN_REFRESHED, USER_UPDATED — no action needed
+      }
+    );
+    return () => subscription.unsubscribe();
+  }, [loadFromLocalStorage, loadFromSupabase]);
+
+  // Persist to localStorage only in anon mode.
+  // authMode in deps ensures React batches the mode change and data change together —
+  // no window where authMode='anon' while favorites still holds Supabase data.
+  useEffect(() => {
+    if (authMode === 'anon') localStorage.setItem('sof-favorites', JSON.stringify(favorites));
+  }, [authMode, favorites]);
 
   useEffect(() => {
-    if (authModeRef.current === 'anon') localStorage.setItem('sof-playlists', JSON.stringify(playlists));
-  }, [playlists]);
+    if (authMode === 'anon') localStorage.setItem('sof-playlists', JSON.stringify(playlists));
+  }, [authMode, playlists]);
 
   const toggleFavorite = useCallback((songId: string) => {
-    if (authModeRef.current === 'supabase' && userIdRef.current) {
-      const uid = userIdRef.current;
+    if (authModeRef.current === 'supabase') {
       setFavorites(prev => {
         const has = prev.includes(songId);
-        const supabase = createAuthBrowserClient();
-        if (has) {
-          supabase.from('user_favorites').delete().match({ user_id: uid, song_id: songId }).then(() => {});
-          return prev.filter(id => id !== songId);
-        } else {
-          supabase.from('user_favorites').insert({ user_id: uid, song_id: songId }).then(() => {});
-          return [...prev, songId];
-        }
+        post('/api/user-data/favorites', { song_id: songId, action: has ? 'remove' : 'add' });
+        return has ? prev.filter(id => id !== songId) : [...prev, songId];
       });
-    } else {
+    } else if (authModeRef.current !== 'loading') {
       setFavorites(prev =>
         prev.includes(songId) ? prev.filter(id => id !== songId) : [...prev, songId]
       );
@@ -148,25 +173,29 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   const isFavorite = useCallback((songId: string) => favorites.includes(songId), [favorites]);
 
-  const createPlaylist = useCallback((name: string) => {
-    if (authModeRef.current === 'supabase' && userIdRef.current) {
-      const uid = userIdRef.current;
-      createAuthBrowserClient()
-        .from('user_playlists')
-        .insert({ user_id: uid, name })
-        .select('id, name')
-        .single()
-        .then((result: { data: { id: string; name: string } | null }) => {
-          if (result.data) setPlaylists(prev => [...prev, { id: result.data!.id, name: result.data!.name, songIds: [] }]);
-        });
-    } else {
-      setPlaylists(prev => [...prev, { id: `pl-${Date.now()}`, name, songIds: [] }]);
+  const createPlaylist = useCallback((name: string, initialSongId?: string) => {
+    if (authModeRef.current === 'supabase') {
+      fetch('/api/user-data/playlists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      })
+        .then(r => r.json())
+        .then(async (data: { id: string; name: string } | null) => {
+          if (!data?.id) return;
+          if (initialSongId) {
+            await post('/api/user-data/playlist-songs', { playlist_id: data.id, song_id: initialSongId, position: 0 });
+          }
+          setPlaylists(prev => [...prev, { id: data.id, name: data.name, songIds: initialSongId ? [initialSongId] : [] }]);
+        })
+        .catch(() => {});
     }
+    // guests cannot create playlists
   }, []);
 
   const deletePlaylist = useCallback((id: string) => {
     if (authModeRef.current === 'supabase') {
-      createAuthBrowserClient().from('user_playlists').delete().eq('id', id).then(() => {});
+      del('/api/user-data/playlists', { id });
     }
     setPlaylists(prev => prev.filter(p => p.id !== id));
   }, []);
@@ -176,10 +205,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       const pl = prev.find(p => p.id === playlistId);
       const position = pl?.songIds.length ?? 0;
       if (authModeRef.current === 'supabase') {
-        createAuthBrowserClient()
-          .from('user_playlist_songs')
-          .insert({ playlist_id: playlistId, song_id: songId, position })
-          .then(() => {});
+        post('/api/user-data/playlist-songs', { playlist_id: playlistId, song_id: songId, position });
       }
       return prev.map(p =>
         p.id === playlistId ? { ...p, songIds: [...new Set([...p.songIds, songId])] } : p
@@ -189,11 +215,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   const removeSongFromPlaylist = useCallback((playlistId: string, songId: string) => {
     if (authModeRef.current === 'supabase') {
-      createAuthBrowserClient()
-        .from('user_playlist_songs')
-        .delete()
-        .match({ playlist_id: playlistId, song_id: songId })
-        .then(() => {});
+      del('/api/user-data/playlist-songs', { playlist_id: playlistId, song_id: songId });
     }
     setPlaylists(prev => prev.map(p =>
       p.id === playlistId ? { ...p, songIds: p.songIds.filter(id => id !== songId) } : p
@@ -210,7 +232,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     if (newQueue) {
       setQueue(newQueue);
     }
-  }, []);
+  }, [setQueue]);
 
   const pauseTrack = useCallback(() => setIsPlaying(false), []);
   const resumeTrack = useCallback(() => {
@@ -281,7 +303,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     deletePlaylist,
     addSongToPlaylist,
     removeSongFromPlaylist,
+    signOutAuth,
+    isSignedIn: authMode === 'supabase',
   }), [
+    authMode,
     playingTrack,
     isPlaying,
     queue,
@@ -313,6 +338,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     deletePlaylist,
     addSongToPlaylist,
     removeSongFromPlaylist,
+    signOutAuth,
   ]);
 
   return (

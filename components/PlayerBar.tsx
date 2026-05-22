@@ -11,7 +11,7 @@ export default function PlayerBar() {
     playingTrack, isPlaying, togglePlay, nextTrack, prevTrack, pauseTrack,
     progress, setProgress, duration, setDuration,
     volume, setVolume, toggleFavorite, isFavorite,
-    playlists, addSongToPlaylist, createPlaylist,
+    playlists, addSongToPlaylist, createPlaylist, isSignedIn,
     registerSeekFn, seekTo, seekMirror, autoAdvance, togglePanel,
     karaokeMode, toggleKaraokeMode,
   } = usePlayer();
@@ -124,7 +124,7 @@ export default function PlayerBar() {
                 </div>
                 <div className="max-h-48 overflow-y-auto py-1">
                   {playlists.length === 0 ? (
-                    <p className="px-4 py-3 text-[11px] text-stone-600 italic">No custom playlists yet</p>
+                    <p className="px-4 py-3 text-[11px] text-stone-600 italic">{isSignedIn ? 'No custom playlists yet' : 'Sign in to create custom playlists'}</p>
                   ) : playlists.map(p => (
                     <button key={p.id}
                       onClick={() => { if (playingTrack) { addSongToPlaylist(p.id, playingTrack.id); showToast(`Added to ${p.name}`); } setShowPlaylistDropdown(false); }}
@@ -135,13 +135,15 @@ export default function PlayerBar() {
                     </button>
                   ))}
                 </div>
-                <div className="p-2 border-t border-white/5">
-                  <form onSubmit={(e) => { e.preventDefault(); if (newPlaylistName.trim()) { createPlaylist(newPlaylistName.trim()); showToast(`Created ${newPlaylistName.trim()}`); setNewPlaylistName(''); setShowPlaylistDropdown(false); } }} className="flex gap-1">
-                    <input autoFocus type="text" placeholder="New playlist…" value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)}
-                      className="flex-1 bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-emerald-500/50 transition-colors" />
-                    <button type="submit" disabled={!newPlaylistName.trim()} className="px-2 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-[10px] font-bold hover:bg-emerald-500/20 disabled:opacity-50 transition-colors">Add</button>
-                  </form>
-                </div>
+                {isSignedIn && (
+                  <div className="p-2 border-t border-white/5">
+                    <form onSubmit={(e) => { e.preventDefault(); if (newPlaylistName.trim()) { createPlaylist(newPlaylistName.trim(), playingTrack?.id); showToast(`Created ${newPlaylistName.trim()}`); setNewPlaylistName(''); setShowPlaylistDropdown(false); } }} className="flex gap-1">
+                      <input autoFocus type="text" placeholder="New playlist…" value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)}
+                        className="flex-1 bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-emerald-500/50 transition-colors" />
+                      <button type="submit" disabled={!newPlaylistName.trim()} className="px-2 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-[10px] font-bold hover:bg-emerald-500/20 disabled:opacity-50 transition-colors">Add</button>
+                    </form>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -246,7 +248,7 @@ export default function PlayerBar() {
               </div>
               <div className="max-h-48 overflow-y-auto py-1">
                 {playlists.length === 0 ? (
-                  <p className="px-4 py-3 text-[11px] text-stone-600 italic">No custom playlists yet</p>
+                  <p className="px-4 py-3 text-[11px] text-stone-600 italic">{isSignedIn ? 'No custom playlists yet' : 'Sign in to create custom playlists'}</p>
                 ) : (
                   playlists.map(p => (
                     <button
@@ -268,36 +270,38 @@ export default function PlayerBar() {
                   ))
                 )}
               </div>
-              <div className="p-2 border-t border-white/5 bg-white/[0.02]">
-                <form 
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (newPlaylistName.trim()) {
-                      createPlaylist(newPlaylistName.trim());
-                      showToast(`Created ${newPlaylistName.trim()}`);
-                      setNewPlaylistName('');
-                      setShowPlaylistDropdown(false);
-                    }
-                  }}
-                  className="flex gap-1"
-                >
-                  <input
-                    autoFocus
-                    type="text"
-                    placeholder="New playlist..."
-                    value={newPlaylistName}
-                    onChange={(e) => setNewPlaylistName(e.target.value)}
-                    className="flex-1 bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
-                  />
-                  <button 
-                    type="submit"
-                    disabled={!newPlaylistName.trim()}
-                    className="px-2 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-[10px] font-bold hover:bg-emerald-500/20 disabled:opacity-50 transition-colors"
+              {isSignedIn && (
+                <div className="p-2 border-t border-white/5 bg-white/[0.02]">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (newPlaylistName.trim()) {
+                        createPlaylist(newPlaylistName.trim(), playingTrack?.id);
+                        showToast(`Created ${newPlaylistName.trim()}`);
+                        setNewPlaylistName('');
+                        setShowPlaylistDropdown(false);
+                      }
+                    }}
+                    className="flex gap-1"
                   >
-                    Add
-                  </button>
-                </form>
-              </div>
+                    <input
+                      autoFocus
+                      type="text"
+                      placeholder="New playlist..."
+                      value={newPlaylistName}
+                      onChange={(e) => setNewPlaylistName(e.target.value)}
+                      className="flex-1 bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!newPlaylistName.trim()}
+                      className="px-2 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-[10px] font-bold hover:bg-emerald-500/20 disabled:opacity-50 transition-colors"
+                    >
+                      Add
+                    </button>
+                  </form>
+                </div>
+              )}
             </div>
           )}
         </div>

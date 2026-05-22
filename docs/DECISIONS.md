@@ -313,6 +313,64 @@ const registerMirrorSeekFn = useCallback((fn) => { mirrorSeekFnRef.current = fn;
 
 ---
 
+## [AUTH] Bootstrap initial auth state via `/api/me`, not browser client
+
+**Chosen:** `UserProfile` fetches `/api/me` on mount for its initial signed-in/signed-out state, then subscribes to `onAuthStateChange` for live updates (sign-in on another tab, sign-out). `/api/me` is a `force-dynamic` route that calls `createAuthServerClient()` → `supabase.auth.getUser()` server-side.
+
+**Why — two confirmed bugs, both present during debugging:**
+
+**Bug 1 — OAuth callback wrote session cookies to the wrong response object.**
+The original callback used `createAuthServerClient()` from `lib/supabase.ts`, which obtains the cookie store via `cookies()` from `next/headers`. Inside the `setAll` handler it called `cookieStore.set(name, value, options)`. But the route handler also constructed a separate `NextResponse.redirect(...)` object and returned it. The `next/headers` cookie store and the returned `NextResponse` are independent objects. Cookies written to `cookieStore` did not appear in the `Set-Cookie` headers of the returned redirect, so the browser received the 302 with no session cookies. Fix: build the `NextResponse.redirect()` first, then call `response.cookies.set()` directly inside `setAll` — the response object carries the cookies to the browser.
+
+Confirmed: server logs showed `exchangeCodeForSession: { user: 'email', error: null }` throughout; the bug was in the delivery of the cookies, not the exchange itself.
+
+**Bug 2 — GoTrueClient Web Locks API contention delays browser-side state.**
+`@supabase/auth-js` uses `navigator.locks` (the Web Locks API) to serialize all auth operations across tabs. Every call — `getUser()`, and the `INITIAL_SESSION` emission inside `onAuthStateChange` — must first await `initializePromise` and then acquire this lock. If the lock is held by an unreleased holder (e.g. from HMR module teardown during development), the library waits up to 5000 ms before stealing the lock (`{ steal: true }`). This is logged as a `console.warn` but is easy to miss. During this wait, both `getUser()` and `onAuthStateChange` return nothing, making the component appear unresponsive. Swapping between them has no effect because both use the same lock path.
+
+Source confirmed: `node_modules/@supabase/auth-js/dist/main/GoTrueClient.js` lines 2472 and 3408–3413; `node_modules/@supabase/auth-js/dist/main/lib/locks.js` (navigatorLock + steal logic).
+
+The `/api/me` fix bypasses the browser client entirely for the initial check — the server has no lock, always reads the session from the HTTP cookie directly.
+
+**Why both bugs coexisted and masked each other:** Bug 1 caused session cookies never to reach the browser. Bug 2 caused the browser client to appear non-responsive even when cookies were present. During debugging, server logs confirmed the exchange succeeded early, ruling Bug 1 out as the *only* cause — but Bug 2 was invisible without knowing what the lock delay looks like in the console.
+
+**What led to the diagnosis taking longer than it should:**
+Trying different combinations of `getUser()` / `onAuthStateChange` / both. All those variants go through the same GoTrue lock path, so none of them improved the outcome. The browser console showed the component mounting but no subsequent auth callbacks — this is indistinguishable from "the call was never made" vs "the call is waiting silently for 5 seconds". Without a specific test for lock contention (checking DevTools → Application → Storage for the cookies, or waiting >5 s before drawing conclusions), the two states look identical.
+
+**Pattern:**
+```typescript
+// On mount — server read, no lock, always accurate
+fetch('/api/me')
+  .then(r => r.json())
+  .then(({ user }) => setUser(user));
+
+// Keep subscription for live changes (tab-to-tab sign-in, sign-out)
+supabase.auth.onAuthStateChange((_event, session) => {
+  setUser(session?.user ?? null);
+});
+```
+
+**Rejected:** Relying solely on `supabase.auth.getUser()` or `onAuthStateChange` for initial state. Both are vulnerable to the lock delay in development (HMR) and potentially production (concurrent component mounts that each initialize a GoTrueClient).
+
+**Implication:** Any component that needs to know auth state on initial render should use `/api/me` (or an equivalent server read) rather than the browser client. The browser client is fine for *subsequent* state changes. `PlayerContext` currently relies solely on `onAuthStateChange` for loading favorites — this works but may show a blank favorites state for up to 5 s after a page load if lock contention occurs.
+
+**Date:** 2026-05-22
+
+---
+
+## [AUTH] OAuth callback: build redirect response first, set cookies on it directly
+
+**Chosen:** In `app/auth/callback/route.ts`, construct `const response = NextResponse.redirect(...)` before calling `supabase.auth.exchangeCodeForSession(code)`. Pass `response.cookies.set(name, value, options)` inside the `setAll` cookie handler. Return `response`.
+
+**Why:** `NextResponse` is a standalone object with its own `Set-Cookie` bag. Cookies written to the `next/headers` cookie store (via `cookieStore.set()`) are not reflected in a separately constructed `NextResponse`. The documented `@supabase/ssr` pattern for route handlers requires the response object to exist first so `setAll` can attach cookies to it.
+
+**Rejected:** Using `createAuthServerClient()` (the shared server client from `lib/supabase.ts`) inside the callback. That client uses `cookies()` from `next/headers` — correct for Server Components and Server Actions, wrong for route handlers that need cookies on a specific `NextResponse`. The distinction is subtle and not surfaced as an error; it fails silently.
+
+**Implication:** This pattern (response-first, then `response.cookies.set` in `setAll`) is the only correct approach for any `@supabase/ssr` route handler that must attach cookies to a `NextResponse`. Do not mix `next/headers` cookie writes with a `NextResponse` return in the same handler.
+
+**Date:** 2026-05-22
+
+---
+
 ## [DEV] Dev server on port 3002
 
 **Chosen:** `--port 3002` in the `dev` script.

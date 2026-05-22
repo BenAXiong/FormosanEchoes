@@ -95,6 +95,8 @@ export default function BrowserPage({ songs, artists }: Props) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [genreOpen, setGenreOpen] = useState(false);
   const [bookmarkOpen, setBookmarkOpen] = useState(false);
+  const [bookmarkPinned, setBookmarkPinned] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [songMenu, setSongMenu] = useState<{ song: Song; rect: DOMRect } | null>(null);
   const [songMenuView, setSongMenuView] = useState<'main' | 'playlists'>('main');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -104,7 +106,16 @@ export default function BrowserPage({ songs, artists }: Props) {
   const [searchMode, setSearchMode] = useState<'songs' | 'lyrics'>('songs');
   const overlayInputRef = useRef<HTMLInputElement>(null);
   const [defaultLanguage, setDefaultLanguage] = useState('');
-  const { playingTrack, playTrack, setQueue, setAutoAdvance, isFavorite, toggleFavorite, playlists, addSongToPlaylist, createPlaylist, registerTogglePanelFn, karaokeMode, toggleKaraokeMode } = usePlayer();
+  const { playingTrack, playTrack, setQueue, setAutoAdvance, isFavorite, toggleFavorite, playlists, addSongToPlaylist, createPlaylist, deletePlaylist, registerTogglePanelFn, karaokeMode, toggleKaraokeMode, isSignedIn } = usePlayer();
+
+  const goHome = useCallback(() => {
+    setSelected(null);
+    setSelectedArtist(null);
+    setActiveTab('songs');
+    setFilters(f => ({ ...f, only_favorites: false, playlist_id: null }));
+    setBookmarkOpen(false);
+    setBookmarkPinned(false);
+  }, []);
 
   // History API refs for PWA back-button handling
   const historyDepth = useRef(0);
@@ -346,6 +357,7 @@ export default function BrowserPage({ songs, artists }: Props) {
           onClose={() => setSidebarOpen(false)}
           defaultLanguage={defaultLanguage}
           onSetDefaultLanguage={handleSetDefaultLanguage}
+          onLogoClick={goHome}
         />
       </div>
 
@@ -353,8 +365,10 @@ export default function BrowserPage({ songs, artists }: Props) {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <div className="sticky top-0 z-20 bg-[#0f0f16] border-b border-white/5">
           <div className="lg:hidden flex items-center px-4 py-3 border-b border-white/5">
-            <img src="/FE_logo_1d.png" alt="Logo" className="w-7 h-7 object-contain mr-2" />
-            <span className="text-white font-bold text-sm tracking-tight">Formosan Echoes</span>
+            <button onClick={goHome} className="flex items-center hover:opacity-80 transition-opacity" aria-label="Go to home">
+              <img src="/FE_logo_1d.png" alt="Logo" className="w-7 h-7 object-contain mr-2" />
+              <span className="text-white font-bold text-sm tracking-tight">Formosan Echoes</span>
+            </button>
             <div className="ml-auto flex items-center gap-3">
               <button
                 onClick={() => setSearchOverlayOpen(true)}
@@ -438,20 +452,6 @@ export default function BrowserPage({ songs, artists }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 11h10M4 16h13" />
               </svg>
             </button>
-            <button
-              onClick={() => setFilters({ ...filters, only_favorites: !filters.only_favorites })}
-              aria-label="Filter: liked songs"
-              aria-pressed={filters.only_favorites}
-              className={`p-2 rounded-full transition-colors border shrink-0 ${
-                filters.only_favorites
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                  : 'bg-white/5 text-stone-400 border-white/10 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <svg className={`w-3.5 h-3.5 ${filters.only_favorites ? 'fill-current' : 'fill-none'}`} viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </button>
             {/* Genre filter */}
             <div className="relative shrink-0">
               <button
@@ -504,9 +504,13 @@ export default function BrowserPage({ songs, artists }: Props) {
             </div>
 
             {/* Bookmark / Library */}
-            <div className="relative shrink-0">
+            <div
+              className="relative shrink-0"
+              onMouseEnter={() => setBookmarkOpen(true)}
+              onMouseLeave={() => { if (!bookmarkPinned) setBookmarkOpen(false); }}
+            >
               <button
-                onClick={() => setBookmarkOpen(o => !o)}
+                onClick={() => setBookmarkPinned(p => !p)}
                 aria-label="Library"
                 aria-pressed={!!(filters.only_favorites || filters.playlist_id)}
                 className={`p-2 rounded-full transition-colors border ${
@@ -519,13 +523,13 @@ export default function BrowserPage({ songs, artists }: Props) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4.5L5 21V5z"/>
                 </svg>
               </button>
-              {bookmarkOpen && (
+              {(bookmarkOpen || bookmarkPinned) && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setBookmarkOpen(false)} />
+                  {bookmarkPinned && <div className="fixed inset-0 z-40" onClick={() => { setBookmarkPinned(false); setBookmarkOpen(false); }} />}
                   <div className="absolute right-0 top-full mt-1 w-52 bg-[#1a1a24] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
                     {/* Favorite Songs — pinned */}
                     <button
-                      onClick={() => { setFilters(f => ({ ...f, only_favorites: !f.only_favorites, playlist_id: null })); setBookmarkOpen(false); }}
+                      onClick={() => { setFilters(f => ({ ...f, only_favorites: !f.only_favorites, playlist_id: null })); setBookmarkPinned(false); setBookmarkOpen(false); }}
                       className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs transition-colors ${
                         filters.only_favorites
                           ? 'bg-emerald-500/10 text-emerald-300'
@@ -537,22 +541,53 @@ export default function BrowserPage({ songs, artists }: Props) {
                       </svg>
                       Favorite Songs
                     </button>
-                    {playlists.length > 0 && <div className="border-t border-white/5 mx-3" />}
+                    <div className="border-t border-white/5 mx-3" />
+                    {!isSignedIn ? (
+                      <p className="px-3 py-2.5 text-[11px] text-stone-600 italic">Sign in to create custom playlists</p>
+                    ) : playlists.length === 0 ? (
+                      <p className="px-3 py-2.5 text-[11px] text-stone-600 italic">No custom playlists yet</p>
+                    ) : null}
                     {playlists.map(p => (
-                      <button
-                        key={p.id}
-                        onClick={() => { setFilters(f => ({ ...f, playlist_id: f.playlist_id === p.id ? null : p.id, only_favorites: false })); setBookmarkOpen(false); }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs transition-colors ${
-                          filters.playlist_id === p.id
-                            ? 'bg-emerald-500/10 text-emerald-300'
-                            : 'text-stone-300 hover:bg-white/5 hover:text-white'
-                        }`}
-                      >
-                        <svg className="w-3.5 h-3.5 shrink-0 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-                        {p.name}
-                      </button>
+                      <div key={p.id} className="group relative">
+                        {confirmDeleteId === p.id ? (
+                          <div className="flex items-center gap-2 px-3 py-2.5 text-xs">
+                            <span className="text-stone-400 flex-1">Delete "{p.name}"?</span>
+                            <button
+                              onClick={() => { deletePlaylist(p.id); if (filters.playlist_id === p.id) setFilters(f => ({ ...f, playlist_id: null })); setConfirmDeleteId(null); }}
+                              className="px-2 py-0.5 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+                            >Yes</button>
+                            <button
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="px-2 py-0.5 rounded bg-white/5 text-stone-400 hover:bg-white/10 transition-colors"
+                            >No</button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => { setFilters(f => ({ ...f, playlist_id: f.playlist_id === p.id ? null : p.id, only_favorites: false })); setBookmarkPinned(false); setBookmarkOpen(false); setConfirmDeleteId(null); }}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs transition-colors ${
+                              filters.playlist_id === p.id
+                                ? 'bg-emerald-500/10 text-emerald-300'
+                                : 'text-stone-300 hover:bg-white/5 hover:text-white'
+                            }`}
+                          >
+                            <svg className="w-3.5 h-3.5 shrink-0 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                            <span className="flex-1 text-left truncate">{p.name}</span>
+                            {isSignedIn && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(p.id); setBookmarkPinned(true); }}
+                                className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:text-red-400 transition-all"
+                                aria-label={`Delete playlist ${p.name}`}
+                              >
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                              </button>
+                            )}
+                          </button>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </>
@@ -999,13 +1034,15 @@ export default function BrowserPage({ songs, artists }: Props) {
                         {pl.name}
                       </button>
                     ))}
-                    <button
-                      onClick={() => createPlaylist('New Playlist')}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-stone-400 hover:bg-white/5 hover:text-white transition-colors border-t border-white/5 mt-1"
-                    >
-                      <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
-                      New playlist
-                    </button>
+                    {isSignedIn && (
+                      <button
+                        onClick={() => { createPlaylist('New Playlist', song.id); setSongMenu(null); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-stone-400 hover:bg-white/5 hover:text-white transition-colors border-t border-white/5 mt-1"
+                      >
+                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+                        New playlist
+                      </button>
+                    )}
                   </div>
                 </>
               )}
