@@ -20,16 +20,19 @@ export const metadata: Metadata = {
 };
 
 import { PlayerProvider } from '@/lib/PlayerContext';
+import { LangProvider } from '@/lib/lang';
 import PlayerBar from '@/components/PlayerBar';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-TW" className={geist.variable}>
       <body className="antialiased bg-stone-50 text-stone-800" suppressHydrationWarning>
-        <PlayerProvider>
-          {children}
-          <PlayerBar />
-        </PlayerProvider>
+        <LangProvider>
+          <PlayerProvider>
+            {children}
+            <PlayerBar />
+          </PlayerProvider>
+        </LangProvider>
       </body>
     </html>
   );

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 import { usePlayer } from '@/lib/PlayerContext';
+import { useT } from '@/lib/lang';
 import { getDisplayTitle, isYouTubeUrl, getYouTubeId } from '@/lib/normalize';
 
 export default function PlayerBar() {
@@ -15,6 +16,7 @@ export default function PlayerBar() {
     registerSeekFn, seekTo, seekMirror, autoAdvance, togglePanel,
     karaokeMode, toggleKaraokeMode,
   } = usePlayer();
+  const t = useT();
   const playerRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function PlayerBar() {
 
   if (!mounted) return null;
 
-  const title = playingTrack ? getDisplayTitle(playingTrack) : 'No song selected';
+  const title = playingTrack ? getDisplayTitle(playingTrack) : t('noSongSelected');
   const artist = playingTrack?.artist || '—';
   const youtubeId = playingTrack && isYouTubeUrl(playingTrack.youtube_url) ? getYouTubeId(playingTrack.youtube_url!) : null;
 
@@ -111,7 +113,7 @@ export default function PlayerBar() {
             <button
               onClick={() => setShowPlaylistDropdown(!showPlaylistDropdown)}
               className={`p-2 transition-colors ${showPlaylistDropdown ? 'text-white' : 'text-stone-500 hover:text-white'}`}
-              title="Add to playlist"
+              title={t('addToPlaylist')}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
@@ -120,14 +122,14 @@ export default function PlayerBar() {
             {showPlaylistDropdown && (
               <div className="absolute bottom-full right-0 mb-2 w-56 bg-[#12121a] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-[70]">
                 <div className="p-3 border-b border-white/5">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">Add to Playlist</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">{t('addToPlaylistHeader')}</p>
                 </div>
                 <div className="max-h-48 overflow-y-auto py-1">
                   {playlists.length === 0 ? (
-                    <p className="px-4 py-3 text-[11px] text-stone-600 italic">{isSignedIn ? 'No custom playlists yet' : 'Sign in to create custom playlists'}</p>
+                    <p className="px-4 py-3 text-[11px] text-stone-600 italic">{isSignedIn ? t('noPlaylistsYet') : t('signInToCreatePlaylists')}</p>
                   ) : playlists.map(p => (
                     <button key={p.id}
-                      onClick={() => { if (playingTrack) { addSongToPlaylist(p.id, playingTrack.id); showToast(`Added to ${p.name}`); } setShowPlaylistDropdown(false); }}
+                      onClick={() => { if (playingTrack) { addSongToPlaylist(p.id, playingTrack.id); showToast(t('addedToPlaylist', { name: p.name })); } setShowPlaylistDropdown(false); }}
                       className="w-full text-left px-4 py-2 text-xs text-stone-300 hover:text-white hover:bg-white/5 transition-colors flex items-center justify-between"
                     >
                       <span>{p.name}</span>
@@ -137,10 +139,10 @@ export default function PlayerBar() {
                 </div>
                 {isSignedIn && (
                   <div className="p-2 border-t border-white/5">
-                    <form onSubmit={(e) => { e.preventDefault(); if (newPlaylistName.trim()) { createPlaylist(newPlaylistName.trim(), playingTrack?.id); showToast(`Created ${newPlaylistName.trim()}`); setNewPlaylistName(''); setShowPlaylistDropdown(false); } }} className="flex gap-1">
-                      <input autoFocus type="text" placeholder="New playlist…" value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)}
+                    <form onSubmit={(e) => { e.preventDefault(); if (newPlaylistName.trim()) { createPlaylist(newPlaylistName.trim(), playingTrack?.id); showToast(t('createdPlaylist', { name: newPlaylistName.trim() })); setNewPlaylistName(''); setShowPlaylistDropdown(false); } }} className="flex gap-1">
+                      <input autoFocus type="text" placeholder={t('newPlaylistPlaceholder')} value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)}
                         className="flex-1 bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-emerald-500/50 transition-colors" />
-                      <button type="submit" disabled={!newPlaylistName.trim()} className="px-2 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-[10px] font-bold hover:bg-emerald-500/20 disabled:opacity-50 transition-colors">Add</button>
+                      <button type="submit" disabled={!newPlaylistName.trim()} className="px-2 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-[10px] font-bold hover:bg-emerald-500/20 disabled:opacity-50 transition-colors">{t('addButton')}</button>
                     </form>
                   </div>
                 )}
@@ -153,7 +155,7 @@ export default function PlayerBar() {
         <div className="flex items-center justify-between px-6 py-1">
           {/* Info button (not wired) */}
           <button
-            aria-label="Song info"
+            aria-label={t('songInfo')}
             className="w-5 h-5 rounded-full border border-white/20 bg-white/5 flex items-center justify-center text-[15px] leading-none text-stone-400 active:text-white transition-colors"
           >ℹ</button>
 
@@ -177,7 +179,7 @@ export default function PlayerBar() {
           {/* Karaoke toggle */}
           <button
             onClick={toggleKaraokeMode}
-            aria-label={karaokeMode ? 'Exit karaoke mode' : 'Enter karaoke mode'}
+            aria-label={karaokeMode ? t('exitKaraokeMode') : t('enterKaraokeMode')}
             className={`flex items-center justify-center text-xl transition-opacity ${karaokeMode ? 'opacity-100' : 'opacity-40 active:opacity-70'}`}
           >🎤</button>
         </div>
@@ -244,11 +246,11 @@ export default function PlayerBar() {
           {showPlaylistDropdown && (
             <div className="absolute bottom-full left-0 mb-4 w-56 bg-[#12121a] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-[70] animate-in fade-in slide-in-from-bottom-2 duration-200">
               <div className="p-3 border-b border-white/5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">Add to Playlist</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">{t('addToPlaylistHeader')}</p>
               </div>
               <div className="max-h-48 overflow-y-auto py-1">
                 {playlists.length === 0 ? (
-                  <p className="px-4 py-3 text-[11px] text-stone-600 italic">{isSignedIn ? 'No custom playlists yet' : 'Sign in to create custom playlists'}</p>
+                  <p className="px-4 py-3 text-[11px] text-stone-600 italic">{isSignedIn ? t('noPlaylistsYet') : t('signInToCreatePlaylists')}</p>
                 ) : (
                   playlists.map(p => (
                     <button
@@ -256,7 +258,7 @@ export default function PlayerBar() {
                       onClick={() => {
                         if (playingTrack) {
                           addSongToPlaylist(p.id, playingTrack.id);
-                          showToast(`Added to ${p.name}`);
+                          showToast(t('addedToPlaylist', { name: p.name }));
                         }
                         setShowPlaylistDropdown(false);
                       }}
@@ -277,7 +279,7 @@ export default function PlayerBar() {
                       e.preventDefault();
                       if (newPlaylistName.trim()) {
                         createPlaylist(newPlaylistName.trim(), playingTrack?.id);
-                        showToast(`Created ${newPlaylistName.trim()}`);
+                        showToast(t('createdPlaylist', { name: newPlaylistName.trim() }));
                         setNewPlaylistName('');
                         setShowPlaylistDropdown(false);
                       }
@@ -287,7 +289,7 @@ export default function PlayerBar() {
                     <input
                       autoFocus
                       type="text"
-                      placeholder="New playlist..."
+                      placeholder={t('newPlaylistPlaceholder')}
                       value={newPlaylistName}
                       onChange={(e) => setNewPlaylistName(e.target.value)}
                       className="flex-1 bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
@@ -297,7 +299,7 @@ export default function PlayerBar() {
                       disabled={!newPlaylistName.trim()}
                       className="px-2 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-[10px] font-bold hover:bg-emerald-500/20 disabled:opacity-50 transition-colors"
                     >
-                      Add
+                      {t('addButton')}
                     </button>
                   </form>
                 </div>

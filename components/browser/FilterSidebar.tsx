@@ -1,5 +1,6 @@
 'use client';
 import { useState, useMemo } from 'react';
+import { useT } from '@/lib/lang';
 import type { Artist, FilterState, Song } from '@/lib/types';
 import UserProfile from './UserProfile';
 import { DEFAULT_FILTERS, hasActiveFilters } from '@/lib/filters';
@@ -35,6 +36,7 @@ function PillList({
   expandLabel: string;
   allCount: number;
 }) {
+  const t = useT();
   const [expanded, setExpanded] = useState(false);
   const visible = expanded ? options : options.slice(0, FIRST_N);
   const rest = options.length - FIRST_N;
@@ -46,7 +48,7 @@ function PillList({
         className={`flex items-center px-3 py-1.5 rounded-lg text-xs transition-colors
           ${!value ? 'bg-white/10 text-white font-semibold' : 'text-stone-400 hover:text-white hover:bg-white/5'}`}
       >
-        <span className="flex-1 text-left">All</span>
+        <span className="flex-1 text-left">{t('all')}</span>
         <span className="tabular-nums text-[10px] text-stone-600 shrink-0">{allCount}</span>
       </button>
       {visible.map((o) => (
@@ -64,7 +66,7 @@ function PillList({
         <button
           onClick={() => setExpanded(!expanded)}
           className="text-left px-3 py-1.5 rounded-lg text-xs text-stone-600 hover:text-stone-400 hover:bg-white/5 transition-colors"
-        >{expanded ? '↑ Show less' : `+ ${rest} ${expandLabel}`}</button>
+        >{expanded ? t('showLess') : `+ ${rest} ${expandLabel}`}</button>
       )}
     </div>
   );
@@ -89,14 +91,16 @@ interface Props {
   onClose?: () => void;
   defaultLanguage: string;
   onSetDefaultLanguage: (lang: string) => void;
+  onLogoClick?: () => void;
 }
 
 export default function FilterSidebar({
   filters, onChange, resultCount, totalCount, allSongs, allArtists,
   activeTab, onTabChange, artistQuery, onArtistQueryChange,
   artistLanguage, onArtistLanguageChange, filteredArtistCount, onClose,
-  defaultLanguage, onSetDefaultLanguage,
+  defaultLanguage, onSetDefaultLanguage, onLogoClick,
 }: Props) {
+  const t = useT();
   const [defaultPickerOpen, setDefaultPickerOpen] = useState(false);
 
   const artistLangCounts = useMemo(() => {
@@ -177,23 +181,29 @@ export default function FilterSidebar({
   return (
     <aside className="h-full flex flex-col bg-[#0f0f16] overflow-hidden">
       {/* Title */}
-      <div className="px-4 py-4 border-b border-white/5 shrink-0 flex items-center gap-3">
-        <img src="/FE_logo_1d.png" alt="Logo" className="w-8 h-8 rounded-full object-cover" />
-        <p className="text-white font-bold text-sm tracking-tight">Formosan Echoes</p>
+      <div className="px-4 py-4 border-b border-white/5 shrink-0">
+        <button
+          onClick={onLogoClick}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+          aria-label={t('goHome')}
+        >
+          <img src="/FE_logo_1d.png" alt="Logo" className="w-8 h-8 rounded-full object-cover" />
+          <p className="text-white font-bold text-sm tracking-tight">{t('appName')}</p>
+        </button>
       </div>
 
       {/* Tab switcher */}
       <div className="px-3 py-2 border-b border-white/5 shrink-0">
         <div className="flex gap-1 bg-white/5 rounded-lg p-0.5">
-          {(['songs', 'artists'] as const).map(t => (
+          {(['songs', 'artists'] as const).map(tab => (
             <button
-              key={t}
-              onClick={() => onTabChange(t)}
+              key={tab}
+              onClick={() => onTabChange(tab)}
               className={`flex-1 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-                activeTab === t ? 'bg-white/15 text-white' : 'text-stone-500 hover:text-stone-300'
+                activeTab === tab ? 'bg-white/15 text-white' : 'text-stone-500 hover:text-stone-300'
               }`}
             >
-              {t === 'songs' ? 'Songs' : 'Artists'}
+              {tab === 'songs' ? t('tabSongs') : t('tabArtists')}
             </button>
           ))}
         </div>
@@ -214,7 +224,7 @@ export default function FilterSidebar({
                 type="search"
                 value={artistQuery}
                 onChange={e => onArtistQueryChange(e.target.value)}
-                placeholder="Search artists…"
+                placeholder={t('searchArtistsPlaceholder')}
                 className="w-full rounded-lg bg-white/5 border border-white/10 pl-7 pr-3 py-1.5 text-xs text-white
                   placeholder-stone-600 focus:outline-none focus:border-white/20 transition-colors"
               />
@@ -231,19 +241,19 @@ export default function FilterSidebar({
               <button
                 onClick={() => { onArtistQueryChange(''); onArtistLanguageChange(''); }}
                 className="text-xs text-stone-500 hover:text-white transition-colors underline underline-offset-4"
-              >Clear</button>
+              >{t('clear')}</button>
             )}
           </div>
 
           {/* Artist language filter */}
           <div className="flex-1 py-4 overflow-y-auto thin-scrollbar">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-5">Language</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-5">{t('language')}</p>
             <div className="px-2">
               <PillList
                 options={artistLangOptions}
                 value={artistLanguage}
                 onChange={(v) => { onArtistLanguageChange(v); if (v) onClose?.(); }}
-                expandLabel="more languages"
+                expandLabel={t('moreLanguages')}
                 allCount={allArtists.length}
               />
             </div>
@@ -269,11 +279,11 @@ export default function FilterSidebar({
       <div className="flex-1 py-4 overflow-y-auto thin-scrollbar">
         <div className="mb-6">
           <div className="flex items-center px-5 mb-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 flex-1">Languages</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 flex-1">{t('languages')}</p>
             <button
               onClick={() => setDefaultPickerOpen(o => !o)}
-              aria-label="Set default language"
-              title={defaultLanguage ? `Default: ${defaultLanguage}` : 'Set default language'}
+              aria-label={t('setDefaultLanguage')}
+              title={defaultLanguage ? t('defaultLanguageTitle', { language: defaultLanguage }) : t('setDefaultLanguage')}
               className={`p-1 rounded transition-colors ${defaultLanguage ? 'text-emerald-400 hover:text-emerald-300' : 'text-stone-600 hover:text-stone-400'}`}
             >
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
@@ -284,7 +294,7 @@ export default function FilterSidebar({
           </div>
           {defaultPickerOpen && (
             <div className="mx-2 mb-3 rounded-lg overflow-hidden border border-white/10 bg-white/3">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-stone-600 px-3 pt-2 pb-1">Opens with</p>
+              <p className="text-[9px] font-bold uppercase tracking-widest text-stone-600 px-3 pt-2 pb-1">{t('opensWith')}</p>
               <div className="max-h-44 overflow-y-auto thin-scrollbar pb-1">
                 <button
                   onClick={() => { onSetDefaultLanguage(''); setDefaultPickerOpen(false); }}
@@ -294,7 +304,7 @@ export default function FilterSidebar({
                     ? <svg className="w-3 h-3 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
                     : <span className="w-3 h-3 shrink-0" />
                   }
-                  All languages
+                  {t('allLanguages')}
                 </button>
                 {CIP_LANGUAGES.map(l => (
                   <button
@@ -317,17 +327,17 @@ export default function FilterSidebar({
               options={langOptions}
               value={filters.language}
               onChange={(v) => { updateFilters({ language: v, artist_id: '' }); if (v) onClose?.(); }}
-              expandLabel="other languages"
+              expandLabel={t('otherLanguages')}
               allCount={allSongs.length}
             />
           </div>
         </div>
         <div className="mb-6">
           <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-5">
-            Artists
+            {t('artists')}
             {filters.language && (
               <span className="ml-1 text-stone-700 normal-case font-normal tracking-normal">
-                — {filters.language}
+                {t('languageFilterLabel', { language: filters.language })}
               </span>
             )}
           </p>
@@ -337,23 +347,23 @@ export default function FilterSidebar({
                 options={artistOptions}
                 value={artistFilter}
                 onChange={(v) => { setArtistFilter(v); if (v) onClose?.(); }}
-                expandLabel="more artists"
+                expandLabel={t('moreArtists')}
                 allCount={artistPool.length}
               />
             ) : (
-              <p className="text-stone-700 text-xs px-3 italic">No artists yet</p>
+              <p className="text-stone-700 text-xs px-3 italic">{t('noArtistsYet')}</p>
             )}
           </div>
         </div>
         {recordingTypeOptions.length > 0 && (
           <div className="mb-6">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-5">Format</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-5">{t('format')}</p>
             <div className="px-2">
               <PillList
                 options={recordingTypeOptions}
                 value={filters.recording_type}
                 onChange={(v) => set('recording_type', v)}
-                expandLabel="more types"
+                expandLabel={t('moreTypes')}
                 allCount={allSongs.filter(s => !!s.recording_type).length}
               />
             </div>
@@ -364,7 +374,7 @@ export default function FilterSidebar({
 
       {/* User profile — bottom */}
       <div className="px-4 py-3 border-t border-white/5 shrink-0 flex items-center">
-        <UserProfile />
+        <UserProfile variant="sidebar" />
       </div>
     </aside>
   );

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { createAuthBrowserClient } from '@/lib/supabase-browser';
 import { usePlayer } from '@/lib/PlayerContext';
+import { useT } from '@/lib/lang';
 
 interface Props {
   readonly variant?: 'icon' | 'sidebar';
@@ -11,6 +12,7 @@ interface Props {
 
 export default function UserProfile({ variant = 'icon' }: Props) {
   const { signOutAuth } = usePlayer();
+  const t = useT();
   const [user, setUser] = useState<User | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -60,7 +62,7 @@ export default function UserProfile({ variant = 'icon' }: Props) {
       return (
         <button
           onClick={signIn}
-          aria-label="Sign in with Google"
+          aria-label={t('signInWithGoogle')}
           className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/15 transition-colors"
         >
           <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
@@ -68,8 +70,8 @@ export default function UserProfile({ variant = 'icon' }: Props) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
           </div>
-          <span className="text-xs font-semibold text-amber-400 leading-tight">Sign in</span>
-          <span className="text-[10px] text-amber-500/60 leading-tight truncate">save favorites</span>
+          <span className="text-xs font-semibold text-amber-400 leading-tight">{t('signIn')}</span>
+          <span className="text-[10px] text-amber-500/60 leading-tight truncate">{t('saveFavorites')}</span>
         </button>
       );
     }
@@ -77,8 +79,8 @@ export default function UserProfile({ variant = 'icon' }: Props) {
     return (
       <button
         onClick={signIn}
-        aria-label="Sign in with Google"
-        title="Sign in"
+        aria-label={t('signInWithGoogle')}
+        title={t('signIn')}
         className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
       >
         <svg className="w-4 h-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
@@ -93,7 +95,7 @@ export default function UserProfile({ variant = 'icon' }: Props) {
       <div className="relative w-full">
         <button
           onClick={() => setOpen(o => !o)}
-          aria-label="Account"
+          aria-label={t('account')}
           className="w-full flex items-center gap-2.5 px-1 py-1 rounded-lg hover:bg-white/5 transition-colors"
         >
           <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 ring-2 ring-emerald-500/40">
@@ -118,7 +120,7 @@ export default function UserProfile({ variant = 'icon' }: Props) {
                   onClick={signOut}
                   className="w-full text-left px-3 py-2 text-xs text-stone-400 hover:bg-white/5 hover:text-white transition-colors"
                 >
-                  Sign out
+                  {t('signOut')}
                 </button>
               </div>
             </div>
@@ -132,7 +134,7 @@ export default function UserProfile({ variant = 'icon' }: Props) {
     <div className="relative shrink-0">
       <button
         onClick={() => setOpen(o => !o)}
-        aria-label="Account"
+        aria-label={t('account')}
         className="w-7 h-7 rounded-full overflow-hidden shrink-0 ring-2 ring-emerald-500/40 hover:ring-emerald-500/70 transition-all"
       >
         {avatar
