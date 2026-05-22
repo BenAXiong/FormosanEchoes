@@ -141,9 +141,9 @@ function GapBar({ label, missing, total, naCount = 0 }: Readonly<{
   return (
     <div className="flex items-center gap-3">
       <span className="text-xs text-stone-500 w-32 shrink-0">{label}</span>
-      <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden flex">
-        <div className={'h-full ' + barColor(displayPct)} style={{ width: filledPct + '%' }} />
-        {safeNA > 0 && <div className="h-full bg-violet-500/50" style={{ width: naPct + '%' }} />}
+      <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden relative">
+        <div className={'absolute inset-y-0 left-0 ' + barColor(displayPct)} style={{ width: filledPct + '%' }} />
+        {safeNA > 0 && <div className="absolute inset-y-0 bg-violet-500/50" style={{ left: filledPct + '%', width: naPct + '%' }} />}
       </div>
       <span className="text-xs tabular-nums text-stone-500 w-20 text-right">{filled}/{total}<span className="ml-1 text-stone-600">({displayPct}%)</span></span>
     </div>
