@@ -32,6 +32,7 @@ import FilterSidebar from '@/components/browser/FilterSidebar';
 import ArtistCard from '@/components/browser/ArtistCard';
 import ArtistDetailPanel from '@/components/browser/ArtistDetailPanel';
 import { usePlayer } from '@/lib/PlayerContext';
+import UserProfile from '@/components/browser/UserProfile';
 
 type LyricsMatch = {
   song_id: string;
@@ -364,7 +365,7 @@ export default function BrowserPage({ songs, artists }: Props) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
-              <div className="w-7 h-7 rounded-full bg-linear-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-xs font-bold text-white shrink-0">B</div>
+              <UserProfile />
             </div>
           </div>
           <div className="flex items-center gap-2 px-4 sm:px-5 py-2.5">

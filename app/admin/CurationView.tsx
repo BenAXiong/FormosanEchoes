@@ -5,6 +5,7 @@ import type { Song } from '@/lib/types';
 import SongsAdminView from '@/components/admin/SongsAdminView';
 import ArtistsAdminView from '@/components/admin/ArtistsAdminView';
 import MetricsPanel from '@/components/admin/MetricsPanel';
+import { signOut } from './actions';
 
 type Tab = 'metrics' | 'songs' | 'artists';
 
@@ -130,6 +131,14 @@ export default function CurationView(_: { songs: Song[] }) {
             <p className="text-xs text-stone-400 hidden sm:block">Formosan-language song metadata browser · all entries are candidates unless verified</p>
           </div>
           <div className="flex items-center gap-2">
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="text-xs text-stone-400 hover:text-stone-600 transition-colors px-2 py-1 rounded hover:bg-stone-100"
+              >
+                Sign out
+              </button>
+            </form>
             <button
               onClick={() => setFiltersOpen(o => !o)}
               title="Toggle filters"

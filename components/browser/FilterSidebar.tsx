@@ -1,6 +1,7 @@
 'use client';
 import { useState, useMemo } from 'react';
 import type { Artist, FilterState, Song } from '@/lib/types';
+import UserProfile from './UserProfile';
 import { DEFAULT_FILTERS, hasActiveFilters } from '@/lib/filters';
 import { getArtistsWithSongs } from '@/lib/artists';
 
@@ -361,15 +362,9 @@ export default function FilterSidebar({
       </div>
       </>}
 
-      {/* User profile pill — bottom */}
-      <div className="px-4 py-3 border-t border-white/5 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-linear-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-xs font-bold text-white shrink-0">B</div>
-          <div>
-            <p className="text-white text-xs font-semibold leading-tight">Ben</p>
-            <p className="text-stone-500 text-[10px]">Researcher</p>
-          </div>
-        </div>
+      {/* User profile — bottom */}
+      <div className="px-4 py-3 border-t border-white/5 shrink-0 flex items-center">
+        <UserProfile />
       </div>
     </aside>
   );
