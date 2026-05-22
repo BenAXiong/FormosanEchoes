@@ -91,7 +91,7 @@ const en = {
   // User profile
   signInWithGoogle: 'Sign in with Google',
   signIn: 'Sign in',
-  saveFavorites: 'save favorites',
+  saveFavorites: 'create playlists & sync across devices',
   account: 'Account',
   signOut: 'Sign out',
 

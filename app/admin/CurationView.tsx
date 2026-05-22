@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Song } from '@/lib/types';
 import SongsAdminView from '@/components/admin/SongsAdminView';
 import ArtistsAdminView from '@/components/admin/ArtistsAdminView';
 import MetricsPanel from '@/components/admin/MetricsPanel';
-import { signOut } from './actions';
+import { createAuthBrowserClient } from '@/lib/supabase-browser';
 
 type Tab = 'metrics' | 'songs' | 'artists';
 
@@ -89,9 +90,15 @@ function FilterIcon({ className }: Readonly<{ className?: string }>) {
 
 // songs prop kept for ISR compatibility with the admin page — not used internally
 export default function CurationView(_: { songs: Song[] }) {
+  const router = useRouter();
   const [tab, setTab]                 = useState<Tab>('metrics');
   const [filtersOpen, setFiltersOpen] = useState(true);
   const [filters, setFilters]         = useState<AdminFilters>(EMPTY_FILTERS);
+
+  const handleSignOut = useCallback(async () => {
+    await createAuthBrowserClient().auth.signOut();
+    router.push('/login');
+  }, [router]);
   const [artistOptions, setArtistOptions] = useState<string[]>([]);
   const [unlinkedCount, setUnlinkedCount] = useState(0);
 
@@ -131,14 +138,12 @@ export default function CurationView(_: { songs: Song[] }) {
             <p className="text-xs text-stone-400 hidden sm:block">Formosan-language song metadata browser · all entries are candidates unless verified</p>
           </div>
           <div className="flex items-center gap-2">
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="text-xs text-stone-400 hover:text-stone-600 transition-colors px-2 py-1 rounded hover:bg-stone-100"
-              >
-                Sign out
-              </button>
-            </form>
+            <button
+              onClick={handleSignOut}
+              className="text-xs text-stone-400 hover:text-stone-600 transition-colors px-2 py-1 rounded hover:bg-stone-100"
+            >
+              Sign out
+            </button>
             <button
               onClick={() => setFiltersOpen(o => !o)}
               title="Toggle filters"

@@ -102,6 +102,7 @@ export default function FilterSidebar({
 }: Props) {
   const t = useT();
   const [defaultPickerOpen, setDefaultPickerOpen] = useState(false);
+  const [formatOpen, setFormatOpen] = useState(false);
 
   const artistLangCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -181,7 +182,7 @@ export default function FilterSidebar({
   return (
     <aside className="h-full flex flex-col bg-[#0f0f16] overflow-hidden">
       {/* Title */}
-      <div className="px-4 py-4 border-b border-white/5 shrink-0">
+      <div className="px-4 py-2.5 border-b border-white/5 shrink-0">
         <button
           onClick={onLogoClick}
           className="flex items-center gap-3 hover:opacity-80 transition-opacity"
@@ -231,20 +232,6 @@ export default function FilterSidebar({
             </div>
           </div>
 
-          {/* Artist count */}
-          <div className="flex items-center justify-between px-5 py-3 bg-white/2 shrink-0">
-            <p className="text-stone-500 text-xs tabular-nums">
-              <span className="text-white font-semibold">{filteredArtistCount}</span>
-              <span className="text-stone-600"> / {allArtists.length}</span>
-            </p>
-            {(artistQuery || artistLanguage) && (
-              <button
-                onClick={() => { onArtistQueryChange(''); onArtistLanguageChange(''); }}
-                className="text-xs text-stone-500 hover:text-white transition-colors underline underline-offset-4"
-              >{t('clear')}</button>
-            )}
-          </div>
-
           {/* Artist language filter */}
           <div className="flex-1 py-4 overflow-y-auto thin-scrollbar">
             <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-5">{t('language')}</p>
@@ -261,24 +248,19 @@ export default function FilterSidebar({
         </>
       )}
 
-      {activeTab === 'songs' && <>{/* Count + clear */}
-      <div className="flex items-center justify-between px-5 py-3 bg-white/2">
-        <p className="text-stone-500 text-xs tabular-nums">
-          <span className="text-white font-semibold">{resultCount}</span>
-          <span className="text-stone-600"> / {totalCount}</span>
-        </p>
-        {active && (
-          <button
-            onClick={() => onChange(DEFAULT_FILTERS)}
-            className="text-xs text-stone-500 hover:text-white transition-colors underline underline-offset-4"
-          >Clear</button>
-        )}
-      </div>
-
+      {activeTab === 'songs' && <>
       {/* Filter lists */}
       <div className="flex-1 py-4 overflow-y-auto thin-scrollbar">
+        {active && (
+          <div className="flex justify-end px-5 pb-3">
+            <button
+              onClick={() => onChange(DEFAULT_FILTERS)}
+              className="text-[10px] text-stone-600 hover:text-stone-300 transition-colors"
+            >{t('clearAll')}</button>
+          </div>
+        )}
         <div className="mb-6">
-          <div className="flex items-center px-5 mb-2">
+          <div className="flex items-center pl-5 pr-4 mb-2">
             <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 flex-1">{t('languages')}</p>
             <button
               onClick={() => setDefaultPickerOpen(o => !o)}
@@ -357,16 +339,26 @@ export default function FilterSidebar({
         </div>
         {recordingTypeOptions.length > 0 && (
           <div className="mb-6">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-5">{t('format')}</p>
-            <div className="px-2">
-              <PillList
-                options={recordingTypeOptions}
-                value={filters.recording_type}
-                onChange={(v) => set('recording_type', v)}
-                expandLabel={t('moreTypes')}
-                allCount={allSongs.filter(s => !!s.recording_type).length}
-              />
-            </div>
+            <button
+              onClick={() => setFormatOpen(o => !o)}
+              className="flex items-center w-full pl-5 pr-4 mb-2"
+            >
+              <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 flex-1 text-left">{t('format')}</p>
+              <svg className={`w-3 h-3 text-stone-600 transition-transform duration-200 ${formatOpen ? '' : '-rotate-90'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            {formatOpen && (
+              <div className="px-2">
+                <PillList
+                  options={recordingTypeOptions}
+                  value={filters.recording_type}
+                  onChange={(v) => set('recording_type', v)}
+                  expandLabel={t('moreTypes')}
+                  allCount={allSongs.filter(s => !!s.recording_type).length}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -93,7 +93,7 @@ const zh: Locale = {
   // User profile
   signInWithGoogle: '以 Google 帳號登入',
   signIn: '登入',
-  saveFavorites: '儲存最愛',
+  saveFavorites: '建立播放清單，跨裝置同步',
   account: '帳號',
   signOut: '登出',
 
