@@ -163,9 +163,13 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
   }, []); // intentionally run once on mount only
 
   // History API refs for PWA back-button handling
-  const historyDepth = useRef(0);
+  const songHistoryPushed = useRef(false);
   const skipNextPop = useRef(false);
   const selectedRef = useRef<Song | null>(null);
+  const isLargeScreenRef = useRef(false);
+  const selectedArtistRef = useRef<Artist | null>(null);
+  const showPlaylistsViewRef = useRef(false);
+  const activeTabRef = useRef<'songs' | 'artists'>('songs');
 
   useEffect(() => {
     setMounted(true);
@@ -282,26 +286,51 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
 
   // Keep refs in sync for use inside stable callbacks
   useEffect(() => { selectedRef.current = selected; }, [selected]);
+  useEffect(() => { isLargeScreenRef.current = isLargeScreen; }, [isLargeScreen]);
+  useEffect(() => { selectedArtistRef.current = selectedArtist; }, [selectedArtist]);
+  useEffect(() => { showPlaylistsViewRef.current = showPlaylistsView; }, [showPlaylistsView]);
+  useEffect(() => { activeTabRef.current = activeTab; }, [activeTab]);
 
   // Push a history entry when the mobile sheet opens; replace when switching songs
   useEffect(() => {
     if (isLargeScreen || !selected) return;
-    if (historyDepth.current === 0) {
-      history.pushState({ sheet: true }, '');
+    if (!songHistoryPushed.current) {
+      history.pushState({ nav: 'song' }, '');
+      songHistoryPushed.current = true;
     } else {
-      history.replaceState({ sheet: true }, '');
+      history.replaceState({ nav: 'song' }, '');
     }
-    historyDepth.current = 1;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected?.id, isLargeScreen]);
+
+  // Push history when switching to artists tab so back returns to songs
+  useEffect(() => {
+    if (!mounted || activeTab !== 'artists') return;
+    history.pushState({ nav: 'artists' }, '');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  // Push history when opening playlist view so back closes it
+  useEffect(() => {
+    if (!mounted || !showPlaylistsView) return;
+    history.pushState({ nav: 'playlists' }, '');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showPlaylistsView]);
 
   // Intercept hardware/gesture back button in PWA
   useEffect(() => {
     const onPop = () => {
       if (skipNextPop.current) { skipNextPop.current = false; return; }
-      setSelected(null);
-      if (karaokeMode) toggleKaraokeMode();
-      historyDepth.current = 0;
+      if (selectedRef.current && !isLargeScreenRef.current) {
+        songHistoryPushed.current = false;
+        setSelected(null);
+        if (karaokeMode) toggleKaraokeMode();
+      } else if (showPlaylistsViewRef.current) {
+        setShowPlaylistsView(false);
+      } else if (activeTabRef.current === 'artists') {
+        setActiveTab('songs');
+        setSelectedArtist(null);
+      }
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
@@ -310,10 +339,10 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
   useEffect(() => {
     registerTogglePanelFn(() => {
       if (selectedRef.current) {
-        if (historyDepth.current > 0) {
+        if (songHistoryPushed.current) {
           skipNextPop.current = true;
           history.back();
-          historyDepth.current = 0;
+          songHistoryPushed.current = false;
         }
         setSelected(null);
         if (karaokeMode) toggleKaraokeMode();
