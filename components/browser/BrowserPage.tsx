@@ -93,11 +93,16 @@ export default function BrowserPage({ songs, artists }: Props) {
   const [showArtistZh, setShowArtistZh] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [genreOpen, setGenreOpen] = useState(false);
+  const [bookmarkOpen, setBookmarkOpen] = useState(false);
   const [songMenu, setSongMenu] = useState<{ song: Song; rect: DOMRect } | null>(null);
   const [songMenuView, setSongMenuView] = useState<'main' | 'playlists'>('main');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [searchFocused, setSearchFocused] = useState(false);
   const [recentVisibleCount, setRecentVisibleCount] = useState(10);
+  const [searchOverlayOpen, setSearchOverlayOpen] = useState(false);
+  const [searchMode, setSearchMode] = useState<'songs' | 'lyrics'>('songs');
+  const overlayInputRef = useRef<HTMLInputElement>(null);
+  const [defaultLanguage, setDefaultLanguage] = useState('');
   const { playingTrack, playTrack, setQueue, setAutoAdvance, isFavorite, toggleFavorite, playlists, addSongToPlaylist, createPlaylist, registerTogglePanelFn, karaokeMode, toggleKaraokeMode } = usePlayer();
 
   // History API refs for PWA back-button handling
@@ -111,6 +116,11 @@ export default function BrowserPage({ songs, artists }: Props) {
     setIsLargeScreen(window.innerWidth >= 1024);
     setShowSongZh(localStorage.getItem('fe-show-song-zh') !== 'false');
     setShowArtistZh(localStorage.getItem('fe-show-artist-zh') === 'true');
+    const savedLang = localStorage.getItem('fe-default-language');
+    if (savedLang) {
+      setDefaultLanguage(savedLang);
+      setFilters(f => ({ ...f, language: savedLang, artist_id: '' }));
+    }
     const saved = localStorage.getItem('fe-recent-searches');
     if (saved) { try { setRecentSearches(JSON.parse(saved)); } catch { /* ignore */ } }
   }, []);
@@ -126,6 +136,16 @@ export default function BrowserPage({ songs, artists }: Props) {
       localStorage.setItem('fe-recent-searches', JSON.stringify(updated));
       return updated;
     });
+  }, []);
+
+  const handleSetDefaultLanguage = useCallback((lang: string) => {
+    setDefaultLanguage(lang);
+    if (lang) {
+      localStorage.setItem('fe-default-language', lang);
+    } else {
+      localStorage.removeItem('fe-default-language');
+    }
+    setFilters(f => ({ ...f, language: lang, artist_id: '' }));
   }, []);
 
   const toggleLyricsFilter = () =>
@@ -243,6 +263,19 @@ export default function BrowserPage({ songs, artists }: Props) {
     return m;
   }, [songs]);
 
+  const overlayResults = useMemo(() => {
+    if (query.length < 2) return [];
+    return searchSongs(songs, query).slice(0, 30);
+  }, [songs, query]);
+
+  useEffect(() => {
+    if (searchOverlayOpen) {
+      setTimeout(() => overlayInputRef.current?.focus(), 50);
+    } else if (query.length >= 2) {
+      saveRecentSearch(query);
+    }
+  }, [searchOverlayOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [lyricsResults, setLyricsResults] = useState<LyricsMatch[]>([]);
   const [lyricsLoading, setLyricsLoading] = useState(false);
 
@@ -310,6 +343,8 @@ export default function BrowserPage({ songs, artists }: Props) {
           onArtistLanguageChange={setArtistLanguage}
           filteredArtistCount={filteredArtists.length}
           onClose={() => setSidebarOpen(false)}
+          defaultLanguage={defaultLanguage}
+          onSetDefaultLanguage={handleSetDefaultLanguage}
         />
       </div>
 
@@ -319,7 +354,18 @@ export default function BrowserPage({ songs, artists }: Props) {
           <div className="lg:hidden flex items-center px-4 py-3 border-b border-white/5">
             <img src="/FE_logo_1d.png" alt="Logo" className="w-7 h-7 object-contain mr-2" />
             <span className="text-white font-bold text-sm tracking-tight">Formosan Echoes</span>
-            <div className="ml-auto w-7 h-7 rounded-full bg-linear-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-xs font-bold text-white shrink-0">B</div>
+            <div className="ml-auto flex items-center gap-3">
+              <button
+                onClick={() => setSearchOverlayOpen(true)}
+                aria-label="Search"
+                className="text-white hover:text-stone-300 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+              <div className="w-7 h-7 rounded-full bg-linear-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-xs font-bold text-white shrink-0">B</div>
+            </div>
           </div>
           <div className="flex items-center gap-2 px-4 sm:px-5 py-2.5">
             <button
@@ -331,7 +377,7 @@ export default function BrowserPage({ songs, artists }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 12h10M11 20h2" />
               </svg>
             </button>
-            <div className="relative flex-1 min-w-0">
+            <div className="hidden lg:block relative flex-1 min-w-0">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3" aria-hidden>
                 <svg className="h-3.5 w-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -449,6 +495,62 @@ export default function BrowserPage({ songs, artists }: Props) {
                       >
                         <span className="w-3 h-3 shrink-0 flex items-center justify-center">{g.icon}</span>
                         {g.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Bookmark / Library */}
+            <div className="relative shrink-0">
+              <button
+                onClick={() => setBookmarkOpen(o => !o)}
+                aria-label="Library"
+                aria-pressed={!!(filters.only_favorites || filters.playlist_id)}
+                className={`p-2 rounded-full transition-colors border ${
+                  (filters.only_favorites || filters.playlist_id)
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                    : 'bg-white/5 text-stone-400 border-white/10 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" fill={filters.only_favorites || filters.playlist_id ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4.5L5 21V5z"/>
+                </svg>
+              </button>
+              {bookmarkOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setBookmarkOpen(false)} />
+                  <div className="absolute right-0 top-full mt-1 w-52 bg-[#1a1a24] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                    {/* Favorite Songs — pinned */}
+                    <button
+                      onClick={() => { setFilters(f => ({ ...f, only_favorites: !f.only_favorites, playlist_id: null })); setBookmarkOpen(false); }}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs transition-colors ${
+                        filters.only_favorites
+                          ? 'bg-emerald-500/10 text-emerald-300'
+                          : 'text-stone-300 hover:bg-white/5 hover:text-white'
+                      }`}
+                    >
+                      <svg className="w-3.5 h-3.5 shrink-0" fill={filters.only_favorites ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                      </svg>
+                      Favorite Songs
+                    </button>
+                    {playlists.length > 0 && <div className="border-t border-white/5 mx-3" />}
+                    {playlists.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => { setFilters(f => ({ ...f, playlist_id: f.playlist_id === p.id ? null : p.id, only_favorites: false })); setBookmarkOpen(false); }}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs transition-colors ${
+                          filters.playlist_id === p.id
+                            ? 'bg-emerald-500/10 text-emerald-300'
+                            : 'text-stone-300 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <svg className="w-3.5 h-3.5 shrink-0 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        {p.name}
                       </button>
                     ))}
                   </div>
@@ -671,6 +773,149 @@ export default function BrowserPage({ songs, artists }: Props) {
       {!isLargeScreen && selected && (
         <div className={`lg:hidden fixed inset-x-0 top-13 ${playingTrack ? 'bottom-29 sm:bottom-0' : 'bottom-0'} z-30 rounded-none overflow-hidden border-t border-white/10 shadow-2xl`}>
           <NowPlaying song={selected} onClose={() => setSelected(null)} autoplay={autoplay} />
+        </div>
+      )}
+
+      {/* Mobile search overlay */}
+      {searchOverlayOpen && (
+        <div className="lg:hidden fixed inset-0 z-60 bg-[#0a0a0f] flex flex-col">
+          {/* Top bar */}
+          <div className="flex items-center gap-3 px-3 py-3 border-b border-white/8 shrink-0">
+            <button
+              onClick={() => setSearchOverlayOpen(false)}
+              aria-label="Back"
+              className="p-1.5 -ml-1 text-stone-400 hover:text-white transition-colors shrink-0"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
+              </svg>
+            </button>
+            <input
+              ref={overlayInputRef}
+              type="search"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') saveRecentSearch(query); }}
+              placeholder="Search songs, artists…"
+              className="flex-1 bg-transparent text-white placeholder-stone-600 text-sm focus:outline-none min-w-0"
+              autoComplete="off"
+            />
+            {query && (
+              <button
+                onClick={() => setQuery('')}
+                className="p-1 text-stone-600 hover:text-white transition-colors shrink-0"
+                aria-label="Clear"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            )}
+            <button
+              onClick={() => setSearchMode(m => m === 'songs' ? 'lyrics' : 'songs')}
+              className="shrink-0 px-2.5 py-1 rounded-full text-xs font-medium border border-white/15 text-stone-400 hover:text-white hover:border-white/30 transition-colors"
+            >
+              {searchMode === 'songs' ? 'lyrics' : 'songs'}
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto thin-scrollbar">
+            {query.length < 2 ? (
+              recentSearches.length > 0 ? (
+                <div className="py-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 px-5 mb-2">Recent</p>
+                  {recentSearches.slice(0, recentVisibleCount).map(term => (
+                    <button
+                      key={term}
+                      onClick={() => setQuery(term)}
+                      className="w-full text-left flex items-center gap-3 px-5 py-2.5 text-sm text-stone-300 hover:bg-white/5 hover:text-white transition-colors"
+                    >
+                      <svg className="w-4 h-4 text-stone-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      {term}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-40">
+                  <p className="text-stone-700 text-sm">Start typing to search</p>
+                </div>
+              )
+            ) : searchMode === 'songs' ? (
+              overlayResults.length === 0 ? (
+                <div className="flex items-center justify-center h-40">
+                  <p className="text-stone-600 text-sm">No results</p>
+                </div>
+              ) : (
+                <ul className="py-2">
+                  {overlayResults.map(song => {
+                    const ytId = song.youtube_url && isYouTubeUrl(song.youtube_url) ? getYouTubeId(song.youtube_url) : null;
+                    const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : null;
+                    return (
+                      <li key={song.id}>
+                        <button
+                          onClick={() => { setSelected(song); playTrack(song, results); setSearchOverlayOpen(false); saveRecentSearch(query); }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-colors"
+                        >
+                          <div className="shrink-0 w-10 h-10 rounded-md overflow-hidden bg-white/8 flex items-center justify-center text-stone-600">
+                            {thumb
+                              ? <img src={thumb} alt="" aria-hidden className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                              : <span aria-hidden>♪</span>
+                            }
+                          </div>
+                          <div className="flex-1 min-w-0 text-left">
+                            <p className="text-sm font-semibold text-white truncate">{song.title_original ?? song.title_chinese ?? '—'}</p>
+                            {song.artist && <p className="text-xs text-stone-400 truncate">{song.artist}</p>}
+                          </div>
+                          {song.language_claimed && (
+                            <span className="shrink-0 px-1.5 py-0.5 rounded text-[9px] bg-white/5 text-stone-500">{song.language_claimed}</span>
+                          )}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )
+            ) : lyricsLoading ? (
+              <div className="flex items-center justify-center h-40">
+                <p className="text-stone-600 text-sm animate-pulse">Searching lyrics…</p>
+              </div>
+            ) : lyricsResults.length === 0 ? (
+              <div className="flex items-center justify-center h-40">
+                <p className="text-stone-600 text-sm">No lyrics matches</p>
+              </div>
+            ) : (
+              <div className="py-2">
+                {lyricsResults.map(match => {
+                  const song = songById.get(match.song_id);
+                  if (!song) return null;
+                  const ytId = match.yt_url && isYouTubeUrl(match.yt_url) ? getYouTubeId(match.yt_url) : null;
+                  const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : null;
+                  return (
+                    <button
+                      key={match.song_id}
+                      onClick={() => { setSelected(song); playTrack(song, results); setSearchOverlayOpen(false); saveRecentSearch(query); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-colors"
+                    >
+                      <div className="shrink-0 w-10 h-10 rounded-md overflow-hidden bg-white/8 flex items-center justify-center text-stone-600">
+                        {thumb
+                          ? <img src={thumb} alt="" aria-hidden className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                          : <span aria-hidden>♪</span>
+                        }
+                      </div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="text-sm font-semibold text-white truncate">{match.title}</p>
+                        {match.artist_credit && <p className="text-xs text-stone-400 truncate">{match.artist_credit}</p>}
+                        <p className="text-xs text-stone-600 italic truncate">"{match.snippet}"</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

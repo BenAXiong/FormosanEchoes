@@ -1,6 +1,5 @@
 'use client';
 import { useState, useMemo } from 'react';
-import { usePlayer } from '@/lib/PlayerContext';
 import type { Artist, FilterState, Song } from '@/lib/types';
 import { DEFAULT_FILTERS, hasActiveFilters } from '@/lib/filters';
 import { getArtistsWithSongs } from '@/lib/artists';
@@ -87,14 +86,17 @@ interface Props {
   onArtistLanguageChange: (l: string) => void;
   filteredArtistCount: number;
   onClose?: () => void;
+  defaultLanguage: string;
+  onSetDefaultLanguage: (lang: string) => void;
 }
 
 export default function FilterSidebar({
   filters, onChange, resultCount, totalCount, allSongs, allArtists,
   activeTab, onTabChange, artistQuery, onArtistQueryChange,
   artistLanguage, onArtistLanguageChange, filteredArtistCount, onClose,
+  defaultLanguage, onSetDefaultLanguage,
 }: Props) {
-  const { playlists } = usePlayer();
+  const [defaultPickerOpen, setDefaultPickerOpen] = useState(false);
 
   const artistLangCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -248,39 +250,8 @@ export default function FilterSidebar({
         </>
       )}
 
-      {activeTab === 'songs' && <>{/* Library Section */}
-      <div className="py-4 border-b border-white/5 shrink-0">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-5">Library</p>
-        <div className="px-2 flex flex-col gap-0.5">
-          <button
-            onClick={() => updateFilters({ only_favorites: !filters.only_favorites, playlist_id: null })}
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-colors
-              ${filters.only_favorites ? 'bg-white/10 text-white font-semibold' : 'text-stone-400 hover:text-white hover:bg-white/5'}`}
-          >
-            <svg className={`w-4 h-4 ${filters.only_favorites ? 'fill-emerald-500 text-emerald-500' : 'text-stone-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            Favorite Songs
-          </button>
-          
-          {playlists.map(p => (
-            <button
-              key={p.id}
-              onClick={() => updateFilters({ playlist_id: filters.playlist_id === p.id ? null : p.id, only_favorites: false })}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-colors
-                ${filters.playlist_id === p.id ? 'bg-white/10 text-white font-semibold' : 'text-stone-400 hover:text-white hover:bg-white/5'}`}
-            >
-              <svg className={`w-4 h-4 ${filters.playlist_id === p.id ? 'text-white' : 'text-stone-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-              {p.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Count + clear */}
-      <div className="flex items-center justify-between px-5 py-3 bg-white/[0.02]">
+      {activeTab === 'songs' && <>{/* Count + clear */}
+      <div className="flex items-center justify-between px-5 py-3 bg-white/2">
         <p className="text-stone-500 text-xs tabular-nums">
           <span className="text-white font-semibold">{resultCount}</span>
           <span className="text-stone-600"> / {totalCount}</span>
@@ -296,7 +267,50 @@ export default function FilterSidebar({
       {/* Filter lists */}
       <div className="flex-1 py-4 overflow-y-auto thin-scrollbar">
         <div className="mb-6">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2 px-5">Languages</p>
+          <div className="flex items-center px-5 mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 flex-1">Languages</p>
+            <button
+              onClick={() => setDefaultPickerOpen(o => !o)}
+              aria-label="Set default language"
+              title={defaultLanguage ? `Default: ${defaultLanguage}` : 'Set default language'}
+              className={`p-1 rounded transition-colors ${defaultLanguage ? 'text-emerald-400 hover:text-emerald-300' : 'text-stone-600 hover:text-stone-400'}`}
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </button>
+          </div>
+          {defaultPickerOpen && (
+            <div className="mx-2 mb-3 rounded-lg overflow-hidden border border-white/10 bg-white/3">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-stone-600 px-3 pt-2 pb-1">Opens with</p>
+              <div className="max-h-44 overflow-y-auto thin-scrollbar pb-1">
+                <button
+                  onClick={() => { onSetDefaultLanguage(''); setDefaultPickerOpen(false); }}
+                  className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs transition-colors ${!defaultLanguage ? 'text-white' : 'text-stone-400 hover:text-white hover:bg-white/5'}`}
+                >
+                  {!defaultLanguage
+                    ? <svg className="w-3 h-3 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    : <span className="w-3 h-3 shrink-0" />
+                  }
+                  All languages
+                </button>
+                {CIP_LANGUAGES.map(l => (
+                  <button
+                    key={l.value}
+                    onClick={() => { onSetDefaultLanguage(l.value); setDefaultPickerOpen(false); }}
+                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs transition-colors ${defaultLanguage === l.value ? 'text-white' : 'text-stone-400 hover:text-white hover:bg-white/5'}`}
+                  >
+                    {defaultLanguage === l.value
+                      ? <svg className="w-3 h-3 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                      : <span className="w-3 h-3 shrink-0" />
+                    }
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="px-2">
             <PillList
               options={langOptions}
@@ -350,7 +364,7 @@ export default function FilterSidebar({
       {/* User profile pill — bottom */}
       <div className="px-4 py-3 border-t border-white/5 shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-xs font-bold text-white shrink-0">B</div>
+          <div className="w-7 h-7 rounded-full bg-linear-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-xs font-bold text-white shrink-0">B</div>
           <div>
             <p className="text-white text-xs font-semibold leading-tight">Ben</p>
             <p className="text-stone-500 text-[10px]">Researcher</p>
