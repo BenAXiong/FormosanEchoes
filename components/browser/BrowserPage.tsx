@@ -463,6 +463,13 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
+              <button
+                onClick={toggleLang}
+                aria-label={t('langToggleLabel')}
+                className="px-2 py-1 rounded-lg text-[11px] font-semibold tracking-wide text-stone-400 hover:text-white hover:bg-white/8 transition-colors"
+              >
+                {lang === 'en' ? '中' : 'EN'}
+              </button>
               <UserProfile />
             </div>
           </div>
