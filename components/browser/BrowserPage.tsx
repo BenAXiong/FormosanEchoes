@@ -912,7 +912,7 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
           )}
         </button>
 
-        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 sm:px-5 py-5">
+        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 sm:px-5 pt-2 pb-5">
           {showPlaylistsView ? (
             <>
               <div className="flex items-center justify-between mb-5">
