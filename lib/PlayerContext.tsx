@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import type { Song, Playlist } from './types';
 import { createAuthBrowserClient } from './supabase-browser';
+import { track } from './analytics';
 
 interface PlayerContextType {
   playingTrack: Song | null;
@@ -74,8 +75,52 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const togglePanel = useCallback(() => togglePanelFnRef.current?.(), []);
   const registerTogglePanelFn = useCallback((fn: (() => void) | null) => { togglePanelFnRef.current = fn; }, []);
 
+  // Stable refs for use in zero-dep callbacks (same pattern as authModeRef)
+  const playingTrackRef = useRef<Song | null>(null);
+  const isPlayingRef = useRef(false);
+  useEffect(() => { playingTrackRef.current = playingTrack; }, [playingTrack]);
+  useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
+
+  // Listen duration — cumulative play time per song, fires at 30s and 2min thresholds
+  const listenSongIdRef = useRef<string | null>(null);
+  const listenAccumRef = useRef(0);     // accumulated ms for current song
+  const listenFiredRef = useRef({ s30: false, s120: false });
+  const playStartRef = useRef<number | null>(null);  // timestamp of current play segment start
+
+  useEffect(() => {
+    if (!playingTrack) return;
+    if (playingTrack.id !== listenSongIdRef.current) {
+      listenSongIdRef.current = playingTrack.id;
+      listenAccumRef.current = 0;
+      listenFiredRef.current = { s30: false, s120: false };
+    }
+    if (!isPlaying) return;
+    playStartRef.current = Date.now();
+    const interval = setInterval(() => {
+      const total = listenAccumRef.current + (Date.now() - (playStartRef.current ?? Date.now()));
+      if (!listenFiredRef.current.s30 && total >= 30_000) {
+        listenFiredRef.current.s30 = true;
+        track('song-listen', { threshold: '30s', song_id: playingTrack.id, title: playingTrack.title_original ?? '', language: playingTrack.language_claimed ?? '' });
+      }
+      if (!listenFiredRef.current.s120 && total >= 120_000) {
+        listenFiredRef.current.s120 = true;
+        track('song-listen', { threshold: '2min', song_id: playingTrack.id, title: playingTrack.title_original ?? '', language: playingTrack.language_claimed ?? '' });
+      }
+    }, 1000);
+    return () => {
+      clearInterval(interval);
+      if (playStartRef.current !== null) {
+        listenAccumRef.current += Date.now() - playStartRef.current;
+        playStartRef.current = null;
+      }
+    };
+  }, [isPlaying, playingTrack?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [karaokeMode, setKaraokeMode] = useState(false);
-  const toggleKaraokeMode = useCallback(() => setKaraokeMode(v => !v), []);
+  const toggleKaraokeMode = useCallback(() => setKaraokeMode(v => {
+    track('karaoke-toggle', { enabled: !v });
+    return !v;
+  }), []);
 
   const [autoAdvance, setAutoAdvance] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -137,6 +182,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           setAuthMode('anon');
           loadFromLocalStorage();
         } else if (event === 'SIGNED_IN' && session?.user) {
+          track('sign-in');
           setAuthMode('supabase');
           await loadFromSupabase();
         }
@@ -161,13 +207,16 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     if (authModeRef.current === 'supabase') {
       setFavorites(prev => {
         const has = prev.includes(songId);
+        track('favorite-toggle', { song_id: songId, action: has ? 'remove' : 'add' });
         post('/api/user-data/favorites', { song_id: songId, action: has ? 'remove' : 'add' });
         return has ? prev.filter(id => id !== songId) : [...prev, songId];
       });
     } else if (authModeRef.current !== 'loading') {
-      setFavorites(prev =>
-        prev.includes(songId) ? prev.filter(id => id !== songId) : [...prev, songId]
-      );
+      setFavorites(prev => {
+        const has = prev.includes(songId);
+        track('favorite-toggle', { song_id: songId, action: has ? 'remove' : 'add' });
+        return has ? prev.filter(id => id !== songId) : [...prev, songId];
+      });
     }
   }, []);
 
@@ -175,6 +224,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   const createPlaylist = useCallback((name: string, initialSongId?: string) => {
     if (authModeRef.current === 'supabase') {
+      track('playlist-create');
       fetch('/api/user-data/playlists', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -201,6 +251,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addSongToPlaylist = useCallback((playlistId: string, songId: string) => {
+    track('playlist-add-song');
     setPlaylists(prev => {
       const pl = prev.find(p => p.id === playlistId);
       const position = pl?.songIds.length ?? 0;
@@ -227,6 +278,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const playTrack = useCallback((song: Song, newQueue?: Song[]) => {
+    track('song-play', { song_id: song.id, title: song.title_original ?? '', artist: song.artist ?? '', language: song.language_claimed ?? '' });
     setPlayingTrackState(song);
     setIsPlaying(true);
     if (newQueue) {
@@ -234,12 +286,22 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }
   }, [setQueue]);
 
-  const pauseTrack = useCallback(() => setIsPlaying(false), []);
-  const resumeTrack = useCallback(() => {
-    if (playingTrack) setIsPlaying(true);
-  }, [playingTrack]);
+  const pauseTrack = useCallback(() => {
+    track('song-pause', { song_id: playingTrackRef.current?.id });
+    setIsPlaying(false);
+  }, []);
 
-  const togglePlay = useCallback(() => setIsPlaying(prev => !prev), []);
+  const resumeTrack = useCallback(() => {
+    if (playingTrackRef.current) {
+      track('song-resume', { song_id: playingTrackRef.current.id });
+      setIsPlaying(true);
+    }
+  }, []);
+
+  const togglePlay = useCallback(() => {
+    track(isPlayingRef.current ? 'song-pause' : 'song-resume', { song_id: playingTrackRef.current?.id });
+    setIsPlaying(prev => !prev);
+  }, []);
 
   const nextTrack = useCallback(() => {
     if (!playingTrack || queue.length === 0) {
@@ -254,6 +316,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       setProgress(0);
       return;
     }
+    track('song-skip', { direction: 'next', from_song_id: playingTrack.id });
     setPlayingTrackState(queue[nextIndex]);
     setIsPlaying(true);
   }, [playingTrack, queue]);
@@ -262,6 +325,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     if (!playingTrack || queue.length === 0) return;
     const currentIndex = queue.findIndex(s => s.id === playingTrack.id);
     const prevIndex = (currentIndex - 1 + queue.length) % queue.length;
+    track('song-skip', { direction: 'prev', from_song_id: playingTrack.id });
     setPlayingTrackState(queue[prevIndex]);
     setIsPlaying(true);
   }, [playingTrack, queue]);

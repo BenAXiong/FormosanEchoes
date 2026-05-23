@@ -7,7 +7,7 @@ import ArtistsAdminView from '@/components/admin/ArtistsAdminView';
 import MetricsPanel from '@/components/admin/MetricsPanel';
 import { signOut } from './actions';
 
-type Tab = 'metrics' | 'songs' | 'artists';
+type Tab = 'metrics' | 'songs' | 'artists' | 'live' | 'analytics';
 
 export type AdminFilters = {
   language: string;
@@ -139,19 +139,21 @@ export default function CurationView(_: { songs: Song[] }) {
                 Sign out
               </button>
             </form>
-            <button
-              onClick={() => setFiltersOpen(o => !o)}
-              title="Toggle filters"
-              className={`relative p-2 rounded-lg transition-colors ${
-                filtersOpen
-                  ? 'bg-stone-800 text-white'
-                  : 'bg-stone-100 text-stone-500 hover:bg-stone-200 hover:text-stone-700'
-              }`}
-            >
-              <FilterIcon className="w-4 h-4" />
-            </button>
+            {!['live', 'analytics'].includes(tab) && (
+              <button
+                onClick={() => setFiltersOpen(o => !o)}
+                title="Toggle filters"
+                className={`relative p-2 rounded-lg transition-colors ${
+                  filtersOpen
+                    ? 'bg-stone-800 text-white'
+                    : 'bg-stone-100 text-stone-500 hover:bg-stone-200 hover:text-stone-700'
+                }`}
+              >
+                <FilterIcon className="w-4 h-4" />
+              </button>
+            )}
             <div className="flex gap-1 bg-stone-100 rounded-lg p-1">
-              {(['metrics', 'songs', 'artists'] as Tab[]).map(t => (
+              {(['metrics', 'songs', 'artists', 'live', 'analytics'] as Tab[]).map(t => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
@@ -159,7 +161,7 @@ export default function CurationView(_: { songs: Song[] }) {
                     tab === t ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700'
                   }`}
                 >
-                  {{ metrics: 'Metrics', songs: 'Songs', artists: 'Artists' }[t]}
+                  {{ metrics: 'Metrics', songs: 'Songs', artists: 'Artists', live: 'Live', analytics: 'Analytics' }[t]}
                   {t === 'artists' && unlinkedCount > 0 && (
                     <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold leading-none">
                       {unlinkedCount > 9 ? '9+' : unlinkedCount}
@@ -173,7 +175,7 @@ export default function CurationView(_: { songs: Song[] }) {
       </header>
 
       {/* Filter bar */}
-      {filtersOpen && (
+      {filtersOpen && !['live', 'analytics'].includes(tab) && (
         <div className="shrink-0 bg-white border-b border-stone-200 z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-4 flex-wrap">
             {(tab === 'metrics' || tab === 'songs') && <>
@@ -200,8 +202,10 @@ export default function CurationView(_: { songs: Song[] }) {
         </div>
       )}
 
-      <main className={`flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 ${
-        tab === 'songs' ? 'overflow-hidden' : 'overflow-y-auto'
+      <main className={`flex-1 w-full ${
+        ['live', 'analytics'].includes(tab)
+          ? 'overflow-hidden'
+          : `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 ${tab === 'songs' ? 'overflow-hidden' : 'overflow-y-auto'}`
       }`}>
 
         {tab === 'metrics' && (
@@ -215,6 +219,32 @@ export default function CurationView(_: { songs: Song[] }) {
         {tab === 'artists' && (
           <div className="h-full overflow-hidden">
             <ArtistsAdminView filters={filters} />
+          </div>
+        )}
+
+        {tab === 'live' && (
+          process.env.NEXT_PUBLIC_UMAMI_SHARE_URL ? (
+            <iframe
+              src={process.env.NEXT_PUBLIC_UMAMI_SHARE_URL}
+              className="w-full h-full border-0"
+              title="Umami live dashboard"
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full gap-3 text-stone-400">
+              <p className="text-sm font-medium">Umami share URL not configured.</p>
+              <ol className="text-xs text-stone-500 list-decimal list-inside space-y-1 max-w-sm text-left">
+                <li>Go to <strong>app.umami.is</strong> → Websites → your site</li>
+                <li>Open the <strong>Share</strong> tab and enable sharing</li>
+                <li>Copy the share URL</li>
+                <li>Add <code className="bg-stone-100 px-1 rounded">NEXT_PUBLIC_UMAMI_SHARE_URL=&lt;url&gt;</code> to <code className="bg-stone-100 px-1 rounded">.env.local</code> and Vercel env vars</li>
+              </ol>
+            </div>
+          )
+        )}
+
+        {tab === 'analytics' && (
+          <div className="flex items-center justify-center h-full text-stone-400 text-sm">
+            Custom analytics — coming soon
           </div>
         )}
 

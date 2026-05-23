@@ -36,6 +36,7 @@ import { useLang, useT } from '@/lib/lang';
 import UserProfile from '@/components/browser/UserProfile';
 import ShareModal, { type ShareTarget } from '@/components/ShareModal';
 import { useRouter } from 'next/navigation';
+import { track } from '@/lib/analytics';
 
 type LyricsMatch = {
   song_id: string;
@@ -128,14 +129,17 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
   }, []);
 
   const openShare = useCallback(async (target: ShareTarget) => {
+    const type = target.url.includes('?song=') ? 'song' : target.url.includes('?artist=') ? 'artist' : 'playlist';
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
-        await navigator.share({ url: target.url, title: target.title, text: target.text });
+        await navigator.share({ url: `${target.url}&utm_source=native`, title: target.title, text: target.text });
+        track('share', { type, platform: 'native' });
         return;
       } catch (e) {
         if ((e as Error).name === 'AbortError') return;
       }
     }
+    track('share', { type, platform: 'modal' });
     setShareTarget(target);
   }, []);
 
@@ -157,6 +161,8 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
         .catch(() => {});
     }
     if (initialSongId || initialArtistId || initialPlaylistId) {
+      const type = initialSongId ? 'song' : initialArtistId ? 'artist' : 'playlist';
+      track('deep-link', { type });
       router.replace('/', { scroll: false });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -283,6 +289,45 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
   useEffect(() => { setQueue(results); }, [results, setQueue]);
   useEffect(() => { setAutoAdvance(autoplay); }, [autoplay, setAutoAdvance]);
   useEffect(() => { if (karaokeMode) toggleKaraokeMode(); }, [selected?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Analytics: search (debounced to avoid firing on every keystroke)
+  useEffect(() => {
+    if (query.length < 2) return;
+    const timer = setTimeout(() => {
+      track('song-search', { query, mode: searchMode, result_count: results.length });
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [query, searchMode, results.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Analytics: filter changes (compare against previous to detect which field changed)
+  const prevFiltersRef = useRef(filters);
+  useEffect(() => {
+    const prev = prevFiltersRef.current;
+    prevFiltersRef.current = filters;
+    if (!mounted) return;
+    if (filters.language !== prev.language && filters.language) {
+      track('filter-language', { language: filters.language });
+    }
+    if (filters.genre !== prev.genre && filters.genre) {
+      track('filter-genre', { genre: filters.genre });
+    }
+    if (filters.has_lyrics !== prev.has_lyrics) {
+      track('filter-lyrics', { enabled: !!filters.has_lyrics });
+    }
+  }, [filters, mounted]);
+
+  // Analytics: tab switch
+  const prevTabRef = useRef(activeTab);
+  useEffect(() => {
+    if (!mounted || activeTab === prevTabRef.current) return;
+    prevTabRef.current = activeTab;
+    track('tab-switch', { tab: activeTab });
+  }, [activeTab, mounted]);
+
+  // Analytics: artist panel open
+  useEffect(() => {
+    if (selectedArtist) track('artist-open', { artist_id: selectedArtist.id, name: selectedArtist.name_display });
+  }, [selectedArtist?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keep refs in sync for use inside stable callbacks
   useEffect(() => { selectedRef.current = selected; }, [selected]);

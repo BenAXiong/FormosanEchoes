@@ -22,11 +22,19 @@ export const metadata: Metadata = {
 import { PlayerProvider } from '@/lib/PlayerContext';
 import { LangProvider } from '@/lib/lang';
 import PlayerBar from '@/components/PlayerBar';
+import Script from 'next/script';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-TW" className={geist.variable}>
       <body className="antialiased bg-stone-50 text-stone-800" suppressHydrationWarning>
+        {process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && (
+          <Script
+            src="https://cloud.umami.is/script.js"
+            data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+            strategy="afterInteractive"
+          />
+        )}
         <LangProvider>
           <PlayerProvider>
             {children}

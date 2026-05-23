@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useT } from '@/lib/lang';
+import { track } from '@/lib/analytics';
 
 export interface ShareTarget {
   url: string;
@@ -18,9 +19,14 @@ export default function ShareModal({ url, title, text, onClose }: Props) {
   const t = useT();
   const [copyState, setCopyState] = useState<CopyState>('idle');
 
+  // Append utm_source so Umami auto-attributes the referrer when the recipient opens the link
+  const utmUrl = (source: string) => `${url}&utm_source=${source}`;
+
   const copy = async (variant: CopyState = 'copied') => {
+    const copyUrl = variant === 'instagram' ? utmUrl('instagram') : utmUrl('link');
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(copyUrl);
+      track('share-platform', { platform: variant === 'instagram' ? 'instagram' : 'copy' });
       setCopyState(variant);
       setTimeout(() => setCopyState('idle'), variant === 'instagram' ? 3000 : 2000);
     } catch { /* ignore */ }
@@ -49,7 +55,7 @@ export default function ShareModal({ url, title, text, onClose }: Props) {
       id: 'facebook',
       label: t('shareOnFacebook'),
       bg: 'bg-[#1877F2]',
-      href: `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`,
+      href: `https://www.facebook.com/sharer/sharer.php?u=${enc(utmUrl('facebook'))}`,
       icon: (
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5" aria-hidden>
           <path d="M13.5 21.95V14h2.7l.4-3H13.5v-1.9c0-.87.24-1.46 1.5-1.46H16.7V4.8A19.6 19.6 0 0 0 14.3 4.7c-2.4 0-4 1.47-4 4.17V11H7.6v3h2.7v7.95a9.05 9.05 0 0 0 3.2 0Z"/>
@@ -60,7 +66,7 @@ export default function ShareModal({ url, title, text, onClose }: Props) {
       id: 'whatsapp',
       label: t('shareOnWhatsApp'),
       bg: 'bg-[#25D366]',
-      href: `https://wa.me/?text=${enc(shareText)}`,
+      href: `https://wa.me/?text=${enc(title + '\n' + utmUrl('whatsapp'))}`,
       icon: (
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5" aria-hidden>
           <path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96s-.47-.15-.67.15-.77.96-.94 1.15-.35.23-.64.08a8.07 8.07 0 0 1-2.38-1.47 8.92 8.92 0 0 1-1.64-2.05c-.17-.3 0-.46.13-.6s.3-.35.44-.52.15-.3.23-.5.04-.37-.02-.52-.67-1.6-.91-2.2c-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.79.38S7 7.8 7 9.05c0 1.26.92 2.48 1.05 2.65a13.6 13.6 0 0 0 5.34 4.75c.74.32 1.32.51 1.77.65a4.27 4.27 0 0 0 1.97.12c.6-.09 1.85-.76 2.11-1.49s.26-1.36.18-1.49-.27-.19-.57-.34Zm-5.44 7.44h-.01a9.98 9.98 0 0 1-5.07-1.38l-.36-.22-3.77 1 1.01-3.67-.24-.38A10 10 0 1 1 12.03 21.82Zm0-19.82A9.97 9.97 0 0 0 3.5 18.18L2 22l3.92-1.03A9.97 9.97 0 1 0 12.03 2Z"/>
@@ -71,7 +77,7 @@ export default function ShareModal({ url, title, text, onClose }: Props) {
       id: 'x',
       label: t('shareOnX'),
       bg: 'bg-[#000000]',
-      href: `https://twitter.com/intent/tweet?url=${enc(url)}&text=${enc(title)}`,
+      href: `https://twitter.com/intent/tweet?url=${enc(utmUrl('x'))}&text=${enc(title)}`,
       icon: (
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4" aria-hidden>
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -94,7 +100,7 @@ export default function ShareModal({ url, title, text, onClose }: Props) {
       id: 'reddit',
       label: t('shareOnReddit'),
       bg: 'bg-[#FF4500]',
-      href: `https://reddit.com/submit?url=${enc(url)}&title=${enc(title)}`,
+      href: `https://reddit.com/submit?url=${enc(utmUrl('reddit'))}&title=${enc(title)}`,
       icon: (
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5" aria-hidden>
           <circle cx="12" cy="12" r="10"/>
@@ -131,6 +137,7 @@ export default function ShareModal({ url, title, text, onClose }: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={link.label}
+                  onClick={() => track('share-platform', { platform: link.id })}
                   className={`w-12 h-12 rounded-full ${link.bg} flex items-center justify-center text-white hover:opacity-90 transition-opacity`}
                 >
                   {link.icon}

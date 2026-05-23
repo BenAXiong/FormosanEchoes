@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Chill'ey ~",
-    short_name: "Chill'ey ~",
+    name: '契咧！',
+    short_name: '契咧！',
     description: 'A cultural metadata browser for Formosan-language songs.',
     start_url: '/',
     display: 'standalone',

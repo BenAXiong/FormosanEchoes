@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import en, { type Locale } from './locales/en';
 import zh from './locales/zh';
+import { track } from './analytics';
 
 export type LocaleCode = 'en' | 'zh';
 
@@ -36,6 +37,7 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
   }, [lang]);
 
   const setLang = useCallback((l: LocaleCode) => {
+    track('language-toggle', { to: l });
     setLangState(l);
     localStorage.setItem(STORAGE_KEY, l);
   }, []);
@@ -43,6 +45,7 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
   const toggleLang = useCallback(() => {
     setLangState(prev => {
       const next: LocaleCode = prev === 'en' ? 'zh' : 'en';
+      track('language-toggle', { to: next });
       localStorage.setItem(STORAGE_KEY, next);
       return next;
     });

@@ -7,6 +7,7 @@ import { usePlayer } from '@/lib/PlayerContext';
 import { useT } from '@/lib/lang';
 import type { ShareTarget } from '@/components/ShareModal';
 import { useEffect, useRef } from 'react';
+import { track } from '@/lib/analytics';
 import dynamic from 'next/dynamic';
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
@@ -89,6 +90,11 @@ export default function NowPlaying({ song, onClose, autoplay, onShare }: Props) 
   const [showInfo, setShowInfo] = useState(false);
   const swipeStartX = useRef(0);
   const swipeStartY = useRef(0);
+  const modeInitRef = useRef(false);
+  useEffect(() => {
+    if (!modeInitRef.current) { modeInitRef.current = true; return; }
+    track('lyrics-mode', { mode: activeMode, song_id: song.id });
+  }, [activeMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const title = getDisplayTitle(song);
   const titleFallback = isTitleFallback(song);

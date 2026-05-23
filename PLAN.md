@@ -47,6 +47,9 @@ Living document. Update at the end of any session that completes a task or chang
 - **Duplicate URL detection in Add Songs panel** — URLs already present in the DB are flagged at extraction time in AddMultipleSongsPanel; duplicate rows are visually marked before the user imports
 - **Metrics dashboard visualizations** — segmented ring charts and triple-segment gap bars in MetricsPanel; fixed fill-% rendering (bars always correct color/length regardless of segment values)
 - **Share feature (May 2026)** — `ShareModal` component with 6 social platforms (Instagram, Facebook, WhatsApp, X, Email, Reddit); `openShare()` in BrowserPage tries Web Share API first (native mobile sheet), falls back to modal; share buttons in: song context menu, NowPlaying title row, artist detail panel header, playlist rows in bookmark dropdown; deep links `/?song=<uuid>` / `/?artist=<uuid>` / `/?playlist=<uuid>` consumed once on mount and cleared; public playlist API route `GET /api/playlists/[id]` using anon Supabase client (requires RLS policy); lyrics text payload included in share when `show_publicly` is true
+- **Analytics (May 2026)** — Umami (cloud, cookie-free, no consent banner required); provider-agnostic `lib/analytics.ts` wrapper; 20 events instrumented: `song-play/pause/resume/skip/listen(30s+2min)`, `song-search`, `filter-*`, `tab-switch`, `artist-open`, `lyrics-mode`, `favorite-toggle`, `playlist-create/add-song`, `share`, `share-platform` (UTM source appended to all shared URLs), `deep-link`, `language-toggle`, `karaoke-toggle`, `sign-in`; reference doc at `docs/ANALYTICS.md`
+- **Admin analytics tabs (May 2026)** — "Live" tab: Umami share URL embedded as full-height iframe (`NEXT_PUBLIC_UMAMI_SHARE_URL` env var, setup instructions shown if unset); "Analytics" tab: empty placeholder for future custom charts
+- **OAuth / admin auth (already shipped)** — Google OAuth via Supabase Auth; `/login` page with Google sign-in server action; `app/admin/page.tsx` gate via `getUser()`; middleware blocks unauthenticated requests; `?key=654321` gate fully removed
 
 ---
 
@@ -69,8 +72,6 @@ Pending field additions (when ready):
 - [ ] **Play count tracking** — add `play_count` to `songs` table; increment via `POST /api/play/[id]` after 30s of continuous play (fired from PlayerContext); optimistic local increment for instant feedback; ISR handles display lag. Needed as input to the sorting matrix above.
 - [ ] **Karaoke auto-scroll** — timed lyric highlighting for singing practice (requires timestamp data; basic karaoke mode already shipped)
 - [ ] **Lyrics search** — full-text search returning songs that contain a given word or phrase (Supabase FTS)
-- [ ] **Language toggle** — user-facing zh / en switcher in the browser UI (i18n infrastructure already shipped; this is the visible toggle control)
-- [ ] **OAuth** — replace hard-coded admin key with Supabase Auth
 - [ ] **Save-artist duplicate guard** — check for existing `name_display` before INSERT in `/api/admin/save-artist` (rapid-fire clicks can create duplicates)
 
 ---
