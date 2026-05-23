@@ -513,7 +513,7 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
       {/* Center */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <div className="sticky top-0 z-20 bg-[#0f0f16]">
-          <div className="lg:hidden flex items-center px-4 py-3 border-b border-white/5">
+          <div className="lg:hidden flex items-center px-4 py-2 border-b border-white/5">
             <button onClick={goHome} className="flex items-center hover:opacity-80 transition-opacity" aria-label={t('goHome')}>
               <img src="/FE_logo_1d.png" alt="Logo" className="w-7 h-7 object-contain mr-2" />
               <span className="text-white font-bold text-sm tracking-tight">{t('appName')}</span>
@@ -544,7 +544,7 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
               <UserProfile />
             </div>
           </div>
-          <div className="hidden lg:flex items-center gap-2 px-4 sm:px-5 py-2.5 border-b border-white/5">
+          <div className="hidden lg:flex items-center gap-2 px-4 sm:px-5 py-1.5 border-b border-white/5">
             <div className="relative flex-1 min-w-0 max-w-[22vw]">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3" aria-hidden>
                 <svg className="h-3.5 w-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -762,7 +762,7 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
           </div>
 
           {/* Mobile filter row — pills centered, gear right, bg matches listing area */}
-          <div className="lg:hidden flex items-center px-4 py-2.5 bg-[#0a0a0f]">
+          <div className="lg:hidden flex items-center px-4 py-2 bg-[#0a0a0f]">
 
             {/* 4 pills — centered */}
             <div className="flex-1 flex items-center justify-center gap-2">
