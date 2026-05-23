@@ -24,6 +24,8 @@ const zh: Locale = {
   clearSearch: '清除',
 
   // Toolbar filters
+  genre: '曲風',
+  lyricsLabel: '歌詞',
   filterHasLyrics: '篩選：有歌詞',
   filterByGenre: '依曲風篩選',
   clearGenreFilter: '清除曲風篩選',

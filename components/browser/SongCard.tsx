@@ -114,7 +114,7 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
           <button
             onClick={(e) => { e.stopPropagation(); toggleFavorite(song.id); }}
             className={`absolute top-1 right-1 transition-all duration-200 z-10
-              ${isFavorite(song.id) ? 'opacity-100 text-emerald-500 scale-110' : 'text-white/40 hover:text-white opacity-0 group-hover:opacity-100'}`}
+              ${isFavorite(song.id) ? 'opacity-100 text-emerald-500 scale-110' : 'text-white/40 hover:text-white opacity-100'}`}
             aria-label={isFavorite(song.id) ? 'Unlike' : 'Like'}
           >
             <svg className="w-4 h-4" fill={isFavorite(song.id) ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
@@ -218,7 +218,7 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
             toggleFavorite(song.id);
           }}
           className={`absolute top-4 right-4 transition-all duration-200 z-10
-            ${isFavorite(song.id) ? 'text-emerald-500 scale-110 drop-shadow-lg' : 'text-white/40 hover:text-white opacity-0 group-hover:opacity-100'}`}
+            ${isFavorite(song.id) ? 'text-emerald-500 scale-110 drop-shadow-lg' : 'text-white/40 hover:text-white opacity-100'}`}
         >
           <svg className="w-6 h-6" fill={isFavorite(song.id) ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />

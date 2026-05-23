@@ -117,6 +117,7 @@ Full audit with gaps table and phased plan at `docs/SONGS_TAB_AUDIT.md`.
 
 ## Post-demo
 
+- [ ] **Player bar dismiss gesture** — add swipe-down on the NowPlaying sheet (or tap mini thumbnail to collapse) to close the PlayerBar without a cross button; options: swipe-down on sheet, drag handle affordance, tap thumbnail again to toggle. For now PlayerBar closes when mobile filter sidebar opens (already shipped).
 - [ ] **Service worker** — add SW for consistent update behaviour; decision rationale in `docs/DECISIONS.md [PWA]`.
 
   Implementation plan:

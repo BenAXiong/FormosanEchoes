@@ -43,6 +43,7 @@ interface PlayerContextType {
   deletePlaylist: (id: string) => void;
   addSongToPlaylist: (playlistId: string, songId: string) => void;
   removeSongFromPlaylist: (playlistId: string, songId: string) => void;
+  clearTrack: () => void;
   signOutAuth: () => void;
   isSignedIn: boolean;
 }
@@ -277,6 +278,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setQueueState(newQueue);
   }, []);
 
+  const clearTrack = useCallback(() => {
+    setPlayingTrackState(null);
+    setIsPlaying(false);
+  }, []);
+
   const playTrack = useCallback((song: Song, newQueue?: Song[]) => {
     track('song-play', { song_id: song.id, title: song.title_original ?? '', artist: song.artist ?? '', language: song.language_claimed ?? '' });
     setPlayingTrackState(song);
@@ -367,6 +373,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     deletePlaylist,
     addSongToPlaylist,
     removeSongFromPlaylist,
+    clearTrack,
     signOutAuth,
     isSignedIn: authMode === 'supabase',
   }), [
@@ -402,6 +409,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     deletePlaylist,
     addSongToPlaylist,
     removeSongFromPlaylist,
+    clearTrack,
     signOutAuth,
   ]);
 

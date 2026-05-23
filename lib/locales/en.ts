@@ -22,6 +22,8 @@ const en = {
   clearSearch: 'Clear',
 
   // Toolbar filters
+  genre: 'Genre',
+  lyricsLabel: 'Lyrics',
   filterHasLyrics: 'Filter: has lyrics',
   filterByGenre: 'Filter by genre',
   clearGenreFilter: 'Clear genre filter',
