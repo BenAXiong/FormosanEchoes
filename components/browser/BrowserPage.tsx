@@ -134,6 +134,7 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
   const bookmarkDropdownRef = useRef<HTMLDivElement>(null);
   const [defaultLanguage, setDefaultLanguage] = useState('');
   const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null);
+  const [langSpinning, setLangSpinning] = useState(false);
   const { playingTrack, playTrack, clearTrack, setQueue, setAutoAdvance, isFavorite, toggleFavorite, playlists, addSongToPlaylist, createPlaylist, deletePlaylist, registerTogglePanelFn, karaokeMode, toggleKaraokeMode, isSignedIn } = usePlayer();
   const t = useT();
   const { lang, toggleLang } = useLang();
@@ -511,13 +512,13 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
 
       {/* Center */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <div className="sticky top-0 z-20 bg-[#0f0f16] border-b border-white/5">
+        <div className="sticky top-0 z-20 bg-[#0f0f16]">
           <div className="lg:hidden flex items-center px-4 py-3 border-b border-white/5">
             <button onClick={goHome} className="flex items-center hover:opacity-80 transition-opacity" aria-label={t('goHome')}>
               <img src="/FE_logo_1d.png" alt="Logo" className="w-7 h-7 object-contain mr-2" />
               <span className="text-white font-bold text-sm tracking-tight">{t('appName')}</span>
             </button>
-            <div className="ml-auto flex items-center gap-3">
+            <div className="ml-auto flex items-center gap-4">
               <button
                 onClick={() => setSearchOverlayOpen(true)}
                 aria-label="Search"
@@ -528,26 +529,23 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
                 </svg>
               </button>
               <button
-                onClick={toggleLang}
+                onClick={() => { setLangSpinning(true); toggleLang(); }}
                 aria-label={t('langToggleLabel')}
-                className="hover:opacity-70 transition-opacity"
+                className="text-white hover:opacity-70 transition-opacity"
               >
-                <span className="text-xl leading-none select-none">🌐</span>
+                <svg
+                  className={`w-5 h-5${langSpinning ? ' animate-[spin_0.5s_ease-in-out_1]' : ''}`}
+                  onAnimationEnd={() => setLangSpinning(false)}
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                </svg>
               </button>
               <UserProfile />
             </div>
           </div>
-          <div className="flex items-center gap-2 px-4 sm:px-5 py-2.5">
-            <button
-              onClick={() => { setSidebarOpen(true); clearTrack(); }}
-              className="lg:hidden p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-stone-400 hover:text-white transition-colors shrink-0"
-              aria-label="Open filters"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 12h10M11 20h2" />
-              </svg>
-            </button>
-            <div className="hidden lg:block relative flex-1 min-w-0 max-w-[22vw]">
+          <div className="hidden lg:flex items-center gap-2 px-4 sm:px-5 py-2.5 border-b border-white/5">
+            <div className="relative flex-1 min-w-0 max-w-[22vw]">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3" aria-hidden>
                 <svg className="h-3.5 w-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -763,8 +761,20 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
             </div>
           </div>
 
-          {/* Mobile filter pills — replaces toolbar buttons on small screens */}
-          <div className="lg:hidden flex items-center gap-2 px-4 pb-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          {/* Mobile filter row — all controls inline, centered, bg matches card listing */}
+          <div className="lg:hidden flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1a1a24]">
+
+            {/* Language pill — opens filter sidebar */}
+            <button
+              onClick={() => { setSidebarOpen(true); clearTrack(); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium border shrink-0 transition-colors bg-white/8 text-stone-400 border-white/10 active:bg-white/12"
+              aria-label="Open language filters"
+            >
+              <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 12h10M11 20h2" />
+              </svg>
+              <span className="whitespace-nowrap">{t('language')}</span>
+            </button>
 
             {/* Genre pill */}
             <div className="relative shrink-0">
@@ -843,6 +853,35 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
               </svg>
               <span className="whitespace-nowrap">{t('library')}</span>
             </button>
+
+            {/* Settings gear */}
+            <div className="relative shrink-0">
+              <button
+                onClick={() => setSettingsOpen(o => !o)}
+                aria-label={t('displaySettings')}
+                className={`p-1.5 rounded-lg transition-colors ${settingsOpen ? 'bg-white/15 text-white' : 'text-stone-500 hover:text-white hover:bg-white/8'}`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </button>
+              {settingsOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setSettingsOpen(false)} />
+                  <div className="absolute right-0 top-full mt-1 w-52 bg-[#1a1a24] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 px-3 pt-3 pb-1">{t('display')}</p>
+                    <div className="p-2">
+                      <ToggleRow label={t('songChineseNames')} value={showSongZh} onChange={setShowSongZh} />
+                      <ToggleRow label={t('artistChineseNames')} value={showArtistZh} onChange={setShowArtistZh} />
+                    </div>
+                    <div className="border-t border-white/5 p-2">
+                      <ToggleRow label={t('autoplay')} value={autoplay} onChange={setAutoplay} />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
 
           </div>
         </div>
