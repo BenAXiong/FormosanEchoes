@@ -29,7 +29,7 @@ const zh: Locale = {
   filterHasLyrics: '篩選：有歌詞',
   filterByGenre: '依曲風篩選',
   clearGenreFilter: '清除曲風篩選',
-  library: '收藏庫',
+  library: '收藏',
   toggleCompactView: '切換顯示模式',
   switchToGridView: '切換為方格檢視',
   switchToCompactView: '切換為緊湊檢視',

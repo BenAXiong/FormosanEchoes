@@ -52,7 +52,7 @@ interface Props {
 }
 
 export default function SongCard({ song, isSelected, isPlaying, onSelect, compact = false, artistMap, showSongZh = true, showArtistZh = false, onArtistClick, onOpenMenu, onOpenMenuAtPlaylists }: Props) {
-  const { isPlaying: globalIsPlaying, togglePlay, toggleFavorite, isFavorite } = usePlayer();
+  const { isPlaying: globalIsPlaying, togglePlay, toggleFavorite, isFavorite, playlists } = usePlayer();
   const gradient = getLangGradient(song.language_claimed);
   const title = getDisplayTitle(song);
   const titleFallback = isTitleFallback(song);
@@ -199,17 +199,20 @@ export default function SongCard({ song, isSelected, isPlaying, onSelect, compac
         </div>
 
         {/* Playlist Add */}
-        {onOpenMenuAtPlaylists && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onOpenMenuAtPlaylists(song, e.currentTarget.getBoundingClientRect()); }}
-            className="absolute top-2 left-2 z-10 w-7 h-7 rounded-md bg-black/60 flex items-center justify-center text-stone-400 hover:text-white transition-all duration-200 opacity-0 group-hover:opacity-100"
-            aria-label="Add to playlist"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4.5L5 21V5z"/>
-            </svg>
-          </button>
-        )}
+        {onOpenMenuAtPlaylists && (() => {
+          const inPlaylist = playlists.some(pl => pl.songIds.includes(song.id));
+          return (
+            <button
+              onClick={(e) => { e.stopPropagation(); onOpenMenuAtPlaylists(song, e.currentTarget.getBoundingClientRect()); }}
+              className={`absolute top-2 left-2 z-10 w-7 h-7 rounded-md bg-black/60 flex items-center justify-center transition-all duration-200 ${inPlaylist ? 'text-emerald-400' : 'text-stone-400 hover:text-white'}`}
+              aria-label="Add to playlist"
+            >
+              <svg className="w-3.5 h-3.5" fill={inPlaylist ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4.5L5 21V5z"/>
+              </svg>
+            </button>
+          );
+        })()}
 
         {/* Fav Toggle (Normal) */}
         <button
