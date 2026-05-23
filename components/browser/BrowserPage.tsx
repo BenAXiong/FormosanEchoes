@@ -761,8 +761,11 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
             </div>
           </div>
 
-          {/* Mobile filter row — all controls inline, centered, bg matches card listing */}
-          <div className="lg:hidden flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1a1a24]">
+          {/* Mobile filter row — pills centered, gear right, bg matches listing area */}
+          <div className="lg:hidden flex items-center px-4 py-2.5 bg-[#0a0a0f]">
+
+            {/* 4 pills — centered */}
+            <div className="flex-1 flex items-center justify-center gap-2">
 
             {/* Language pill — opens filter sidebar */}
             <button
@@ -854,7 +857,9 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
               <span className="whitespace-nowrap">{t('library')}</span>
             </button>
 
-            {/* Settings gear */}
+            </div>{/* end 4 pills */}
+
+            {/* Settings gear — right-aligned */}
             <div className="relative shrink-0">
               <button
                 onClick={() => setSettingsOpen(o => !o)}
