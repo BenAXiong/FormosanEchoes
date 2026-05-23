@@ -122,7 +122,6 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
   const [genreOpen, setGenreOpen] = useState(false);
   const [showPlaylistsView, setShowPlaylistsView] = useState(false);
   const [bookmarkOpen, setBookmarkOpen] = useState(false);
-  const [langPillOpen, setLangPillOpen] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [songMenu, setSongMenu] = useState<{ song: Song; rect: DOMRect } | null>(null);
   const [songMenuView, setSongMenuView] = useState<'main' | 'playlists'>('main');
@@ -594,12 +593,12 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
                 </div>
               )}
             </div>
-            <div className="hidden lg:flex items-center gap-2 ml-auto shrink-0">
+            <div className="flex items-center gap-2 ml-auto shrink-0">
               <button
                 onClick={toggleLyricsFilter}
                 aria-label={t('filterHasLyrics')}
                 aria-pressed={!!filters.has_lyrics}
-                className={`p-2 rounded-full transition-colors border shrink-0 ${
+                className={`hidden lg:flex p-2 rounded-full transition-colors border shrink-0 ${
                   filters.has_lyrics
                     ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                     : 'bg-white/5 text-stone-400 border-white/10 hover:text-white hover:bg-white/10'
@@ -610,7 +609,7 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
                 </svg>
               </button>
               {/* Genre filter */}
-              <div className="relative">
+              <div className="relative hidden lg:block">
                 <button
                   onClick={() => setGenreOpen(o => !o)}
                   aria-label={t('filterByGenre')}
@@ -661,7 +660,7 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
               </div>
               {/* Bookmark / Library */}
               <div
-                className="relative"
+                className="relative hidden lg:block"
                 onMouseEnter={() => setBookmarkOpen(true)}
                 onMouseLeave={() => setBookmarkOpen(false)}
               >
@@ -710,7 +709,7 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
               <button
                 onClick={toggleLang}
                 aria-label={t('langToggleLabel')}
-                className="px-2 py-1 rounded-lg text-[11px] font-semibold tracking-wide text-stone-400 hover:text-white hover:bg-white/8 transition-colors"
+                className="hidden lg:flex px-2 py-1 rounded-lg text-[11px] font-semibold tracking-wide text-stone-400 hover:text-white hover:bg-white/8 transition-colors"
               >
                 {lang === 'en' ? '中' : 'EN'}
               </button>
@@ -719,7 +718,7 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
                 aria-pressed={compact}
                 aria-label={t('toggleCompactView')}
                 title={compact ? t('switchToGridView') : t('switchToCompactView')}
-                className={`p-1.5 rounded-lg transition-colors ${compact ? 'bg-white/15 text-white' : 'text-stone-500 hover:text-white hover:bg-white/8'}`}
+                className={`hidden lg:block p-1.5 rounded-lg transition-colors ${compact ? 'bg-white/15 text-white' : 'text-stone-500 hover:text-white hover:bg-white/8'}`}
               >
                 {compact ? (
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -766,51 +765,17 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
           {/* Mobile filter pills — replaces toolbar buttons on small screens */}
           <div className="lg:hidden flex items-center gap-2 px-4 pb-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
 
-            {/* Language pill */}
-            <div className="relative shrink-0">
-              <button
-                onClick={() => setLangPillOpen(o => !o)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium border transition-colors ${
-                  filters.language
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                    : 'bg-white/8 text-stone-400 border-white/10 active:bg-white/12'
-                }`}
-              >
-                <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
-                </svg>
-                <span className="whitespace-nowrap">{filters.language || t('language')}</span>
-              </button>
-              {langPillOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setLangPillOpen(false)} />
-                  <div className="absolute left-0 top-full mt-1 w-52 bg-[#1a1a24] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 max-h-72 overflow-y-auto">
-                    {filters.language && (
-                      <button
-                        onClick={() => { setFilters(f => ({ ...f, language: '' })); setLangPillOpen(false); }}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-stone-400 hover:text-white hover:bg-white/5 border-b border-white/5"
-                      >
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                        {t('allLanguages')}
-                      </button>
-                    )}
-                    {CIP_LANGUAGES.map(l => (
-                      <button
-                        key={l.value}
-                        onClick={() => { setFilters(f => ({ ...f, language: l.value })); setLangPillOpen(false); }}
-                        className={`w-full text-left px-3 py-2 text-xs transition-colors ${
-                          filters.language === l.value
-                            ? 'bg-emerald-500/10 text-emerald-300'
-                            : 'text-stone-300 hover:bg-white/5 hover:text-white'
-                        }`}
-                      >
-                        {l.label}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+            {/* Language toggle pill (UI language: en ↔ zh) */}
+            <button
+              onClick={toggleLang}
+              aria-label={t('langToggleLabel')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium border shrink-0 bg-white/8 text-stone-400 border-white/10 active:bg-white/12 transition-colors"
+            >
+              <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253M3.284 14.253A8.959 8.959 0 013 12c0-.778.099-1.533.284-2.253" />
+              </svg>
+              <span className="whitespace-nowrap">A/文</span>
+            </button>
 
             {/* Genre pill */}
             <div className="relative shrink-0">
@@ -875,48 +840,20 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
             </button>
 
             {/* Library / playlists pill */}
-            <div className="relative shrink-0">
-              <button
-                onClick={() => setBookmarkOpen(o => !o)}
-                aria-pressed={!!(filters.only_favorites || filters.playlist_id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium border transition-colors ${
-                  (filters.only_favorites || filters.playlist_id)
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                    : 'bg-white/8 text-stone-400 border-white/10 active:bg-white/12'
-                }`}
-              >
-                <svg className="w-3 h-3 shrink-0" fill={filters.only_favorites || filters.playlist_id ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4.5L5 21V5z"/>
-                </svg>
-                <span className="whitespace-nowrap">{t('library')}</span>
-              </button>
-              {bookmarkOpen && (
-                <div ref={bookmarkDropdownRef} className="absolute left-0 top-full mt-1 w-52 bg-[#1a1a24] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
-                  <button
-                    onClick={() => { setFilters(f => ({ ...f, only_favorites: !f.only_favorites, playlist_id: null })); setBookmarkOpen(false); setShowPlaylistsView(false); }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors ${filters.only_favorites ? 'bg-emerald-500/10 text-emerald-300' : 'text-stone-300 hover:bg-white/5 hover:text-white'}`}
-                  >
-                    <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                    <span className="truncate flex-1 text-left">{t('favoriteSongs')}</span>
-                    <span className="ml-auto text-stone-600 tabular-nums text-[10px]">{songs.filter(s => isFavorite(s.id)).length}</span>
-                  </button>
-                  {playlists.map(pl => (
-                    <button
-                      key={pl.id}
-                      onClick={() => { setFilters(f => ({ ...f, playlist_id: f.playlist_id === pl.id ? null : pl.id, only_favorites: false })); setBookmarkOpen(false); setShowPlaylistsView(false); }}
-                      className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors ${filters.playlist_id === pl.id ? 'bg-emerald-500/10 text-emerald-300' : 'text-stone-300 hover:bg-white/5 hover:text-white'}`}
-                    >
-                      <svg className="w-3.5 h-3.5 shrink-0 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h10"/></svg>
-                      <span className="truncate flex-1 text-left">{pl.name}</span>
-                      <span className="ml-auto text-stone-600 tabular-nums text-[10px]">{pl.songIds.length}</span>
-                    </button>
-                  ))}
-                  {!isSignedIn && (
-                    <p className="px-3 py-2 text-[10px] text-stone-600 italic border-t border-white/5 mt-1">{t('signInToCreatePlaylists')}</p>
-                  )}
-                </div>
-              )}
-            </div>
+            <button
+              onClick={() => setShowPlaylistsView(v => !v)}
+              aria-pressed={!!(filters.only_favorites || filters.playlist_id || showPlaylistsView)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium border shrink-0 transition-colors ${
+                (filters.only_favorites || filters.playlist_id || showPlaylistsView)
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                  : 'bg-white/8 text-stone-400 border-white/10 active:bg-white/12'
+              }`}
+            >
+              <svg className="w-3 h-3 shrink-0" fill={filters.only_favorites || filters.playlist_id ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4.5L5 21V5z"/>
+              </svg>
+              <span className="whitespace-nowrap">{t('library')}</span>
+            </button>
 
           </div>
         </div>
@@ -926,8 +863,8 @@ export default function BrowserPage({ songs, artists, initialSongId, initialArti
           onClick={() => setCompact(!compact)}
           aria-pressed={compact}
           aria-label={t('toggleCompactView')}
-          className={`lg:hidden fixed right-4 z-30 p-3 rounded-full border shadow-lg backdrop-blur-sm transition-all duration-300 ${
-            playingTrack ? 'bottom-44' : 'bottom-4'
+          className={`lg:hidden fixed right-8 z-30 p-3 rounded-full border shadow-lg backdrop-blur-sm transition-all duration-300 ${
+            playingTrack ? 'bottom-44' : 'bottom-12'
           } ${compact ? 'bg-white/20 text-white border-white/25' : 'bg-[#1a1a24]/90 text-stone-400 border-white/10'}`}
         >
           {compact ? (
