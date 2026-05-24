@@ -697,6 +697,15 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
           body: JSON.stringify({ ...payload, ...(sourceSongId ? { link_song_id: sourceSongId } : {}) }),
         });
         const json = await res.json();
+        if (res.status === 409 && json.duplicate_id) {
+          // Duplicate — jump to the existing artist instead of creating a new one
+          const freshList = await fetchArtists();
+          const existing = freshList.find(a => a.id === json.duplicate_id);
+          if (existing) { setSelected(existing); setIsNew(false); setDraft(draftFromArtist(existing)); }
+          setPanelStatus('error');
+          setPanelMessage(json.error ?? 'Already exists');
+          return;
+        }
         if (!res.ok) throw new Error(json.error ?? 'Save failed');
         const saved = json.saved as { id: string; name_display: string };
         setPanelStatus('saved');

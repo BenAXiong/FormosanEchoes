@@ -28,6 +28,21 @@ export async function POST(request: Request) {
 
   const supabase = createServerClient();
 
+  // Duplicate guard — prevent rapid-fire clicks from creating the same artist twice
+  const { data: existing } = await supabase
+    .from('artists')
+    .select('id, name_display')
+    .ilike('name_display', artist.name_display.trim())
+    .limit(1)
+    .maybeSingle();
+
+  if (existing) {
+    return NextResponse.json(
+      { error: `Artist "${existing.name_display}" already exists`, duplicate_id: existing.id },
+      { status: 409 },
+    );
+  }
+
   const { data: saved, error } = await supabase
     .from('artists')
     .insert({
