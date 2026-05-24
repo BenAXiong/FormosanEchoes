@@ -68,8 +68,15 @@ CREATE TABLE songs (
   description         TEXT,             -- public-facing context shown to visitors
   notes               TEXT,             -- internal admin/curation notes
   verification_status TEXT NOT NULL DEFAULT 'candidate',  -- candidate | checked | approved | rejected
+  play_count          INTEGER NOT NULL DEFAULT 0,         -- weighted: +1 at 30s, +1 at 2min per listen
   created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Atomic play-count increment (called by POST /api/play/[id])
+-- CREATE OR REPLACE FUNCTION increment_play_count(song_id uuid)
+-- RETURNS void LANGUAGE sql AS $$
+--   UPDATE songs SET play_count = play_count + 1 WHERE id = song_id;
+-- $$;
 
 CREATE INDEX idx_songs_language           ON songs (language);
 CREATE INDEX idx_songs_ethnic_group       ON songs (ethnic_group);

@@ -78,6 +78,7 @@ export interface Song {
   date_added?: string;
   artist_ids?: string[];          // resolved links into artists.json
   lyrics?: LyricsData;
+  play_count?: number;
 }
 
 // ─── Artist ───────────────────────────────────────────────────────────────────

@@ -102,10 +102,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       if (!listenFiredRef.current.s30 && total >= 30_000) {
         listenFiredRef.current.s30 = true;
         track('song-listen', { threshold: '30s', song_id: playingTrack.id, title: playingTrack.title_original ?? '', language: playingTrack.language_claimed ?? '' });
+        fetch(`/api/play/${playingTrack.id}`, { method: 'POST' });
       }
       if (!listenFiredRef.current.s120 && total >= 120_000) {
         listenFiredRef.current.s120 = true;
         track('song-listen', { threshold: '2min', song_id: playingTrack.id, title: playingTrack.title_original ?? '', language: playingTrack.language_claimed ?? '' });
+        fetch(`/api/play/${playingTrack.id}`, { method: 'POST' });
       }
     }, 1000);
     return () => {
