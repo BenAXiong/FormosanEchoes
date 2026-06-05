@@ -91,6 +91,7 @@ function FilterIcon({ className }: Readonly<{ className?: string }>) {
 export default function CurationView(_: { songs: Song[] }) {
   const [tab, setTab]                 = useState<Tab>('metrics');
   const [filtersOpen, setFiltersOpen] = useState(true);
+  const [drawerOpen, setDrawerOpen]   = useState(false);
   const [filters, setFilters]         = useState<AdminFilters>(EMPTY_FILTERS);
   const [artistOptions, setArtistOptions] = useState<string[]>([]);
   const [unlinkedCount, setUnlinkedCount] = useState(0);
@@ -123,31 +124,49 @@ export default function CurationView(_: { songs: Song[] }) {
     <div className="h-screen overflow-hidden bg-stone-50 flex flex-col">
       {/* Header */}
       <header className="shrink-0 bg-white border-b border-stone-200 z-20 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-4">
+        {/* Mobile header */}
+        <div className="lg:hidden px-4 py-3 flex items-center justify-between">
+          <h1 className="text-base font-bold text-stone-800 tracking-tight">
+            Echoes <span className="text-xs font-normal text-stone-400 capitalize">{tab}</span>
+          </h1>
+          <div className="flex items-center gap-1">
+            {!['live', 'analytics'].includes(tab) && (
+              <button
+                onClick={() => setFiltersOpen(o => !o)}
+                className={`p-2 rounded-lg transition-colors ${filtersOpen ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-500'}`}
+              >
+                <FilterIcon className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="p-2 text-stone-500 hover:text-stone-800 transition-colors"
+              aria-label="Open menu"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        {/* Desktop header */}
+        <div className="hidden lg:flex max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 items-center gap-4">
           <div className="flex-1">
             <h1 className="text-lg font-bold text-stone-800 tracking-tight">
               Formosan Echoes{' '}<span className="text-xs font-normal text-stone-400 ml-2">台灣原住民音樂索引</span>
             </h1>
-            <p className="text-xs text-stone-400 hidden sm:block">Formosan-language song metadata browser · all entries are candidates unless verified</p>
+            <p className="text-xs text-stone-400">Formosan-language song metadata browser · all entries are candidates unless verified</p>
           </div>
           <div className="flex items-center gap-2">
             <form action={signOut}>
-              <button
-                type="submit"
-                className="text-xs text-stone-400 hover:text-stone-600 transition-colors px-2 py-1 rounded hover:bg-stone-100"
-              >
+              <button type="submit" className="text-xs text-stone-400 hover:text-stone-600 transition-colors px-2 py-1 rounded hover:bg-stone-100">
                 Sign out
               </button>
             </form>
             {!['live', 'analytics'].includes(tab) && (
               <button
                 onClick={() => setFiltersOpen(o => !o)}
-                title="Toggle filters"
-                className={`relative p-2 rounded-lg transition-colors ${
-                  filtersOpen
-                    ? 'bg-stone-800 text-white'
-                    : 'bg-stone-100 text-stone-500 hover:bg-stone-200 hover:text-stone-700'
-                }`}
+                className={`relative p-2 rounded-lg transition-colors ${filtersOpen ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200 hover:text-stone-700'}`}
               >
                 <FilterIcon className="w-4 h-4" />
               </button>
@@ -157,9 +176,7 @@ export default function CurationView(_: { songs: Song[] }) {
                 <button
                   key={t}
                   onClick={() => setTab(t)}
-                  className={`px-5 py-2 rounded-md text-sm font-semibold transition-colors ${
-                    tab === t ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700'
-                  }`}
+                  className={`px-5 py-2 rounded-md text-sm font-semibold transition-colors ${tab === t ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
                 >
                   {{ metrics: 'Metrics', songs: 'Songs', artists: 'Artists', live: 'Live', analytics: 'Analytics' }[t]}
                   {t === 'artists' && unlinkedCount > 0 && (
@@ -173,6 +190,42 @@ export default function CurationView(_: { songs: Song[] }) {
           </div>
         </div>
       </header>
+
+      {/* Mobile drawer */}
+      {drawerOpen && (
+        <>
+          <div className="lg:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setDrawerOpen(false)} />
+          <div className="lg:hidden fixed inset-y-0 right-0 w-64 z-50 bg-white border-l border-stone-200 flex flex-col shadow-xl">
+            <div className="px-4 py-3 border-b border-stone-200 flex items-center justify-between shrink-0">
+              <span className="font-semibold text-stone-800 text-sm">Formosan Echoes</span>
+              <button onClick={() => setDrawerOpen(false)} className="text-stone-400 hover:text-stone-600 transition-colors text-xl leading-none">✕</button>
+            </div>
+            <nav className="flex-1 p-3 flex flex-col gap-0.5 overflow-y-auto">
+              {(['metrics', 'songs', 'artists', 'live', 'analytics'] as Tab[]).map(t => (
+                <button
+                  key={t}
+                  onClick={() => { setTab(t); setDrawerOpen(false); }}
+                  className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-left transition-colors ${tab === t ? 'bg-stone-100 text-stone-900' : 'text-stone-600 hover:bg-stone-50 hover:text-stone-800'}`}
+                >
+                  {{ metrics: 'Metrics', songs: 'Songs', artists: 'Artists', live: 'Live', analytics: 'Analytics' }[t]}
+                  {t === 'artists' && unlinkedCount > 0 && (
+                    <span className="ml-auto inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white text-[9px] font-bold">
+                      {unlinkedCount > 9 ? '9+' : unlinkedCount}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </nav>
+            <div className="p-3 border-t border-stone-200 shrink-0">
+              <form action={signOut}>
+                <button type="submit" className="w-full text-left px-3 py-2.5 text-sm text-stone-500 hover:text-stone-800 transition-colors rounded-lg hover:bg-stone-50">
+                  Sign out
+                </button>
+              </form>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Filter bar */}
       {filtersOpen && !['live', 'analytics'].includes(tab) && (

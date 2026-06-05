@@ -226,6 +226,16 @@ export default function SongsAdminView({ filters }: Readonly<{
   // Left rail
   const [railOpen, setRailOpen]       = useState(true);
 
+  // Mobile
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)');
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
 
   // Edit form (existing song selected)
   const [selected, setSelected]       = useState<AdminSong | null>(null);
@@ -710,21 +720,23 @@ export default function SongsAdminView({ filters }: Readonly<{
   return (
     <div className="bg-[#0f0f16] rounded-xl border border-white/10 overflow-hidden flex flex-col h-full min-h-[520px]">
       <div
-        className="relative grid h-full"
-        style={{ gridTemplateColumns: railOpen ? '450px 1fr' : '12px 1fr' }}
+        className={`relative h-full ${isMobile ? 'flex flex-col' : 'grid'}`}
+        style={isMobile ? undefined : { gridTemplateColumns: railOpen ? '450px 1fr' : '12px 1fr' }}
       >
-        {/* Chevron handle — sits on the divider between left and right panels */}
-        <button
-          onClick={() => setRailOpen(o => !o)}
-          style={{ left: railOpen ? '450px' : '12px' }}
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 w-4 h-9 flex items-center justify-center bg-stone-900 border border-white/10 rounded text-[11px] text-stone-500 hover:text-white hover:bg-stone-800 hover:border-white/25 transition-colors select-none"
-          title={railOpen ? 'Collapse' : 'Expand'}
-        >
-          {railOpen ? '‹' : '›'}
-        </button>
+        {/* Chevron handle — desktop only */}
+        {!isMobile && (
+          <button
+            onClick={() => setRailOpen(o => !o)}
+            style={{ left: railOpen ? '450px' : '12px' }}
+            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 w-4 h-9 flex items-center justify-center bg-stone-900 border border-white/10 rounded text-[11px] text-stone-500 hover:text-white hover:bg-stone-800 hover:border-white/25 transition-colors select-none"
+            title={railOpen ? 'Collapse' : 'Expand'}
+          >
+            {railOpen ? '‹' : '›'}
+          </button>
+        )}
 
         {/* ── Left: song list ───────────────────────────────────────────────── */}
-        <div className="flex flex-col overflow-hidden border-r border-white/5">
+        <div className={`flex flex-col overflow-hidden ${isMobile ? '' : 'border-r border-white/5'}`}>
 
           {/* Collapsible content */}
           {railOpen && (
@@ -853,7 +865,16 @@ export default function SongsAdminView({ filters }: Readonly<{
         </div>
 
         {/* ── Right: panel ─────────────────────────────────────────────────── */}
-        <div className={`flex flex-col h-full ${selected && showLyrics ? 'overflow-hidden' : selected ? `overflow-y-auto ${SCROLLBAR}` : 'overflow-hidden'}`}>
+        <div className={
+          isMobile
+            ? `fixed inset-x-0 bottom-0 z-50 flex flex-col max-h-[92vh] bg-[#0f0f16] rounded-t-2xl border-t border-white/10 transition-transform duration-300 ${selected ? 'translate-y-0' : 'translate-y-full'} ${selected && showLyrics ? 'overflow-hidden' : `overflow-y-auto ${SCROLLBAR}`}`
+            : `flex flex-col h-full ${selected && showLyrics ? 'overflow-hidden' : selected ? `overflow-y-auto ${SCROLLBAR}` : 'overflow-hidden'}`
+        }>
+          {isMobile && (
+            <div className="shrink-0 pt-3 pb-1 flex justify-center">
+              <div className="w-10 h-1 bg-white/20 rounded-full" />
+            </div>
+          )}
 
           {/* ─ No song selected, no checkboxes: add area ─ */}
           {!selected && batchEntries.size === 0 && (
@@ -1278,6 +1299,9 @@ export default function SongsAdminView({ filters }: Readonly<{
           )}
         </div>
       </div>
+      {isMobile && selected && (
+        <div className="fixed inset-0 bg-black/50 z-40" onClick={deselect} />
+      )}
     </div>
   );
 }
