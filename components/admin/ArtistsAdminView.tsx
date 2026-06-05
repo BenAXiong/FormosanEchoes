@@ -282,6 +282,21 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
   const [dismissedPairs, setDismissedPairs] = useState<Set<string>>(new Set());
   const [expandedPairs, setExpandedPairs]   = useState<Set<string>>(new Set());
 
+  // Swipe-to-dismiss
+  const swipeTouchStartY = useRef(0);
+  const [swipeDragY, setSwipeDragY] = useState(0);
+  const mobileSheetOpen = selected !== null || showDuplicates;
+  useEffect(() => { if (!mobileSheetOpen) setSwipeDragY(0); }, [mobileSheetOpen]);
+  function onSwipeTouchStart(e: React.TouchEvent) { swipeTouchStartY.current = e.touches[0].clientY; }
+  function onSwipeTouchMove(e: React.TouchEvent) { const d = e.touches[0].clientY - swipeTouchStartY.current; if (d > 0) setSwipeDragY(d); }
+  function onSwipeTouchEnd() {
+    if (swipeDragY > 80) {
+      if (showDuplicates) { setShowDuplicates(false); setDupePairs([]); setDismissedPairs(new Set()); }
+      else deselect();
+    }
+    setSwipeDragY(0);
+  }
+
   // Song picker (linked songs section)
   const [allSongs, setAllSongs]           = useState<SongMini[] | null>(null);
   const [loadingSongs, setLoadingSongs]   = useState(false);
@@ -920,9 +935,9 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
   const showPanel = hasDraft;
 
   return (
-    <div className="bg-[#0f0f16] rounded-xl border border-white/10 overflow-hidden flex flex-col h-full min-h-130">
+    <div className="bg-[#0f0f16] rounded-xl border border-white/10 overflow-hidden flex flex-col lg:h-full lg:min-h-130">
       <div
-        className={`relative h-full ${isMobile ? 'flex flex-col' : 'grid'}`}
+        className={`relative ${isMobile ? 'flex flex-col' : 'grid h-full'}`}
         style={isMobile ? undefined : { gridTemplateColumns: railOpen ? '450px 1fr' : '12px 1fr' }}
       >
         {/* Chevron handle — desktop only */}
@@ -1051,7 +1066,7 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
 
               {/* List — tabbed: All artists or Unlinked queue */}
               {railTab === 'all' ? (
-                <div className={`flex-1 overflow-y-auto divide-y divide-white/5 ${SCROLLBAR}`}>
+                <div className={`${isMobile ? '' : `flex-1 overflow-y-auto ${SCROLLBAR}`} divide-y divide-white/5`}>
                   {loading && <p className="text-stone-600 text-xs italic px-4 py-3">Loading…</p>}
                   {!loading && filtered.length === 0 && (
                     <p className="text-stone-600 text-xs italic px-4 py-3">No artists match.</p>
@@ -1115,7 +1130,7 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
                   ))}
                 </div>
               ) : (
-                <div className={`flex-1 overflow-y-auto divide-y divide-white/5 ${SCROLLBAR}`}>
+                <div className={`${isMobile ? '' : `flex-1 overflow-y-auto ${SCROLLBAR}`} divide-y divide-white/5`}>
                   {loading && <p className="text-stone-600 text-xs italic px-4 py-3">Loading…</p>}
                   {!loading && unlinked.length === 0 && (
                     <p className="text-stone-600 text-xs italic px-4 py-3">No unlinked artist credits.</p>
@@ -1159,13 +1174,21 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
         </div>
 
         {/* ── Right panel ───────────────────────────────────────────────────── */}
-        <div className={
-          isMobile
-            ? `fixed inset-x-0 bottom-0 z-50 flex flex-col max-h-[92vh] bg-[#0f0f16] rounded-t-2xl border-t border-white/10 transition-transform duration-300 ${(showPanel || showDuplicates) ? 'translate-y-0' : 'translate-y-full'} ${showPanel && panelSection === 'bio' ? 'overflow-hidden' : `overflow-y-auto ${SCROLLBAR}`}`
-            : `flex flex-col h-full ${showDuplicates ? 'overflow-hidden' : showPanel && panelSection === 'bio' ? 'overflow-hidden' : showPanel ? `overflow-y-auto ${SCROLLBAR}` : 'overflow-hidden'}`
-        }>
+        <div
+          className={
+            isMobile
+              ? `fixed inset-x-0 bottom-0 z-50 flex flex-col max-h-[92vh] bg-[#0f0f16] rounded-t-2xl border-t border-white/10 transition-transform duration-300 ${mobileSheetOpen ? 'translate-y-0' : 'translate-y-full'} ${showPanel && panelSection === 'bio' ? 'overflow-hidden' : `overflow-y-auto ${SCROLLBAR}`}`
+              : `flex flex-col h-full ${showDuplicates ? 'overflow-hidden' : showPanel && panelSection === 'bio' ? 'overflow-hidden' : showPanel ? `overflow-y-auto ${SCROLLBAR}` : 'overflow-hidden'}`
+          }
+          style={isMobile && swipeDragY > 0 ? { transform: `translateY(${swipeDragY}px)`, transition: 'none' } : undefined}
+        >
           {isMobile && (
-            <div className="shrink-0 pt-3 pb-1 flex justify-center">
+            <div
+              className="shrink-0 pt-3 pb-2 flex justify-center touch-none"
+              onTouchStart={onSwipeTouchStart}
+              onTouchMove={onSwipeTouchMove}
+              onTouchEnd={onSwipeTouchEnd}
+            >
               <div className="w-10 h-1 bg-white/20 rounded-full" />
             </div>
           )}
@@ -1761,8 +1784,14 @@ export default function ArtistsAdminView({ filters }: { filters?: { ethnic_group
           ) : null}
         </div>
       </div>
-      {isMobile && (showPanel || showDuplicates) && (
-        <div className="fixed inset-0 bg-black/50 z-40" onClick={deselect} />
+      {isMobile && mobileSheetOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40"
+          onClick={() => {
+            if (showDuplicates) { setShowDuplicates(false); setDupePairs([]); setDismissedPairs(new Set()); }
+            else deselect();
+          }}
+        />
       )}
     </div>
   );

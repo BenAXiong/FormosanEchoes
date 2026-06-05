@@ -236,7 +236,6 @@ export default function SongsAdminView({ filters }: Readonly<{
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-
   // Edit form (existing song selected)
   const [selected, setSelected]       = useState<AdminSong | null>(null);
   const [draft, setDraft]             = useState<DraftForm | null>(null);
@@ -244,6 +243,14 @@ export default function SongsAdminView({ filters }: Readonly<{
   const [songResearched, setSongResearched] = useState(false);
   const [panelMessage, setPanelMessage]     = useState('');
   const [sources, setSources]               = useState<{ url: string; title: string | null }[]>([]);
+
+  // Swipe-to-dismiss
+  const swipeTouchStartY = useRef(0);
+  const [swipeDragY, setSwipeDragY] = useState(0);
+  useEffect(() => { if (!selected) setSwipeDragY(0); }, [selected]);
+  function onSwipeTouchStart(e: React.TouchEvent) { swipeTouchStartY.current = e.touches[0].clientY; }
+  function onSwipeTouchMove(e: React.TouchEvent) { const d = e.touches[0].clientY - swipeTouchStartY.current; if (d > 0) setSwipeDragY(d); }
+  function onSwipeTouchEnd() { if (swipeDragY > 80) deselect(); setSwipeDragY(0); }
 
   // Artist link picker
   const [linkPickerOpen, setLinkPickerOpen]       = useState(false);
@@ -718,9 +725,9 @@ export default function SongsAdminView({ filters }: Readonly<{
   // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="bg-[#0f0f16] rounded-xl border border-white/10 overflow-hidden flex flex-col h-full min-h-[520px]">
+    <div className="bg-[#0f0f16] rounded-xl border border-white/10 overflow-hidden flex flex-col lg:h-full lg:min-h-130">
       <div
-        className={`relative h-full ${isMobile ? 'flex flex-col' : 'grid'}`}
+        className={`relative ${isMobile ? 'flex flex-col' : 'grid h-full'}`}
         style={isMobile ? undefined : { gridTemplateColumns: railOpen ? '450px 1fr' : '12px 1fr' }}
       >
         {/* Chevron handle — desktop only */}
@@ -793,7 +800,7 @@ export default function SongsAdminView({ filters }: Readonly<{
               </div>
 
               {/* Song list */}
-              <div className={`flex-1 overflow-y-auto divide-y divide-white/5 ${SCROLLBAR}`}>
+              <div className={`${isMobile ? '' : `flex-1 overflow-y-auto ${SCROLLBAR}`} divide-y divide-white/5`}>
                 {loading && <p className="text-stone-600 text-xs italic px-4 py-3">Loading…</p>}
                 {!loading && filteredSongs.length === 0 && (
                   <p className="text-stone-600 text-xs italic px-4 py-3">
@@ -865,13 +872,21 @@ export default function SongsAdminView({ filters }: Readonly<{
         </div>
 
         {/* ── Right: panel ─────────────────────────────────────────────────── */}
-        <div className={
-          isMobile
-            ? `fixed inset-x-0 bottom-0 z-50 flex flex-col max-h-[92vh] bg-[#0f0f16] rounded-t-2xl border-t border-white/10 transition-transform duration-300 ${selected ? 'translate-y-0' : 'translate-y-full'} ${selected && showLyrics ? 'overflow-hidden' : `overflow-y-auto ${SCROLLBAR}`}`
-            : `flex flex-col h-full ${selected && showLyrics ? 'overflow-hidden' : selected ? `overflow-y-auto ${SCROLLBAR}` : 'overflow-hidden'}`
-        }>
+        <div
+          className={
+            isMobile
+              ? `fixed inset-x-0 bottom-0 z-50 flex flex-col max-h-[92vh] bg-[#0f0f16] rounded-t-2xl border-t border-white/10 transition-transform duration-300 ${selected ? 'translate-y-0' : 'translate-y-full'} ${selected && showLyrics ? 'overflow-hidden' : `overflow-y-auto ${SCROLLBAR}`}`
+              : `flex flex-col h-full ${selected && showLyrics ? 'overflow-hidden' : selected ? `overflow-y-auto ${SCROLLBAR}` : 'overflow-hidden'}`
+          }
+          style={isMobile && swipeDragY > 0 ? { transform: `translateY(${swipeDragY}px)`, transition: 'none' } : undefined}
+        >
           {isMobile && (
-            <div className="shrink-0 pt-3 pb-1 flex justify-center">
+            <div
+              className="shrink-0 pt-3 pb-2 flex justify-center touch-none"
+              onTouchStart={onSwipeTouchStart}
+              onTouchMove={onSwipeTouchMove}
+              onTouchEnd={onSwipeTouchEnd}
+            >
               <div className="w-10 h-1 bg-white/20 rounded-full" />
             </div>
           )}

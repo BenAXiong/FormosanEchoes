@@ -120,8 +120,15 @@ export default function CurationView(_: { songs: Song[] }) {
 
   const hasActiveFilter = Object.values(filters).some(Boolean);
 
+  function mainCls(t: Tab) {
+    if (['live', 'analytics'].includes(t)) return 'w-full lg:flex-1 overflow-hidden';
+    const base = 'w-full lg:flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:py-6';
+    if (t === 'songs')   return `${base} lg:overflow-hidden pb-32`;
+    return `${base} overflow-y-auto py-4 lg:py-6`;
+  }
+
   return (
-    <div className="h-screen overflow-hidden bg-stone-50 flex flex-col">
+    <div className="bg-stone-50 flex flex-col lg:h-screen lg:overflow-hidden">
       {/* Header */}
       <header className="shrink-0 bg-white border-b border-stone-200 z-20 shadow-sm">
         {/* Mobile header */}
@@ -255,11 +262,7 @@ export default function CurationView(_: { songs: Song[] }) {
         </div>
       )}
 
-      <main className={`flex-1 w-full ${
-        ['live', 'analytics'].includes(tab)
-          ? 'overflow-hidden'
-          : `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 ${tab === 'songs' ? 'overflow-hidden' : 'overflow-y-auto'}`
-      }`}>
+      <main className={mainCls(tab)}>
 
         {tab === 'metrics' && (
           <div className="bg-[#0f0f16] rounded-xl border border-white/10">
@@ -270,7 +273,7 @@ export default function CurationView(_: { songs: Song[] }) {
         {tab === 'songs' && <SongsAdminView filters={filters} />}
 
         {tab === 'artists' && (
-          <div className="h-full overflow-hidden">
+          <div className="lg:h-full lg:overflow-hidden">
             <ArtistsAdminView filters={filters} />
           </div>
         )}
