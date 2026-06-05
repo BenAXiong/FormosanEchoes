@@ -247,7 +247,16 @@ export default function SongsAdminView({ filters }: Readonly<{
   // Swipe-to-dismiss
   const swipeTouchStartY = useRef(0);
   const [swipeDragY, setSwipeDragY] = useState(0);
+  const dragHandleRef = useRef<HTMLDivElement>(null);
   useEffect(() => { if (!selected) setSwipeDragY(0); }, [selected]);
+  // Non-passive listener prevents pull-to-refresh during handle drag
+  useEffect(() => {
+    const el = dragHandleRef.current;
+    if (!el) return;
+    const prevent = (e: TouchEvent) => e.preventDefault();
+    el.addEventListener('touchmove', prevent, { passive: false });
+    return () => el.removeEventListener('touchmove', prevent);
+  }, [isMobile]);
   function onSwipeTouchStart(e: React.TouchEvent) { swipeTouchStartY.current = e.touches[0].clientY; }
   function onSwipeTouchMove(e: React.TouchEvent) { const d = e.touches[0].clientY - swipeTouchStartY.current; if (d > 0) setSwipeDragY(d); }
   function onSwipeTouchEnd() { if (swipeDragY > 80) deselect(); setSwipeDragY(0); }
@@ -882,6 +891,7 @@ export default function SongsAdminView({ filters }: Readonly<{
         >
           {isMobile && (
             <div
+              ref={dragHandleRef}
               className="shrink-0 pt-3 pb-2 flex justify-center touch-none"
               onTouchStart={onSwipeTouchStart}
               onTouchMove={onSwipeTouchMove}
