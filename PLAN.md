@@ -47,7 +47,7 @@ Living document. Update at the end of any session that completes a task or chang
 - **Duplicate URL detection in Add Songs panel** — URLs already present in the DB are flagged at extraction time in AddMultipleSongsPanel; duplicate rows are visually marked before the user imports
 - **Metrics dashboard visualizations** — segmented ring charts and triple-segment gap bars in MetricsPanel; fixed fill-% rendering (bars always correct color/length regardless of segment values)
 - **Share feature (May 2026)** — `ShareModal` component with 6 social platforms (Instagram, Facebook, WhatsApp, X, Email, Reddit); `openShare()` in BrowserPage tries Web Share API first (native mobile sheet), falls back to modal; share buttons in: song context menu, NowPlaying title row, artist detail panel header, playlist rows in bookmark dropdown; deep links `/?song=<uuid>` / `/?artist=<uuid>` / `/?playlist=<uuid>` consumed once on mount and cleared; public playlist API route `GET /api/playlists/[id]` using anon Supabase client (requires RLS policy); lyrics text payload included in share when `show_publicly` is true
-- **Analytics (May 2026)** — Umami (cloud, cookie-free, no consent banner required); provider-agnostic `lib/analytics.ts` wrapper; 20 events instrumented: `song-play/pause/resume/skip/listen(30s+2min)`, `song-search`, `filter-*`, `tab-switch`, `artist-open`, `lyrics-mode`, `favorite-toggle`, `playlist-create/add-song`, `share`, `share-platform` (UTM source appended to all shared URLs), `deep-link`, `language-toggle`, `karaoke-toggle`, `sign-in`; reference doc at `docs/ANALYTICS.md`
+- **Analytics (May 2026, migrated to self-hosted Jul 2026)** — Umami, self-hosted on Vercel at `umami-ten-mocha.vercel.app` (moved off cloud.umami.is to avoid the 100K events/mo cap); cookie-free, no consent banner required; provider-agnostic `lib/analytics.ts` wrapper; 20 events instrumented: `song-play/pause/resume/skip/listen(30s+2min)`, `song-search`, `filter-*`, `tab-switch`, `artist-open`, `lyrics-mode`, `favorite-toggle`, `playlist-create/add-song`, `share`, `share-platform` (UTM source appended to all shared URLs), `deep-link`, `language-toggle`, `karaoke-toggle`, `sign-in`; reference doc at `docs/ANALYTICS.md`
 - **Admin analytics tabs (May 2026)** — "Live" tab: Umami share URL embedded as full-height iframe (`NEXT_PUBLIC_UMAMI_SHARE_URL` env var, setup instructions shown if unset); "Analytics" tab: empty placeholder for future custom charts
 - **OAuth / admin auth (already shipped)** — Google OAuth via Supabase Auth; `/login` page with Google sign-in server action; `app/admin/page.tsx` gate via `getUser()`; middleware blocks unauthenticated requests; `?key=654321` gate fully removed
 
@@ -69,10 +69,10 @@ Pending field additions (when ready):
 ## Near-term features
 
 - [ ] **Sorting algorithm** — post-public-release: rank by a popularity × (info accuracy + completeness) matrix. Popularity = play count (see below); accuracy/completeness = derived from `verification_status`, `confidence`, and presence of lyrics/tags. Pre-launch default remains newest-first.
-- [ ] **Play count tracking** — add `play_count` to `songs` table; increment via `POST /api/play/[id]` after 30s of continuous play (fired from PlayerContext); optimistic local increment for instant feedback; ISR handles display lag. Needed as input to the sorting matrix above.
+- [x] **Play count tracking** — `play_count` on `songs` (weighted: +1 at 30s, +1 at 2min); `POST /api/play/[id]` calls `increment_play_count` RPC; fired fire-and-forget from PlayerContext listen timer.
 - [ ] **Karaoke auto-scroll** — timed lyric highlighting for singing practice (requires timestamp data; basic karaoke mode already shipped)
-- [ ] **Lyrics search** — full-text search returning songs that contain a given word or phrase (Supabase FTS)
-- [ ] **Save-artist duplicate guard** — check for existing `name_display` before INSERT in `/api/admin/save-artist` (rapid-fire clicks can create duplicates)
+- [x] **Lyrics search** — `/api/search-lyrics` with ilike across lyrics_original/zh/en + snippet extraction; search overlay mode toggle wired in BrowserPage
+- [x] **Save-artist duplicate guard** — check for existing `name_display` before INSERT in `/api/admin/save-artist` (rapid-fire clicks can create duplicates)
 
 ---
 
@@ -143,6 +143,41 @@ Full audit with gaps table and phased plan at `docs/SONGS_TAB_AUDIT.md`.
 - [ ] Artist pages
 - [ ] Collection / label pages
 - [ ] Animated PWA launch — fake splash screen (full-screen overlay, CSS/Framer Motion on logo SVG, fades out once app is ready; `sessionStorage`-gated so it only plays on first open per session, not every navigation)
+
+---
+
+## Contributor system — multi-user data review
+
+For collaborators who will co-review and curate song/artist data using their own Google accounts.
+
+### Design decisions
+
+- **Two roles: `admin` vs `contributor`.** Admins have full access. Contributors can edit metadata and move songs to `checked`, but cannot set `show_publicly: true` on lyrics or promote songs to `approved_public`. This prevents unilateral publication of sensitive lyric content.
+- **Roles stored in a `user_roles` Supabase table** (keyed by `user_id` from Supabase Auth), not env vars. Env vars don't scale past a handful of people and require a redeploy to change.
+- **Audit trail on songs**: add `reviewed_by` (email) and `reviewed_at` (timestamp) columns. Lightweight — no full revision history needed yet. Makes it clear whether a `checked` status came from a core team member or a new contributor.
+- **Status promotion rules** (enforced in API routes, not just UI):
+  - Anyone with access can move a song to `needs_review` or `checked`
+  - Only `admin` can promote to `approved_public` / `approved_private`
+  - Only `admin` can set `lyrics.show_publicly = true`
+  - Only `admin` can delete songs or artists
+
+### Implementation phases
+
+- [ ] **Phase 1 — Roles table + API enforcement**
+  - `user_roles` table: `(user_id uuid, role text)` — `admin | contributor`
+  - Helper `getUserRole(supabase)` server-side utility
+  - Gate `show_publicly`, `approved_public`, delete-song, delete-artist routes behind `admin` check
+  - Seed initial admin rows for existing team members
+
+- [ ] **Phase 2 — Audit trail**
+  - Add `reviewed_by text` and `reviewed_at timestamptz` to `songs`
+  - Write these fields on any save where `verification_status` changes
+  - Show `reviewed_by` + `reviewed_at` in the song edit panel header
+
+- [ ] **Phase 3 — Contributor-scoped UI**
+  - Contributors see the Songs and Artists tabs, but not Metrics / Analytics / Live tabs
+  - Lyric publish toggle and status promotion controls hidden (not just disabled) for contributors
+  - "Checked queue" view: filter to songs a contributor has moved to `checked`, awaiting admin sign-off
 
 ---
 

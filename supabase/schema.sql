@@ -73,10 +73,10 @@ CREATE TABLE songs (
 );
 
 -- Atomic play-count increment (called by POST /api/play/[id])
--- CREATE OR REPLACE FUNCTION increment_play_count(song_id uuid)
--- RETURNS void LANGUAGE sql AS $$
---   UPDATE songs SET play_count = play_count + 1 WHERE id = song_id;
--- $$;
+CREATE OR REPLACE FUNCTION increment_play_count(song_id uuid)
+RETURNS void LANGUAGE sql AS $$
+  UPDATE songs SET play_count = play_count + 1 WHERE id = song_id;
+$$;
 
 CREATE INDEX idx_songs_language           ON songs (language);
 CREATE INDEX idx_songs_ethnic_group       ON songs (ethnic_group);
