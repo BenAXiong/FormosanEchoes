@@ -289,7 +289,7 @@ export default function CurationView(_: { songs: Song[] }) {
             <div className="flex flex-col items-center justify-center h-full gap-3 text-stone-400">
               <p className="text-sm font-medium">Umami share URL not configured.</p>
               <ol className="text-xs text-stone-500 list-decimal list-inside space-y-1 max-w-sm text-left">
-                <li>Go to <strong>app.umami.is</strong> → Websites → your site</li>
+                <li>Go to your Umami dashboard → Websites → your site</li>
                 <li>Open the <strong>Share</strong> tab and enable sharing</li>
                 <li>Copy the share URL</li>
                 <li>Add <code className="bg-stone-100 px-1 rounded">NEXT_PUBLIC_UMAMI_SHARE_URL=&lt;url&gt;</code> to <code className="bg-stone-100 px-1 rounded">.env.local</code> and Vercel env vars</li>

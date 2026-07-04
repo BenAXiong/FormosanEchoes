@@ -2,10 +2,10 @@
 
 ## Provider: Umami
 
-**Cloud:** app.umami.is (free tier: 100K events/mo)  
-**Self-host path:** Railway template → Umami app + Postgres. Point `DATABASE_URL` at the existing Supabase Postgres connection string if preferred. MIT licensed — no license friction.  
-**Script:** `https://cloud.umami.is/script.js` loaded via `app/layout.tsx` with `strategy="afterInteractive"`.  
-**Website ID env var:** `NEXT_PUBLIC_UMAMI_WEBSITE_ID`
+**Hosting:** Self-hosted on Vercel at `https://umami-ten-mocha.vercel.app` (migrated from app.umami.is cloud to avoid the 100K events/mo cap). MIT licensed — no license friction.  
+**Script:** loaded via `app/layout.tsx` with `strategy="afterInteractive"`, URL controlled by `NEXT_PUBLIC_UMAMI_SCRIPT_URL` (falls back to `https://cloud.umami.is/script.js` if unset).  
+**Website ID env var:** `NEXT_PUBLIC_UMAMI_WEBSITE_ID` — this is per-instance; grab it from the self-hosted dashboard's Websites tab, it does not carry over from the old cloud account.  
+**Share URL env var:** `NEXT_PUBLIC_UMAMI_SHARE_URL` — powers the "live" tab iframe in the admin panel (`app/admin/CurationView.tsx`); regenerate from the self-hosted instance's Share tab.
 
 All call sites use the abstraction layer at `lib/analytics.ts`. Swapping providers = one file change.
 
@@ -30,9 +30,9 @@ All call sites use the abstraction layer at `lib/analytics.ts`. Swapping provide
 **Why not Vercel:** Only 2 custom event types free — insufficient for this app's 14 event types.
 
 ### Self-hosting Umami
-- **Railway:** One-click template, 500 hrs/month free, Postgres included. Zero ops.
-- **Supabase Postgres:** Set Umami `DATABASE_URL` to the project's Postgres connection string. No extra DB cost; host the Umami Next.js app on Railway or Fly.io.
-- Trigger: when cloud 100K/mo limit is consistently hit. Same code instrumentation, just update the script URL + `NEXT_PUBLIC_UMAMI_WEBSITE_ID`.
+- **Current setup:** Umami app deployed directly on Vercel at `umami-ten-mocha.vercel.app`.
+- Same code instrumentation as cloud — switching only required updating `NEXT_PUBLIC_UMAMI_SCRIPT_URL` and `NEXT_PUBLIC_UMAMI_WEBSITE_ID` (new instance, new website ID) in `app/layout.tsx` / env vars. No `lib/analytics.ts` changes.
+- Alternative self-host paths (Railway, Supabase-Postgres-as-DB) remain viable fallbacks if the Vercel deployment needs to move.
 
 ---
 

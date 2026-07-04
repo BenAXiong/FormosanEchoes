@@ -44,3 +44,5 @@ next-env.d.ts
 /notes/
 tdl.txt
 notes.txt
+
+.vercel
